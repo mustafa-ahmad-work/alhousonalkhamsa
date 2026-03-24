@@ -16,6 +16,7 @@ import {
   getXPProgressToNextLevel,
 } from '../utils/helpers';
 import { Ionicons } from '@expo/vector-icons';
+import { JUZ_META, SURAHS } from '../data/quranMeta';
 
 const { width } = Dimensions.get('window');
 
@@ -63,6 +64,40 @@ export default function ProgressScreen() {
 
   const totalXP = user?.totalXP ?? 0;
 
+  // Juz progress calculation
+  const juzProgress = JUZ_META.map(juz => {
+    const pagesInJuz = Array.from({ length: juz.endPage - juz.startPage + 1 }, (_, i) => juz.startPage + i);
+    const memorizedInJuz = pagesInJuz.filter(p => memorizedPages.some(mp => mp.pageNumber === p));
+    const pct = memorizedInJuz.length / pagesInJuz.length;
+    return { ...juz, pct };
+  });
+
+  // Surah progress calculation
+  const surahProgress = SURAHS.slice(0, 15).map(surah => {
+    const pagesInSurah = Array.from({ length: surah.endPage - surah.startPage + 1 }, (_, i) => surah.startPage + i);
+    const memorizedInSurah = pagesInSurah.filter(p => memorizedPages.some(mp => mp.pageNumber === p));
+    const pct = memorizedInSurah.length / pagesInSurah.length;
+    return { ...surah, pct };
+  }).filter(s => s.pct > 0 || (s.id <= 3)); 
+
+  // Completion Estimation
+  const pagesCount = memorizedPages.length;
+  const streakCount = Math.max(streak.currentStreak, 1);
+  const avgPagesPerDay = pagesCount / streakCount;
+  const remaining = totalPages - pagesCount;
+  const daysLeft = avgPagesPerDay > 0 ? Math.ceil(remaining / avgPagesPerDay) : remaining;
+  const finishDate = new Date();
+  finishDate.setDate(finishDate.getDate() + daysLeft);
+
+  // Fortress consistency
+  const fortressStats = [
+    { id: 'recitation', label: 'التلاوة', color: Colors.fortressRecitation, count: dailyProgress.filter(p => p.recitation).length },
+    { id: 'listening', label: 'الاستماع', color: Colors.blue, count: dailyProgress.filter(p => p.listening).length },
+    { id: 'preparation', label: 'التهيؤ', color: Colors.fortressPreparation, count: dailyProgress.filter(p => p.preparation).length },
+    { id: 'memorization', label: 'الحفظ', color: Colors.fortressMemorization, count: dailyProgress.filter(p => p.memorization).length },
+    { id: 'review', label: 'المراجعة', color: Colors.fortressReview, count: dailyProgress.filter(p => p.shortReview || p.longReview).length },
+  ];
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -71,28 +106,27 @@ export default function ProgressScreen() {
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>التقدم والإحصائيات</Text>
-        <Text style={styles.headerSubtitle}>رحلتك مع كلام الله</Text>
+        <Text style={styles.headerTitle}>تحليلات متقدمة</Text>
+        <Text style={styles.headerSubtitle}>رؤية شاملة لرحلة الحفظ</Text>
       </View>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
       >
-        {/* User Level & XP */}
+        {/* Level & XP */}
         <View style={styles.levelCard}>
           <LinearGradient
             colors={[`${Colors.primary}12`, `${Colors.primary}04`]}
             style={styles.levelGradient}
           >
             <View style={styles.levelLeft}>
-              <Ionicons name="trophy-outline" size={32} color={Colors.gold} />
+              <Ionicons name="medal-outline" size={32} color={Colors.gold} />
             </View>
             <View style={styles.levelInfo}>
               <Text style={styles.levelTitle}>{user?.title ?? 'مبتدئ'}</Text>
-              <Text style={styles.levelSubtitle}>{user?.name ?? 'الحافظ'}</Text>
+              <Text style={styles.levelSubtitle}>المستوى {Math.floor(totalXP / 1000) + 1}</Text>
               <View style={styles.xpBar}>
                 <View style={styles.xpBarBg}>
                   <View
@@ -102,197 +136,138 @@ export default function ProgressScreen() {
                     ]}
                   />
                 </View>
-                <View style={styles.xpRow}>
-                  <Text style={styles.xpText}>{xpProgress.current}/{xpProgress.required}</Text>
-                  <Ionicons name="star" size={10} color={Colors.textTertiary} />
-                </View>
+                <Text style={styles.xpText}>{xpProgress.current} / {xpProgress.required} XP للترقية</Text>
               </View>
             </View>
           </LinearGradient>
         </View>
 
-        {/* Stats Row */}
-        <View style={styles.statsRow}>
+        {/* Quick Stats Grid */}
+        <View style={styles.statsGrid}>
           {[
-            { label: 'محفوظ', value: memorizedPages.length, icon: 'book-outline', color: Colors.primary },
-            { label: 'للمراجعة', value: pagesDue.length, icon: 'sync-outline', color: Colors.warning },
-            { label: 'سلسلة', value: `${streak.currentStreak}`, icon: 'flame-outline', color: Colors.gold },
-            { label: 'نقاط', value: totalXP, icon: 'star-outline', color: Colors.purple },
-          ].map((stat, i) => (
-            <View key={i} style={styles.statCard}>
-              <Ionicons name={stat.icon as any} size={18} color={stat.color} style={{ marginBottom: 3, opacity: 0.8 }} />
-              <Text style={[styles.statValue, { color: stat.color }]}>
-                {stat.value}
-              </Text>
-              <Text style={styles.statLabel}>{stat.label}</Text>
+            { label: 'الختم المتوقع', value: finishDate.toLocaleDateString('ar-EG', { month: 'short', year: '2-digit' }), icon: 'calendar', color: Colors.primary },
+            { label: 'معدل الحفظ', value: `${avgPagesPerDay.toFixed(1)} ص/ي`, icon: 'trending-up', color: Colors.success },
+            { label: 'الصفحات', value: `${memorizedPages.length}`, icon: 'book', color: Colors.purple },
+            { label: 'السلسلة', value: `${streak.currentStreak} يوم`, icon: 'flame', color: Colors.gold },
+          ].map((item, i) => (
+            <View key={i} style={styles.gridCard}>
+              <Ionicons name={item.icon as any} size={20} color={item.color} />
+              <Text style={[styles.gridValue, { color: item.color }]}>{item.value}</Text>
+              <Text style={styles.gridLabel}>{item.label}</Text>
             </View>
           ))}
         </View>
 
-        {/* Plan Progress */}
-        {plan && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>تقدم الخطة</Text>
-            <View style={styles.planCard}>
-              <View style={styles.planStats}>
-                <View style={styles.planStat}>
-                  <Text style={styles.planStatValue}>{memorizedPages.length}</Text>
-                  <Text style={styles.planStatLabel}>صفحة محفوظة</Text>
-                </View>
-                <View style={styles.planStat}>
-                  <Text style={styles.planStatValue}>{totalPages - memorizedPages.length}</Text>
-                  <Text style={styles.planStatLabel}>صفحة متبقية</Text>
-                </View>
-                <View style={styles.planStat}>
-                  <Text style={styles.planStatValue}>{Math.round(planPct * 100)}%</Text>
-                  <Text style={styles.planStatLabel}>مكتمل</Text>
-                </View>
-              </View>
-              <View style={styles.bigBarBg}>
-                <View
-                  style={[
-                    styles.bigBarFill,
-                    { width: `${planPct * 100}%` },
-                  ]}
-                />
-              </View>
-              <View style={styles.planGoalRow}>
-                <Text style={styles.planGoal}>{user?.goal}</Text>
-                <Ionicons name="flag-outline" size={12} color={Colors.textTertiary} />
-              </View>
-            </View>
-          </View>
-        )}
-
-        {/* Weekly Activity */}
+        {/* Advanced Progress Chart (Placeholder-like bar) */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>نشاط الأسبوع</Text>
-          <View style={styles.weekCard}>
-            <View style={styles.barchart}>
-              {last7Days.map((day, i) => (
-                <View key={i} style={styles.barItem}>
-                  <View style={styles.barContainer}>
-                    <View
-                      style={[
-                        styles.bar,
-                        { height: `${Math.max(day.pct * 100, 5)}%` },
-                        day.pct >= 1 && styles.barComplete,
-                        day.pct > 0 && day.pct < 1 && styles.barPartial,
-                      ]}
-                    />
-                  </View>
-                  <Text style={styles.dayLabel}>{day.dayName}</Text>
-                  {day.pct >= 1 && <Ionicons name="checkmark" size={12} color={Colors.primary} style={{ marginTop: 2, opacity: 0.7 }} />}
-                </View>
-              ))}
-            </View>
-          </View>
-        </View>
-
-        {/* Strength Distribution */}
-        {memorizedPages.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>توزيع القوة</Text>
-            <View style={styles.strengthCard}>
-              {([1, 2, 3, 4, 5] as MemorizationStrength[]).map((s) => {
-                const count = strengthDist[s];
-                const pct = memorizedPages.length > 0 ? count / memorizedPages.length : 0;
-                const labels: Record<MemorizationStrength, string> = {
-                  1: 'ضعيف جداً',
-                  2: 'ضعيف',
-                  3: 'متوسط',
-                  4: 'جيد',
-                  5: 'ممتاز',
-                };
-                return (
-                  <View key={s} style={styles.strengthRow}>
-                    <Text style={styles.strengthCount}>{count}</Text>
-                    <View style={styles.strengthBarBg}>
-                      <View
-                        style={[
-                          styles.strengthBarFill,
-                          {
-                            width: `${pct * 100}%`,
-                            backgroundColor: STRENGTH_COLORS[s],
-                          },
-                        ]}
-                      />
-                    </View>
-                    <Text style={[styles.strengthLabel, { color: STRENGTH_COLORS[s] }]}>
-                      {labels[s]}
-                    </Text>
-                  </View>
-                );
-              })}
-            </View>
-          </View>
-        )}
-
-        {/* Streak Info */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>السلاسل</Text>
-          <View style={styles.streakCard}>
-            <View style={styles.streakItem}>
-              <Ionicons name="flame-outline" size={28} color={Colors.gold} />
+          <Text style={styles.sectionTitle}>مؤشرات الإنجاز</Text>
+          <View style={styles.advancedCard}>
+            <View style={styles.advancedHeader}>
               <View>
-                <Text style={styles.streakValue}>{streak.currentStreak} يوم</Text>
-                <Text style={styles.streakLabel}>السلسلة الحالية</Text>
+                <Text style={styles.advancedTitle}>نسبة الإتمام الكلية</Text>
+                <Text style={styles.advancedSub}>{Math.round(planPct * 100)}% من الورق الكلي</Text>
               </View>
+              <Text style={styles.advancedBigPct}>{Math.round(planPct * 100)}%</Text>
             </View>
-            <View style={styles.streakDivider} />
-            <View style={styles.streakItem}>
-              <Ionicons name="trophy-outline" size={28} color={Colors.gold} />
-              <View>
-                <Text style={styles.streakValue}>{streak.longestStreak} يوم</Text>
-                <Text style={styles.streakLabel}>أطول سلسلة</Text>
+            <View style={styles.bigBarBg}>
+              <View style={[styles.bigBarFill, { width: `${planPct * 100}%` }]} />
+            </View>
+            <View style={styles.advancedMetaRow}>
+              <View style={styles.metaItem}>
+                <View style={[styles.metaDot, { backgroundColor: Colors.primary }]} />
+                <Text style={styles.metaText}>محفوظ: {memorizedPages.length}</Text>
+              </View>
+              <View style={styles.metaItem}>
+                <View style={[styles.metaDot, { backgroundColor: Colors.border }]} />
+                <Text style={styles.metaText}>متبقي: {remaining}</Text>
               </View>
             </View>
           </View>
         </View>
 
-        {/* Gamification Titles */}
+        {/* Juz completion Grid */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>مسار الألقاب</Text>
-          <View style={styles.titlesContainer}>
-            {[
-              { title: 'مبتدئ', xp: 0, icon: 'star-outline', unlocked: true },
-              { title: 'حارس', xp: 500, icon: 'shield-checkmark-outline', unlocked: totalXP >= 500 },
-              { title: 'سيد', xp: 2000, icon: 'medal-outline', unlocked: totalXP >= 2000 },
-              { title: 'حافظ', xp: 5000, icon: 'ribbon-outline', unlocked: totalXP >= 5000 },
-            ].map((t, i) => (
-              <View
-                key={i}
-                style={[
-                  styles.titleCard,
-                  t.unlocked && styles.titleCardUnlocked,
-                ]}
-              >
-                <Ionicons 
-                  name={t.icon as any} 
-                  size={30} 
-                  color={t.unlocked ? Colors.primary : Colors.textTertiary} 
-                  style={{ marginBottom: Spacing.xs, opacity: t.unlocked ? 0.9 : 0.5 }} 
-                />
-                <Text
+          <Text style={styles.sectionTitle}>خريطة الأجزاء (30 جزء)</Text>
+          <View style={styles.juzGrid}>
+            {juzProgress.map((j) => (
+              <View key={j.id} style={styles.juzBox}>
+                <View 
                   style={[
-                    styles.titleCardName,
-                    t.unlocked && { color: Colors.primary },
+                    styles.juzCheck, 
+                    { 
+                      backgroundColor: j.pct >= 1 ? Colors.primary : j.pct > 0 ? `${Colors.primary}40` : Colors.borderLight,
+                      borderColor: j.pct > 0 ? Colors.primary : Colors.border
+                    }
                   ]}
                 >
-                  {t.title}
-                </Text>
-                <View style={styles.titleXpRow}>
-                  <Text style={styles.titleCardXP}>{t.xp}</Text>
-                  <Ionicons name="star" size={10} color={t.unlocked ? Colors.gold : Colors.textTertiary} />
+                  <Text style={[styles.juzNumber, j.pct >= 0.5 && { color: '#fff' }]}>{j.id}</Text>
                 </View>
-                {t.unlocked && (
-                  <View style={styles.titleUnlockedBadge}>
-                    <Ionicons name="checkmark" size={10} color="#fff" />
-                    <Text style={styles.titleUnlockedText}>مفتوح</Text>
-                  </View>
-                )}
               </View>
             ))}
+          </View>
+        </View>
+
+        {/* Surah Progress List */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>تقدم السور الأساسية</Text>
+          <View style={styles.surahCard}>
+            {surahProgress.map((surah) => (
+              <View key={surah.id} style={styles.surahRow}>
+                <View style={styles.surahHeader}>
+                  <Text style={styles.surahName}>{surah.nameAr}</Text>
+                  <Text style={styles.surahPctText}>{Math.round(surah.pct * 100)}%</Text>
+                </View>
+                <View style={styles.surahBarBg}>
+                  <View 
+                    style={[
+                      styles.surahBarFill, 
+                      { 
+                        width: `${surah.pct * 100}%`, 
+                        backgroundColor: surah.pct === 1 ? Colors.success : Colors.primary 
+                      }
+                    ]} 
+                  />
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* Fortress Performance */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>أداء الحصون</Text>
+          <View style={styles.fortressStatsRow}>
+            {fortressStats.map((fs) => (
+              <View key={fs.id} style={styles.fortressStatCard}>
+                <View style={[styles.fortressStatIcon, { backgroundColor: `${fs.color}15` }]}>
+                  <Text style={[styles.fortressStatCount, { color: fs.color }]}>{fs.count}</Text>
+                </View>
+                <Text style={styles.fortressStatLabel}>{fs.label}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* Strength Balance */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>ميزان القوة</Text>
+          <View style={styles.strengthCard}>
+            {([5, 4, 3, 2, 1] as MemorizationStrength[]).map((s) => {
+              const count = strengthDist[s];
+              const pct = memorizedPages.length > 0 ? count / memorizedPages.length : 0;
+              const labels: Record<MemorizationStrength, string> = {
+                1: 'تحتاج إعادة', 2: 'غير مستقرة', 3: 'متوسطة', 4: 'قوية', 5: 'راسخة'
+              };
+              return (
+                <View key={s} style={styles.strengthRow}>
+                  <Text style={styles.strengthLabel}>{labels[s]}</Text>
+                  <View style={styles.strengthBarBg}>
+                    <View style={[styles.strengthBarFill, { width: `${pct * 100}%`, backgroundColor: STRENGTH_COLORS[s] }]} />
+                  </View>
+                  <Text style={styles.strengthValueText}>{count}</Text>
+                </View>
+              );
+            })}
           </View>
         </View>
 
@@ -304,329 +279,65 @@ export default function ProgressScreen() {
 
 const getStyles = (Colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  header: {
-    paddingTop: 56,
-    paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing.md,
-  },
-  headerTitle: {
-    fontSize: Typography.xl,
-    fontWeight: Typography.bold,
-    color: Colors.textPrimary,
-    textAlign: 'left',
-  },
-  headerSubtitle: {
-    fontSize: Typography.sm,
-    color: Colors.textTertiary,
-    textAlign: 'left',
-    marginTop: 3,
-  },
-  scroll: {
-    padding: Spacing.base,
-    gap: Spacing.md,
-  },
+  header: { paddingTop: 56, paddingHorizontal: Spacing.xl, paddingBottom: Spacing.md },
+  headerTitle: { fontSize: Typography.xl, fontWeight: Typography.bold, color: Colors.textPrimary, textAlign: 'left' },
+  headerSubtitle: { fontSize: Typography.sm, color: Colors.textTertiary, textAlign: 'left', marginTop: 3 },
+  scroll: { padding: Spacing.base, gap: Spacing.lg },
 
-  // Level Card
-  levelCard: {
-    borderRadius: BorderRadius.xl,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: `${Colors.primary}15`,
-  },
-  levelGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: Spacing.lg,
-    gap: Spacing.base,
-  },
-  levelInfo: { flex: 1, alignItems: 'flex-start', gap: 3 },
-  levelTitle: {
-    fontSize: Typography.lg,
-    fontWeight: Typography.semibold,
-    color: Colors.primary,
-  },
-  levelSubtitle: {
-    fontSize: Typography.sm,
-    color: Colors.textSecondary,
-  },
-  xpBar: {
-    width: '100%',
-    gap: 3,
-  },
-  xpBarBg: {
-    height: 4,
-    backgroundColor: Colors.border,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  xpBarFill: {
-    height: 4,
-    backgroundColor: Colors.primary,
-    borderRadius: 2,
-  },
-  xpRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    gap: 3,
-  },
-  xpText: {
-    fontSize: 10,
-    color: Colors.textTertiary,
-    textAlign: 'left',
-  },
+  levelCard: { borderRadius: BorderRadius.xl, overflow: 'hidden', borderWidth: 1, borderColor: `${Colors.primary}15` },
+  levelGradient: { flexDirection: 'row', alignItems: 'center', padding: Spacing.lg, gap: Spacing.base },
+  levelLeft: { backgroundColor: `${Colors.primary}0A`, width: 54, height: 54, borderRadius: 18, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: `${Colors.primary}10` },
+  levelInfo: { flex: 1, alignItems: 'flex-start', gap: 4 },
+  levelTitle: { fontSize: Typography.lg, fontWeight: Typography.bold, color: Colors.primary },
+  levelSubtitle: { fontSize: Typography.sm, color: Colors.textSecondary },
+  xpBar: { width: '100%', gap: 4, marginTop: 4 },
+  xpBarBg: { height: 6, backgroundColor: Colors.borderLight, borderRadius: 3, overflow: 'hidden' },
+  xpBarFill: { height: 6, backgroundColor: Colors.primary, borderRadius: 3 },
+  xpText: { fontSize: 10, color: Colors.textTertiary },
 
-  // Stats Row
-  statsRow: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-  },
-  levelLeft: {
-    backgroundColor: `${Colors.primary}0A`,
-    width: 60,
-    height: 60,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: `${Colors.primary}18`,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: Colors.glass,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    borderColor: Colors.glassBorder,
-    padding: Spacing.md,
-    alignItems: 'center',
-    gap: 2,
-  },
-  statValue: {
-    fontSize: Typography.md,
-    fontWeight: Typography.semibold,
-  },
-  statLabel: {
-    fontSize: 10,
-    color: Colors.textTertiary,
-    textAlign: 'center',
-  },
+  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
+  gridCard: { width: (width - Spacing.base * 2 - Spacing.sm) / 2, backgroundColor: Colors.glass, borderRadius: BorderRadius.lg, padding: Spacing.base, gap: 4, borderWidth: 1, borderColor: Colors.glassBorder, alignItems: 'center' },
+  gridValue: { fontSize: Typography.base, fontWeight: Typography.bold },
+  gridLabel: { fontSize: 10, color: Colors.textTertiary, textAlign: 'center' },
 
-  // Section
-  section: { gap: Spacing.sm },
-  sectionTitle: {
-    fontSize: Typography.md,
-    fontWeight: Typography.semibold,
-    color: Colors.textPrimary,
-    textAlign: 'left',
-  },
+  section: { gap: Spacing.md },
+  sectionTitle: { fontSize: Typography.base, fontWeight: Typography.bold, color: Colors.textPrimary, textAlign: 'left', paddingHorizontal: 4 },
 
-  // Plan Card
-  planCard: {
-    backgroundColor: Colors.glass,
-    borderRadius: BorderRadius.xl,
-    borderWidth: 1,
-    borderColor: Colors.glassBorder,
-    padding: Spacing.lg,
-    gap: Spacing.md,
-  },
-  planStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  planStat: { alignItems: 'center', gap: 3 },
-  planStatValue: {
-    fontSize: Typography.lg,
-    fontWeight: Typography.semibold,
-    color: Colors.textPrimary,
-  },
-  planStatLabel: {
-    fontSize: 10,
-    color: Colors.textTertiary,
-  },
-  bigBarBg: {
-    height: 6,
-    backgroundColor: Colors.border,
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  bigBarFill: {
-    height: 6,
-    backgroundColor: Colors.primary,
-    borderRadius: 3,
-  },
-  planGoalRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    gap: 4,
-  },
-  planGoal: {
-    fontSize: Typography.sm,
-    color: Colors.textTertiary,
-    textAlign: 'left',
-  },
+  advancedCard: { backgroundColor: Colors.glass, borderRadius: BorderRadius.xl, padding: Spacing.lg, borderWidth: 1, borderColor: Colors.glassBorder, gap: Spacing.md },
+  advancedHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  advancedTitle: { fontSize: Typography.base, fontWeight: Typography.semibold, color: Colors.textPrimary },
+  advancedSub: { fontSize: Typography.xs, color: Colors.textSecondary },
+  advancedBigPct: { fontSize: Typography['2xl'], fontWeight: Typography.bold, color: Colors.primary },
+  bigBarBg: { height: 10, backgroundColor: Colors.borderLight, borderRadius: 5, overflow: 'hidden' },
+  bigBarFill: { height: 10, backgroundColor: Colors.primary, borderRadius: 5 },
+  advancedMetaRow: { flexDirection: 'row', gap: Spacing.lg },
+  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  metaDot: { width: 8, height: 8, borderRadius: 4 },
+  metaText: { fontSize: 11, color: Colors.textSecondary },
 
-  // Weekly Chart
-  weekCard: {
-    backgroundColor: Colors.glass,
-    borderRadius: BorderRadius.xl,
-    borderWidth: 1,
-    borderColor: Colors.glassBorder,
-    padding: Spacing.base,
-  },
-  barchart: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    height: 110,
-    gap: 6,
-    paddingBottom: 24,
-  },
-  barItem: {
-    flex: 1,
-    alignItems: 'center',
-    height: '100%',
-    gap: 3,
-  },
-  barContainer: {
-    flex: 1,
-    width: '100%',
-    justifyContent: 'flex-end',
-  },
-  bar: {
-    width: '100%',
-    backgroundColor: Colors.border,
-    borderRadius: 3,
-    minHeight: 3,
-  },
-  barComplete: { backgroundColor: Colors.primary },
-  barPartial: { backgroundColor: Colors.primaryDark },
-  dayLabel: {
-    fontSize: 9,
-    color: Colors.textTertiary,
-    position: 'absolute',
-    bottom: 0,
-  },
+  juzGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center', backgroundColor: Colors.glass, padding: Spacing.md, borderRadius: BorderRadius.xl, borderWidth: 1, borderColor: Colors.glassBorder },
+  juzBox: { width: (width - Spacing.xl * 2 - 80) / 6, alignItems: 'center' },
+  juzCheck: { width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5 },
+  juzNumber: { fontSize: 13, fontWeight: Typography.bold, color: Colors.textSecondary },
 
-  // Strength
-  strengthCard: {
-    backgroundColor: Colors.glass,
-    borderRadius: BorderRadius.xl,
-    borderWidth: 1,
-    borderColor: Colors.glassBorder,
-    padding: Spacing.base,
-    gap: Spacing.sm,
-  },
-  strengthRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
-  strengthCount: {
-    width: 22,
-    fontSize: Typography.sm,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-  },
-  strengthBarBg: {
-    flex: 1,
-    height: 6,
-    backgroundColor: Colors.border,
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  strengthBarFill: {
-    height: 6,
-    borderRadius: 3,
-  },
-  strengthLabel: {
-    width: 56,
-    fontSize: Typography.xs,
-    textAlign: 'left',
-  },
+  surahCard: { backgroundColor: Colors.glass, borderRadius: BorderRadius.xl, padding: Spacing.lg, borderWidth: 1, borderColor: Colors.glassBorder, gap: Spacing.md },
+  surahRow: { gap: 6 },
+  surahHeader: { flexDirection: 'row', justifyContent: 'space-between' },
+  surahName: { fontSize: Typography.sm, fontWeight: Typography.medium, color: Colors.textPrimary },
+  surahPctText: { fontSize: Typography.xs, color: Colors.primary, fontWeight: Typography.bold },
+  surahBarBg: { height: 4, backgroundColor: Colors.borderLight, borderRadius: 2, overflow: 'hidden' },
+  surahBarFill: { height: 4, borderRadius: 2 },
 
-  // Streak
-  streakCard: {
-    flexDirection: 'row',
-    borderRadius: BorderRadius.xl,
-    borderWidth: 1,
-    borderColor: `${Colors.gold}12`,
-    backgroundColor: Colors.goldMuted,
-    padding: Spacing.lg,
-    alignItems: 'center',
-  },
-  streakItem: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    justifyContent: 'center',
-  },
-  streakValue: {
-    fontSize: Typography.lg,
-    fontWeight: Typography.semibold,
-    color: Colors.gold,
-  },
-  streakLabel: {
-    fontSize: 10,
-    color: Colors.textTertiary,
-    marginTop: 1,
-  },
-  streakDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: `${Colors.gold}15`,
-  },
+  fortressStatsRow: { flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap' },
+  fortressStatCard: { flex: 1, minWidth: '30%', backgroundColor: Colors.glass, borderRadius: BorderRadius.lg, padding: Spacing.md, alignItems: 'center', gap: Spacing.xs, borderWidth: 1, borderColor: Colors.glassBorder },
+  fortressStatIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  fortressStatCount: { fontSize: Typography.md, fontWeight: Typography.bold },
+  fortressStatLabel: { fontSize: 10, color: Colors.textSecondary },
 
-  // Titles
-  titlesContainer: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-  },
-  titleCard: {
-    flex: 1,
-    backgroundColor: Colors.glass,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    borderColor: Colors.glassBorder,
-    padding: Spacing.md,
-    alignItems: 'center',
-    gap: 3,
-    opacity: 0.5,
-  },
-  titleCardUnlocked: {
-    borderColor: `${Colors.primary}20`,
-    backgroundColor: Colors.primaryMuted,
-    opacity: 1,
-  },
-  titleCardName: {
-    fontSize: Typography.sm,
-    fontWeight: Typography.semibold,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-  },
-  titleXpRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 3,
-  },
-  titleCardXP: {
-    fontSize: 10,
-    color: Colors.textTertiary,
-  },
-  titleUnlockedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    backgroundColor: Colors.primary,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
-    borderRadius: BorderRadius.sm,
-    marginTop: Spacing.xs,
-  },
-  titleUnlockedText: {
-    fontSize: 9,
-    color: '#ffffff',
-    fontWeight: Typography.semibold,
-  },
+  strengthCard: { backgroundColor: Colors.glass, borderRadius: BorderRadius.xl, padding: Spacing.lg, borderWidth: 1, borderColor: Colors.glassBorder, gap: Spacing.sm },
+  strengthRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.base },
+  strengthLabel: { width: 64, fontSize: 10, color: Colors.textSecondary, textAlign: 'left' },
+  strengthBarBg: { flex: 1, height: 6, backgroundColor: Colors.borderLight, borderRadius: 3, overflow: 'hidden' },
+  strengthBarFill: { height: 6, borderRadius: 3 },
+  strengthValueText: { width: 20, fontSize: 11, fontWeight: Typography.bold, color: Colors.textPrimary, textAlign: 'center' },
 });

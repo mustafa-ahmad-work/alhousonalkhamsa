@@ -14,11 +14,14 @@ import {
 } from "react-native";
 import { ModuleCard } from "../components/ModuleCard";
 import { StreakBadge } from "../components/StreakBadge";
+import { FortressGuide } from "../components/FortressGuide";
 import { useAppStore } from "../store/AppStore";
 import { useSelectionStore } from "../store/selectionStore";
-import { BorderRadius, Spacing, Typography, useTheme } from "../theme";
+import { BorderRadius, Spacing, Typography, useTheme, Shadow } from "../theme";
 import { MODULES } from "../types";
 import { getMotivationalMessage } from "../utils/helpers";
+import * as Linking from 'expo-linking';
+import { UpdateService } from "../store/UpdateService";
 
 const { width } = Dimensions.get("window");
 
@@ -28,6 +31,19 @@ export default function DashboardScreen() {
 
   const { state, getMemorizedPages, getPagesDue } = useAppStore();
   const { user, streak } = state;
+
+  const [updateInfo, setUpdateInfo] = React.useState<{ hasUpdate: boolean, version?: string, changelog?: string }>({ hasUpdate: false });
+  
+  React.useEffect(() => {
+    // Check for updates on mount
+    const check = async () => {
+      const info = await UpdateService.checkForUpdate();
+      if (info?.hasUpdate) {
+        setUpdateInfo({ hasUpdate: true, version: info.latestVersion, changelog: info.changelog });
+      }
+    };
+    check();
+  }, []);
 
   const isLoaded = useSelectionStore((state) => state.isLoaded);
   const loadFromStorage = useSelectionStore((state) => state.loadFromStorage);
@@ -117,6 +133,34 @@ export default function DashboardScreen() {
             </TouchableOpacity>
           </View>
 
+          {updateInfo.hasUpdate && (
+            <TouchableOpacity 
+              style={styles.updateBanner} 
+              onPress={() => Linking.openURL('https://github.com/mustafa-ahmad/alhouson-alkhamsa/releases')}
+            >
+              <LinearGradient 
+                colors={[Colors.primary, Colors.primaryDark]} 
+                start={{ x: 0, y: 0 }} 
+                end={{ x: 1, y: 0 }} 
+                style={styles.updateGradient}
+              >
+                <View style={[styles.updateInfo, { flexShrink: 1 }]}>
+                  <Ionicons name="cloud-download-outline" size={20} color="#FFF" />
+                  <View style={styles.updateTexts}>
+                    <Text style={styles.updateTitle} numberOfLines={1}>تحديث جديد: {updateInfo.version}!</Text>
+                    <Text style={styles.updateDesc} numberOfLines={1} ellipsizeMode="tail">
+                      {updateInfo.changelog || 'اضافات جديدة وتحسينات عامة'}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.updateBtn}>
+                  <Text style={styles.updateBtnText}>تحديث</Text>
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
+          )}
+          <View style={{ height: Spacing.sm }} />
+
           <View style={styles.headerTop}>
             <View style={styles.greetingBox}>
               <Text
@@ -185,56 +229,64 @@ export default function DashboardScreen() {
         </TouchableOpacity>
 
         {/* Daily Progress Panel */}
-        <Animated.View style={[styles.progressPanel, { opacity: fadeAnim }]}>
-          <LinearGradient
-            colors={Colors.gradientCard}
-            style={styles.progressGradient}
-          >
-            {/* Left: Circular */}
-            <View style={styles.circularWrapper}>
-              <View style={styles.circularOuter}>
-                <View
-                  style={[
-                    styles.circularInner,
-                    {
-                      borderColor:
-                        completionPct >= 1 ? Colors.primary : Colors.border,
-                    },
-                  ]}
-                >
-                  <Text style={styles.pctText}>
-                    {Math.round(completionPct * 100)}%
-                  </Text>
-                  <Text style={styles.pctLabel}>إنجاز اليوم</Text>
+        {state.settings.showDailyProgressOnDashboard && (
+          <Animated.View style={[styles.progressPanel, { opacity: fadeAnim }]}>
+            <LinearGradient
+              colors={Colors.gradientCard}
+              style={styles.progressGradient}
+            >
+              {/* Left: Circular */}
+              <View style={styles.circularWrapper}>
+                <View style={styles.circularOuter}>
+                  <View
+                    style={[
+                      styles.circularInner,
+                      {
+                        borderColor:
+                          completionPct >= 1 ? Colors.primary : Colors.border,
+                      },
+                    ]}
+                  >
+                    <Text style={styles.pctText}>
+                      {Math.round(completionPct * 100)}%
+                    </Text>
+                    <Text style={styles.pctLabel}>إنجاز اليوم</Text>
+                  </View>
                 </View>
               </View>
-            </View>
 
-            {/* Right: Stats */}
-            <View style={styles.statsColumn}>
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{taskSelections.length}</Text>
-                <Text style={styles.statLabel}>إجمالي الأوراد</Text>
+              {/* Right: Stats */}
+              <View style={styles.statsColumn}>
+                <View style={styles.statItem}>
+                  <Text style={styles.statValue}>{taskSelections.length}</Text>
+                  <Text style={styles.statLabel}>إجمالي الأوراد</Text>
+                </View>
+                <View style={styles.statDivider} />
+                <View style={styles.statItem}>
+                  <Text style={styles.statValue}>{memorizedPages.length}</Text>
+                  <Text style={styles.statLabel}>صفحة محفوظة</Text>
+                </View>
+                <View style={styles.statDivider} />
+                <View style={styles.statItem}>
+                  <Text style={[styles.statValue, { color: Colors.warning }]}>
+                    {pagesDue.length}
+                  </Text>
+                  <Text style={styles.statLabel}>للمراجعة</Text>
+                </View>
               </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{memorizedPages.length}</Text>
-                <Text style={styles.statLabel}>صفحة محفوظة</Text>
-              </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={[styles.statValue, { color: Colors.warning }]}>
-                  {pagesDue.length}
-                </Text>
-                <Text style={styles.statLabel}>للمراجعة</Text>
-              </View>
-            </View>
-          </LinearGradient>
-        </Animated.View>
+            </LinearGradient>
+          </Animated.View>
+        )}
 
         <StreakBadge
           currentStreak={streak.currentStreak}
           longestStreak={streak.longestStreak}
+        />
+
+        {/* Fortress Daily Guide */}
+        <FortressGuide
+          plan={state.plan}
+          pageProgress={state.pageProgress}
         />
 
         {/* Dynamic Modules Section */}
@@ -320,14 +372,58 @@ const getStyles = (Colors: any) =>
       alignItems: "flex-start",
     },
     settingsBtn: {
-      width: 34,
-      height: 34,
+      width: 32,
+      height: 32,
       borderRadius: 10,
-      backgroundColor: Colors.glass,
-      borderWidth: 1,
-      borderColor: Colors.glassBorder,
+      backgroundColor: Colors.surface,
       alignItems: "center",
       justifyContent: "center",
+      borderWidth: 1,
+      borderColor: Colors.borderLight,
+    },
+    updateBanner: {
+      marginTop: Spacing.md,
+      borderRadius: BorderRadius.lg,
+      overflow: "hidden",
+      ...Shadow.sm,
+    },
+    updateGradient: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: Spacing.lg,
+      height: 64,
+    },
+    updateInfo: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.sm,
+      flex: 1,
+      marginRight: Spacing.sm,
+    },
+    updateTexts: {
+      flex: 1,
+    },
+    updateTitle: {
+      fontSize: Typography.sm,
+      fontWeight: Typography.bold,
+      color: "#FFF",
+    },
+    updateDesc: {
+      fontSize: 10,
+      color: "rgba(255,255,255,0.8)",
+    },
+    updateBtn: {
+      backgroundColor: "#FFF",
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderRadius: 12,
+      flexShrink: 0,
+    },
+    updateBtnText: {
+      fontSize: 10,
+      fontWeight: Typography.bold,
+      color: Colors.primary,
     },
     userBadge: {
       alignItems: "center",

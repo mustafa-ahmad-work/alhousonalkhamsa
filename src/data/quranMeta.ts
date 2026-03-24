@@ -165,3 +165,36 @@ export function formatRangeLabel(
 
 // Total pages in the Quran
 export const TOTAL_PAGES = 604;
+
+export const JUZ_META = [
+  { id: 1, startPage: 1, endPage: 21 },
+  { id: 2, startPage: 22, endPage: 41 },
+  { id: 3, startPage: 42, endPage: 61 },
+  { id: 4, startPage: 62, endPage: 81 },
+  { id: 5, startPage: 82, endPage: 101 },
+  { id: 6, startPage: 102, endPage: 121 },
+  { id: 7, startPage: 122, endPage: 141 },
+  { id: 8, startPage: 142, endPage: 161 },
+  { id: 9, startPage: 162, endPage: 181 },
+  { id: 10, startPage: 182, endPage: 201 },
+  { id: 11, startPage: 202, endPage: 221 },
+  { id: 12, startPage: 222, endPage: 241 },
+  { id: 13, startPage: 242, endPage: 261 },
+  { id: 14, startPage: 262, endPage: 281 },
+  { id: 15, startPage: 282, endPage: 301 },
+  { id: 16, startPage: 302, endPage: 321 },
+  { id: 17, startPage: 322, endPage: 341 },
+  { id: 18, startPage: 342, endPage: 361 },
+  { id: 19, startPage: 362, endPage: 381 },
+  { id: 20, startPage: 382, endPage: 401 },
+  { id: 21, startPage: 402, endPage: 421 },
+  { id: 22, startPage: 422, endPage: 441 },
+  { id: 23, startPage: 442, endPage: 461 },
+  { id: 24, startPage: 462, endPage: 481 },
+  { id: 25, startPage: 482, endPage: 501 },
+  { id: 26, startPage: 502, endPage: 521 },
+  { id: 27, startPage: 522, endPage: 541 },
+  { id: 28, startPage: 542, endPage: 561 },
+  { id: 29, startPage: 562, endPage: 581 },
+  { id: 30, startPage: 582, endPage: 604 },
+];

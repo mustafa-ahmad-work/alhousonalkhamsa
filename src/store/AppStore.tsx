@@ -44,6 +44,7 @@ const initialState: AppState = {
     lastActiveDate: "",
   },
   isOnboarded: false,
+  isLoaded: false,
   themeMode: "light",
   taskSelections: [],
   globalStats: {
@@ -52,6 +53,17 @@ const initialState: AppState = {
     totalPages: 0,
     totalLaunches: 0,
     totalPageViews: 0,
+  },
+  settings: {
+    hapticsEnabled: false,
+    reviewStrategy: "spaced",
+    notificationsEnabled: true,
+    morningReminderTime: "06:00",
+    nightReminderTime: "22:00",
+    showDailyProgressOnDashboard: true,
+    memorizationTimerMinutes: 15,
+    preparationTimerMinutes: 15,
+    reviewTimerMinutes: 15,
   },
 };
 
@@ -71,13 +83,19 @@ type Action =
   | { type: "TOGGLE_THEME" }
   | { type: "RESET" }
   | { type: "UPDATE_USER"; payload: Partial<User> }
+  | { type: "UPDATE_SETTINGS"; payload: Partial<AppState["settings"]> }
   | { type: "UPDATE_GLOBAL_STATS"; payload: any };
 
 // ─── Reducer ──────────────────────────────────────────────
 function appReducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case "LOAD_STATE": {
-      return { ...state, ...action.payload };
+      return {
+        ...state,
+        ...action.payload,
+        settings: { ...state.settings, ...(action.payload.settings || {}) },
+        isLoaded: true,
+      };
     }
 
     case "COMPLETE_ONBOARDING": {
@@ -251,7 +269,7 @@ function appReducer(state: AppState, action: Action): AppState {
     }
 
     case "RESET": {
-      return initialState;
+      return { ...initialState, isLoaded: true };
     }
 
     case "UPDATE_USER": {
@@ -259,6 +277,13 @@ function appReducer(state: AppState, action: Action): AppState {
       return {
         ...state,
         user: { ...state.user, ...action.payload },
+      };
+    }
+ 
+    case "UPDATE_SETTINGS": {
+      return {
+        ...state,
+        settings: { ...state.settings, ...action.payload },
       };
     }
  
@@ -319,41 +344,20 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: PropsWithChildren) {
   const [state, dispatch] = useReducer(appReducer, initialState);
  
-  // Listen to Global Stats when onboarded
-  useEffect(() => {
-    if (state.isOnboarded) {
-      const unsub = StatisticsService.subscribeToStats((stats) => {
-        dispatch({ type: "UPDATE_GLOBAL_STATS", payload: stats });
-      });
-      return unsub;
-    }
-  }, [state.isOnboarded]);
-
-  // Load state from storage on mount
-  useEffect(() => {
-    loadState();
-    StatisticsService.trackAppLaunch();
-  }, []);
-
-  // Persist state on every change
-  useEffect(() => {
-    if (state.isOnboarded) {
-      saveState(state);
-    }
-  }, [state]);
-
-  // Apply theme on change (handled by components using useTheme)
-  // No longer mutating global Colors object
-
   const loadState = async () => {
     try {
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
       if (stored) {
+        console.log("[AppStore] State loaded from storage");
         const parsed = JSON.parse(stored) as Partial<AppState>;
         dispatch({ type: "LOAD_STATE", payload: parsed });
+      } else {
+        console.log("[AppStore] No stored state found");
+        dispatch({ type: "LOAD_STATE", payload: {} });
       }
     } catch (e) {
       console.warn("[AppStore] Failed to load state:", e);
+      dispatch({ type: "LOAD_STATE", payload: {} });
     }
   };
 
@@ -364,6 +368,34 @@ export function AppProvider({ children }: PropsWithChildren) {
       console.warn("[AppStore] Failed to save state:", e);
     }
   };
+
+  // Load state from storage on mount
+  useEffect(() => {
+    loadState();
+    StatisticsService.trackAppLaunch();
+  }, []);
+
+  // Persist state on every change
+  useEffect(() => {
+    if (state.isLoaded) {
+      if (state.isOnboarded) {
+        saveState(state);
+      } else if (state.user === null) {
+        // Only clear if user is null (indicator of RESET)
+        AsyncStorage.removeItem(STORAGE_KEY);
+      }
+    }
+  }, [state]);
+
+  // Listen to Global Stats when onboarded
+  useEffect(() => {
+    if (state.isOnboarded) {
+      const unsub = StatisticsService.subscribeToStats((stats) => {
+        dispatch({ type: "UPDATE_GLOBAL_STATS", payload: stats });
+      });
+      return unsub;
+    }
+  }, [state.isOnboarded]);
 
   const getTodayProgress = useCallback((): DailyProgress | null => {
     const today = todayISO();

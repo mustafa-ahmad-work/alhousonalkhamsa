@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,17 +7,31 @@ import {
   TouchableOpacity,
   StatusBar,
   Alert,
+  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useAppStore } from '../store/AppStore';
+import { useSelectionStore } from '../store/selectionStore';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { useTheme, Typography, Spacing, BorderRadius, Shadow } from '../theme';
-import { PageProgress, MemorizationStrength } from '../types';
-import { getPagesDueForReview } from '../utils/helpers';
+import { PageProgress, MemorizationStrength, TaskSelection } from '../types';
+import { getNextReviewDate, strengthAfterReview, todayISO, getPagesDueForReview } from '../utils/helpers';
 import { Ionicons } from '@expo/vector-icons';
+import { FiveFortressService } from '../store/FiveFortressService';
+import * as Haptics from 'expo-haptics';
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withTiming, 
+  withSpring, 
+  interpolateColor,
+  withSequence
+} from 'react-native-reanimated';
 
-type ReviewMode = 'select' | 'short' | 'long' | 'done';
+const { width } = Dimensions.get('window');
+
+type ReviewMode = 'select' | 'reviewing' | 'done';
 
 const getStrengthLabels = (Colors: any): Record<
   MemorizationStrength,
@@ -35,306 +49,218 @@ export default function ReviewScreen() {
   const styles = React.useMemo(() => getStyles(Colors), [Colors]);
   const STRENGTH_LABELS = React.useMemo(() => getStrengthLabels(Colors), [Colors]);
 
-  const { state, dispatch, getPagesDue, getMemorizedPages } = useAppStore();
+  const { state, dispatch } = useAppStore();
+  const selectionStore = useSelectionStore();
+  const memorizedPages = state.pageProgress;
+  const pagesDue = getPagesDueForReview(state.pageProgress);
+
   const [mode, setMode] = useState<ReviewMode>('select');
-  const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [reviewType, setReviewType] = useState<'short' | 'long'>('short');
-  const [showRating, setShowRating] = useState(false);
+  const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [reviewedCount, setReviewedCount] = useState(0);
+  const [sessionResults, setSessionResults] = useState<{ page: number, oldS: number, newS: number }[]>([]);
 
-  const pagesDue = getPagesDue();
-  const memorizedPages = getMemorizedPages();
+  // Reanimated values
+  const cardScale = useSharedValue(1);
+  const cardOpacity = useSharedValue(1);
+  const progressValue = useSharedValue(0);
 
-  const shortReviewPages = memorizedPages
-    .slice(-5)
-    .reverse();
+  // Filter pages for review
+  const shortReviewPages = FiveFortressService.getNearReviewPages(memorizedPages)
+    .map((pageNum) => memorizedPages.find((p) => p.pageNumber === pageNum)!)
+    .filter(Boolean);
 
   const longReviewPages = pagesDue;
 
-  const currentPages =
-    reviewType === 'short' ? shortReviewPages : longReviewPages;
+  const currentPages = reviewType === 'short' ? shortReviewPages : longReviewPages;
   const currentPage = currentPages[currentReviewIndex];
 
+  useEffect(() => {
+    if (mode === 'reviewing') {
+      progressValue.value = withTiming(currentReviewIndex / currentPages.length);
+    }
+  }, [currentReviewIndex, mode]);
+
+  const triggerHaptic = (style: Haptics.ImpactFeedbackStyle = Haptics.ImpactFeedbackStyle.Light) => {
+    if (state.settings.hapticsEnabled) {
+      Haptics.impactAsync(style);
+    }
+  };
+
   const handleStartReview = (type: 'short' | 'long') => {
+    const list = type === 'short' ? shortReviewPages : longReviewPages;
+    if (list.length === 0) {
+      Alert.alert('منجز!', 'لا توجد صفحات تحتاج للمراجعة في هذا القسم حالياً.');
+      return;
+    }
+    triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);
     setReviewType(type);
     setCurrentReviewIndex(0);
-    setShowRating(false);
     setReviewedCount(0);
-    setMode(type);
+    setMode('reviewing');
+    setSessionResults([]);
   };
 
   const handleRate = (strength: MemorizationStrength) => {
     if (!currentPage) return;
 
-    dispatch({
-      type: 'REVIEW_PAGE',
-      payload: {
-        pageNumber: currentPage.pageNumber,
-        passed: strength >= 3,
-      },
-    });
+    triggerHaptic(strength >= 4 ? Haptics.ImpactFeedbackStyle.Medium : Haptics.ImpactFeedbackStyle.Light);
+    
+    const passed = strength >= 3;
+    const oldS = currentPage.strength;
+    const newS = strengthAfterReview(oldS, passed);
+
+    setSessionResults(prev => [...prev, { page: currentPage.pageNumber, oldS, newS }]);
+    selectionStore.reviewPage(currentPage.pageNumber, passed);
+    dispatch({ type: 'REVIEW_PAGE', payload: { pageNumber: currentPage.pageNumber, passed } });
 
     setReviewedCount((c) => c + 1);
 
     if (currentReviewIndex < currentPages.length - 1) {
-      setCurrentReviewIndex((i) => i + 1);
-      setShowRating(false);
+      cardOpacity.value = withSequence(withTiming(0, { duration: 150 }), withTiming(1, { duration: 250 }));
+      cardScale.value = withSequence(withTiming(0.9, { duration: 150 }), withSpring(1));
+      setTimeout(() => setCurrentReviewIndex(i => i + 1), 150);
     } else {
-      if (reviewType === 'short') {
-        dispatch({ type: 'TOGGLE_FORTRESS', payload: { fortressId: 'review' } });
-      }
       setMode('done');
+      if (reviewType === 'short') {
+        const activeShortTask = selectionStore.getModuleSelections('review_short').find(s => !s.isCompleted);
+        if (activeShortTask) selectionStore.completeTaskSelection(activeShortTask.id);
+        dispatch({ type: 'TOGGLE_FORTRESS', payload: { fortressId: 'review' } });
+      } else {
+        const activeLongTask = selectionStore.getModuleSelections('review_long').find(s => !s.isCompleted);
+        if (activeLongTask) selectionStore.completeTaskSelection(activeLongTask.id);
+      }
     }
   };
 
-  const handleFinish = () => {
-    router.back();
-  };
+  const animatedCardStyle = useAnimatedStyle(() => ({
+    opacity: cardOpacity.value,
+    transform: [{ scale: cardScale.value }],
+  }));
 
-  const strengthBar = (s: MemorizationStrength) => {
-    const info = STRENGTH_LABELS[s];
-    const widthPct: `${number}%` = `${(s / 5) * 100}%`;
-    return (
-      <View style={styles.strengthBar}>
-        <View style={[styles.strengthFill, { width: widthPct, backgroundColor: info.color }]} />
-      </View>
-    );
-  };
+  const animatedProgressStyle = useAnimatedStyle(() => ({
+    width: `${progressValue.value * 100}%`,
+  }));
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <LinearGradient
-        colors={[Colors.background, Colors.surface]}
-        style={StyleSheet.absoluteFill}
-      />
+      <LinearGradient colors={[Colors.background, Colors.surface]} style={StyleSheet.absoluteFill} />
 
-      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleFinish} style={styles.backBtn}>
+        <TouchableOpacity onPress={() => mode === 'reviewing' ? setMode('select') : router.back()} style={styles.backBtn}>
           <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>المراجعة</Text>
+        <Text style={styles.headerTitle}>بيئة المراجعة</Text>
         <View style={{ width: 40 }} />
       </View>
 
-      {/* SELECT MODE */}
       {mode === 'select' && (
-        <ScrollView
-          contentContainerStyle={styles.selectContainer}
-          showsVerticalScrollIndicator={false}
-        >
-          <Text style={styles.selectTitle}>اختر نوع المراجعة</Text>
+        <ScrollView contentContainerStyle={styles.selectContainer} showsVerticalScrollIndicator={false}>
+          <View style={styles.introBox}>
+            <Text style={styles.introTitle}>اختر وردك</Text>
+            <Text style={styles.introDesc}>المراجعة هي أساس التثبيت والاستمرار</Text>
+          </View>
 
-          {/* Short Review */}
-          <TouchableOpacity
-            style={styles.modeCard}
-            onPress={() => handleStartReview('short')}
-          >
-            <LinearGradient
-              colors={[`${Colors.blue}15`, `${Colors.blue}08`]}
-              style={styles.modeCardGradient}
-            >
-              <Ionicons name="flash-outline" size={34} color={Colors.primary} style={{ opacity: 0.85 }} />
-              <View style={styles.modeCardInfo}>
-                <Text style={styles.modeCardTitle}>المراجعة القصيرة</Text>
-                <Text style={styles.modeCardDesc}>
-                  مراجعة آخر الصفحات المحفوظة
-                </Text>
-                <View style={styles.modeCardBadge}>
-                  <Text style={styles.modeCardBadgeText}>
-                    {shortReviewPages.length} صفحة
-                  </Text>
+          <View style={styles.modeGrid}>
+            <TouchableOpacity style={styles.modeCard} onPress={() => handleStartReview('short')}>
+              <LinearGradient colors={[`${Colors.primary}15`, `${Colors.primary}05`]} style={styles.modeCardContent}>
+                <View style={[styles.modeIcon, { backgroundColor: `${Colors.primary}10` }]}>
+                  <Ionicons name="flash" size={26} color={Colors.primary} />
                 </View>
-              </View>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          {/* Long Review */}
-          <TouchableOpacity
-            style={[styles.modeCard, longReviewPages.length === 0 && styles.modeCardDisabled]}
-            onPress={() => {
-              if (longReviewPages.length === 0) {
-                Alert.alert('لا يوجد مراجعة', 'لا توجد صفحات تحتاج مراجعة الآن، أحسنت!');
-                return;
-              }
-              handleStartReview('long');
-            }}
-          >
-            <LinearGradient
-              colors={[`${Colors.primary}12`, `${Colors.primary}06`]}
-              style={styles.modeCardGradient}
-            >
-              <Ionicons name="sync-outline" size={34} color={Colors.primary} style={{ opacity: 0.85 }} />
-              <View style={styles.modeCardInfo}>
-                <Text style={styles.modeCardTitle}>المراجعة الطويلة</Text>
-                <Text style={styles.modeCardDesc}>
-                  مراجعة بنظام التكرار المتباعد
-                </Text>
-                <View
-                  style={[
-                    styles.modeCardBadge,
-                    longReviewPages.length > 0 && styles.modeCardBadgeWarn,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.modeCardBadgeText,
-                      longReviewPages.length > 0 && { color: Colors.warning },
-                    ]}
-                  >
-                    {longReviewPages.length} صفحة مستحقة
-                  </Text>
-                </View>
-              </View>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          {/* Strength Heatmap */}
-          {memorizedPages.length > 0 && (
-            <View style={styles.heatmapSection}>
-              <Text style={styles.heatmapTitle}>خريطة القوة</Text>
-              <View style={styles.heatmap}>
-                {memorizedPages.slice(0, 60).map((page) => (
-                  <View
-                    key={page.pageNumber}
-                    style={[
-                      styles.heatCell,
-                      {
-                        backgroundColor:
-                          STRENGTH_LABELS[page.strength as MemorizationStrength].color +
-                          '40',
-                      },
-                    ]}
-                  />
-                ))}
-              </View>
-              <View style={styles.heatLegend}>
-                {([1, 2, 3, 4, 5] as MemorizationStrength[]).map((s) => (
-                  <View key={s} style={styles.legendItem}>
-                    <View
-                      style={[
-                        styles.legendDot,
-                        { backgroundColor: STRENGTH_LABELS[s].color },
-                      ]}
-                    />
-                    <Text style={styles.legendText}>{STRENGTH_LABELS[s].label}</Text>
+                <View style={styles.modeCardInfo}>
+                  <Text style={styles.modeTitle}>المراجعة القريبة</Text>
+                  <Text style={styles.modeDesc} numberOfLines={2}>تثبيت الصفحات التي حفظتها مؤخراً</Text>
+                  <View style={[styles.badge, { backgroundColor: Colors.primary }]}>
+                    <Text style={styles.badgeText}>{shortReviewPages.length} صفحة</Text>
                   </View>
-                ))}
-              </View>
-            </View>
-          )}
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
 
-          {memorizedPages.length === 0 && (
-            <View style={styles.emptyBox}>
-              <Ionicons name="book-outline" size={48} color={Colors.textTertiary} style={{ marginBottom: Spacing.sm, opacity: 0.6 }} />
-              <Text style={styles.emptyTitle}>لا توجد صفحات محفوظة بعد</Text>
-              <Text style={styles.emptySubtitle}>
-                ابدأ بحفظ صفحات جديدة من شاشة الحفظ
-              </Text>
-            </View>
-          )}
+            <TouchableOpacity style={styles.modeCard} onPress={() => handleStartReview('long')}>
+              <LinearGradient colors={[`${Colors.purple}15`, `${Colors.purple}05`]} style={styles.modeCardContent}>
+                <View style={[styles.modeIcon, { backgroundColor: `${Colors.purple}10` }]}>
+                  <Ionicons name="infinite" size={26} color={Colors.purple} />
+                </View>
+                <View style={styles.modeCardInfo}>
+                  <Text style={styles.modeTitle}>المراجعة العميقة</Text>
+                  <Text style={styles.modeDesc} numberOfLines={2}>تنشيط المحفوظ القديم وربط الأجزاء</Text>
+                  <View style={[styles.badge, { backgroundColor: Colors.purple }]}>
+                    <Text style={styles.badgeText}>{longReviewPages.length} صفحة</Text>
+                  </View>
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       )}
 
-      {/* REVIEW MODE */}
-      {(mode === 'short' || mode === 'long') && currentPage && (
-        <View style={styles.reviewContainer}>
-          {/* Progress */}
-          <View style={styles.reviewProgress}>
-            <Text style={styles.reviewProgressText}>
-              {currentReviewIndex + 1}/{currentPages.length}
-            </Text>
-            <View style={styles.reviewProgressBarBg}>
-              <View
-                style={[
-                  styles.reviewProgressBar,
-                  {
-                    width: `${((currentReviewIndex + 1) / currentPages.length) * 100}%`,
-                  },
-                ]}
-              />
+      {mode === 'reviewing' && currentPage && (
+        <ScrollView contentContainerStyle={styles.reviewContainer} showsVerticalScrollIndicator={false}>
+          <View style={styles.progressSection}>
+            <View style={styles.progressTrack}>
+              <Animated.View style={[styles.progressFill, animatedProgressStyle]} />
             </View>
+            <Text style={styles.progressStatus}>{currentReviewIndex + 1} / {currentPages.length}</Text>
           </View>
 
-          {/* Page Card */}
-          <View style={styles.reviewPageCard}>
-            <Text style={styles.reviewPageLabel}>صفحة</Text>
-            <Text style={styles.reviewPageNumber}>{currentPage.pageNumber}</Text>
-
-            {/* Current strength */}
-            <View style={styles.currentStrength}>
-              <Text style={styles.currentStrengthLabel}>القوة الحالية</Text>
-              <View style={styles.currentStrengthRow}>
-                {strengthBar(currentPage.strength)}
-                <Text
-                  style={[
-                    styles.currentStrengthValue,
-                    {
-                      color:
-                        STRENGTH_LABELS[currentPage.strength as MemorizationStrength].color,
-                    },
-                  ]}
-                >
+          <Animated.View style={[styles.reviewCard, animatedCardStyle]}>
+            <View style={styles.pageInfo}>
+              <Text style={styles.pageLabel}>الصفحة</Text>
+              <Text style={styles.pageValue}>{currentPage.pageNumber}</Text>
+              <View style={[styles.strengthPill, { backgroundColor: `${STRENGTH_LABELS[currentPage.strength as MemorizationStrength].color}15` }]}>
+                <Ionicons name={STRENGTH_LABELS[currentPage.strength as MemorizationStrength].icon as any} size={14} color={STRENGTH_LABELS[currentPage.strength as MemorizationStrength].color} />
+                <Text style={[styles.strengthText, { color: STRENGTH_LABELS[currentPage.strength as MemorizationStrength].color }]}>
                   {STRENGTH_LABELS[currentPage.strength as MemorizationStrength].label}
                 </Text>
               </View>
             </View>
 
-            {/* Review count */}
-            <Text style={styles.reviewCount}>
-              راجعت هذه الصفحة {currentPage.reviewCount} مرة
-            </Text>
-          </View>
+            <View style={styles.divider} />
 
-          {!showRating ? (
-            <PrimaryButton
-              label="قيّم مراجعتك"
-              icon="flag-outline"
-              onPress={() => setShowRating(true)}
-            />
-          ) : (
-            <View style={styles.ratingContainer}>
-              <Text style={styles.ratingTitle}>كيف كانت مراجعتك؟</Text>
-              <View style={styles.ratingButtons}>
-                {([1, 2, 3, 4, 5] as MemorizationStrength[]).map((s) => {
-                  const info = STRENGTH_LABELS[s];
-                  return (
-                    <TouchableOpacity
-                      key={s}
-                      onPress={() => handleRate(s)}
-                      style={[
-                        styles.ratingBtn,
-                        { borderColor: info.color + '30', backgroundColor: info.color + '0A' },
-                      ]}
-                    >
-                      <Ionicons name={info.icon as any} size={22} color={info.color} />
-                      <Text style={[styles.ratingLabel, { color: info.color }]}>
-                        {info.label}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
+            <View style={styles.ratingSection}>
+              <Text style={styles.ratingTitle}>كيف كان أداء تسميعك؟</Text>
+              <View style={styles.ratingRow}>
+                {([1, 2, 3, 4, 5] as MemorizationStrength[]).map((s) => (
+                  <TouchableOpacity key={s} style={styles.rateBtn} onPress={() => handleRate(s)}>
+                    <View style={[styles.rateIcon, { backgroundColor: `${STRENGTH_LABELS[s].color}12` }]}>
+                      <Ionicons name={STRENGTH_LABELS[s].icon as any} size={22} color={STRENGTH_LABELS[s].color} />
+                    </View>
+                    <Text style={[styles.rateLabel, { color: STRENGTH_LABELS[s].color }]}>{STRENGTH_LABELS[s].label}</Text>
+                  </TouchableOpacity>
+                ))}
               </View>
             </View>
-          )}
-        </View>
+          </Animated.View>
+
+          <Text style={styles.hint}>اقرأ الصفحة كاملة غيباً قبل التقييم</Text>
+        </ScrollView>
       )}
 
-      {/* DONE */}
       {mode === 'done' && (
-        <View style={styles.doneContainer}>
-          <Ionicons name="checkmark-circle-outline" size={64} color={Colors.primary} style={{ marginBottom: Spacing.sm, opacity: 0.9 }} />
-          <Text style={styles.doneTitle}>أحسنت!</Text>
-          <Text style={styles.doneSubtitle}>
-            راجعت {reviewedCount} صفحة بنجاح
-          </Text>
-          <PrimaryButton
-            label="العودة"
-            onPress={handleFinish}
-            style={styles.doneBtn}
-          />
-        </View>
+        <ScrollView contentContainerStyle={styles.doneContainer} showsVerticalScrollIndicator={false}>
+          <Ionicons name="sparkles" size={60} color={Colors.primary} />
+          <Text style={styles.doneTitle}>مبارك التثبيت!</Text>
+          <Text style={styles.doneText}>لقد أتممت مراجعة ورد اليوم. استمرارك هو الحصن المنيع.</Text>
+
+          <View style={styles.summaryCard}>
+            <Text style={styles.summaryTitle}>ملخص الجلسة</Text>
+            {sessionResults.map((r, i) => (
+              <View key={i} style={styles.sumRow}>
+                <Text style={styles.sumPage}>صفحة {r.page}</Text>
+                <View style={styles.sumMove}>
+                  <Text style={{ fontSize: 10, color: STRENGTH_LABELS[r.oldS as MemorizationStrength].color }}>{STRENGTH_LABELS[r.oldS as MemorizationStrength].label}</Text>
+                  <Ionicons name="arrow-back" size={12} color={Colors.textTertiary} />
+                  <Text style={{ fontSize: 10, color: STRENGTH_LABELS[r.newS as MemorizationStrength].color, fontWeight: 'bold' }}>{STRENGTH_LABELS[r.newS as MemorizationStrength].label}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+
+          <PrimaryButton label="تم والعودة للرئيسية" onPress={() => router.back()} style={{ width: '100%', marginTop: 20 }} />
+          <View style={{ height: 40 }} />
+        </ScrollView>
       )}
     </View>
   );
@@ -342,276 +268,55 @@ export default function ReviewScreen() {
 
 const getStyles = (Colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 56,
-    paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing.md,
-  },
-  backBtn: {
-    width: 40,
-    height: 40,
-    backgroundColor: Colors.glass,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: Colors.glassBorder,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: Typography.lg,
-    fontWeight: Typography.semibold,
-    color: Colors.textPrimary,
-  },
+  header: { paddingTop: 56, paddingHorizontal: Spacing.xl, paddingBottom: Spacing.md, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  headerTitle: { fontSize: Typography.lg, fontWeight: Typography.bold, color: Colors.textPrimary },
+  countNum: { fontSize: 32, fontWeight: Typography.bold, color: Colors.textPrimary },
+  backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.glass, borderRadius: 12 },
 
-  // SELECT
-  selectContainer: {
-    padding: Spacing.xl,
-    paddingBottom: 100,
-    gap: Spacing.md,
-  },
-  selectTitle: {
-    fontSize: Typography.lg,
-    fontWeight: Typography.semibold,
-    color: Colors.textPrimary,
-    textAlign: 'center',
-    marginBottom: Spacing.sm,
-  },
-  modeCard: {
-    borderRadius: BorderRadius.xl,
-    borderWidth: 1,
-    borderColor: Colors.glassBorder,
-    overflow: 'hidden',
-  },
-  modeCardDisabled: { opacity: 0.4 },
-  modeCardGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.base,
-    gap: Spacing.base,
-  },
-  modeCardInfo: { flex: 1, alignItems: 'flex-start', gap: 4 },
-  modeCardTitle: {
-    fontSize: Typography.base,
-    fontWeight: Typography.semibold,
-    color: Colors.textPrimary,
-  },
-  modeCardDesc: {
-    fontSize: Typography.sm,
-    color: Colors.textSecondary,
-    textAlign: 'left',
-  },
-  modeCardBadge: {
-    backgroundColor: Colors.primaryMuted,
-    borderRadius: BorderRadius.full,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 2,
-    borderWidth: 1,
-    borderColor: `${Colors.primary}15`,
-  },
-  modeCardBadgeWarn: {
-    backgroundColor: Colors.goldMuted,
-    borderColor: `${Colors.gold}15`,
-  },
-  modeCardBadgeText: {
-    fontSize: Typography.xs,
-    color: Colors.primary,
-    fontWeight: Typography.medium,
-  },
-  heatmapSection: {
-    backgroundColor: Colors.glass,
-    borderRadius: BorderRadius.xl,
-    borderWidth: 1,
-    borderColor: Colors.glassBorder,
-    padding: Spacing.lg,
-    marginTop: Spacing.sm,
-  },
-  heatmapTitle: {
-    fontSize: Typography.base,
-    fontWeight: Typography.semibold,
-    color: Colors.textPrimary,
-    textAlign: 'left',
-    marginBottom: Spacing.md,
-  },
-  heatmap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 3,
-    marginBottom: Spacing.md,
-  },
-  heatCell: {
-    width: 14,
-    height: 14,
-    borderRadius: 3,
-  },
-  heatLegend: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.sm,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-  },
-  legendDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  legendText: {
-    fontSize: 10,
-    color: Colors.textTertiary,
-  },
-  emptyBox: {
-    alignItems: 'center',
-    padding: Spacing.xl,
-    gap: Spacing.sm,
-  },
-  emptyTitle: {
-    fontSize: Typography.base,
-    fontWeight: Typography.medium,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-  },
-  emptySubtitle: {
-    fontSize: Typography.sm,
-    color: Colors.textTertiary,
-    textAlign: 'center',
-  },
+  selectContainer: { padding: Spacing.xl },
+  introBox: { marginBottom: Spacing.xl, alignItems: 'flex-start' },
+  introTitle: { fontSize: Typography.xl, fontWeight: Typography.bold, color: Colors.textPrimary },
+  introDesc: { fontSize: Typography.sm, color: Colors.textSecondary },
 
-  // REVIEW
-  reviewContainer: {
-    flex: 1,
-    padding: Spacing.xl,
-    paddingBottom: 100,
-    gap: Spacing.lg,
-  },
-  reviewProgress: {
-    gap: Spacing.sm,
-  },
-  reviewProgressText: {
-    fontSize: Typography.sm,
-    color: Colors.textTertiary,
-    textAlign: 'center',
-  },
-  reviewProgressBarBg: {
-    height: 3,
-    backgroundColor: Colors.border,
-    borderRadius: 1.5,
-    overflow: 'hidden',
-  },
-  reviewProgressBar: {
-    height: 3,
-    backgroundColor: Colors.purple,
-    borderRadius: 1.5,
-  },
-  reviewPageCard: {
-    flex: 1,
-    backgroundColor: Colors.glass,
-    borderRadius: BorderRadius.xl,
-    borderWidth: 1,
-    borderColor: Colors.glassBorder,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: Spacing.xl,
-    gap: Spacing.lg,
-  },
-  reviewPageLabel: {
-    fontSize: Typography.base,
-    color: Colors.textTertiary,
-  },
-  reviewPageNumber: {
-    fontSize: 70,
-    fontWeight: Typography.bold,
-    color: Colors.primary,
-    lineHeight: 78,
-  },
-  currentStrength: {
-    width: '100%',
-    gap: Spacing.sm,
-    alignItems: 'center',
-  },
-  currentStrengthLabel: {
-    fontSize: Typography.sm,
-    color: Colors.textTertiary,
-  },
-  currentStrengthRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-    width: '80%',
-  },
-  strengthBar: {
-    flex: 1,
-    height: 4,
-    backgroundColor: Colors.border,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  strengthFill: {
-    height: 4,
-    borderRadius: 2,
-  },
-  currentStrengthValue: {
-    fontSize: Typography.sm,
-    fontWeight: Typography.medium,
-    minWidth: 56,
-    textAlign: 'left',
-  },
-  reviewCount: {
-    fontSize: Typography.sm,
-    color: Colors.textTertiary,
-  },
-  ratingContainer: {
-    gap: Spacing.md,
-  },
-  ratingTitle: {
-    fontSize: Typography.base,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-  },
-  ratingButtons: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-  },
-  ratingBtn: {
-    borderWidth: 1,
-    borderRadius: BorderRadius.md,
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 3,
-  },
-  ratingLabel: {
-    fontSize: 10,
-    fontWeight: Typography.medium,
-  },
+  modeGrid: { gap: Spacing.md },
+  modeCard: { borderRadius: 24, overflow: 'hidden', borderWidth: 1, borderColor: Colors.glassBorder },
+  modeCardContent: { padding: Spacing.lg, flexDirection: 'row', alignItems: 'center', gap: Spacing.lg },
+  modeIcon: { width: 50, height: 50, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  modeCardInfo: { flex: 1, alignItems: 'flex-start', gap: 2 },
+  modeTitle: { fontSize: Typography.md, fontWeight: Typography.bold, color: Colors.textPrimary },
+  modeDesc: { fontSize: Typography.xs, color: Colors.textSecondary },
+  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, marginTop: 4 },
+  badgeText: { fontSize: 9, color: '#FFF', fontWeight: 'bold' },
 
-  // DONE
-  doneContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: Spacing.xl,
-    paddingBottom: 100,
-    gap: Spacing.md,
-  },
-  doneTitle: {
-    fontSize: Typography['2xl'],
-    fontWeight: Typography.bold,
-    color: Colors.primary,
-  },
-  doneSubtitle: {
-    fontSize: Typography.base,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-  },
-  doneBtn: { width: '100%', marginTop: Spacing.sm },
+  reviewContainer: { padding: Spacing.xl, gap: Spacing.xl },
+  progressSection: { gap: 8 },
+  progressTrack: { height: 4, backgroundColor: Colors.borderLight, borderRadius: 2, overflow: 'hidden' },
+  progressFill: { height: '100%', backgroundColor: Colors.primary },
+  progressStatus: { fontSize: 10, color: Colors.textSecondary, textAlign: 'right', fontWeight: 'bold' },
+
+  reviewCard: { backgroundColor: Colors.glass, borderRadius: 32, padding: Spacing.xl, borderWidth: 1, borderColor: Colors.glassBorder, alignItems: 'center', gap: Spacing.xl, ...Shadow.md },
+  pageInfo: { alignItems: 'center', gap: 4 },
+  pageLabel: { fontSize: Typography.xs, color: Colors.textSecondary, fontWeight: 'bold' },
+  pageValue: { fontSize: 80, color: Colors.primary, fontWeight: Typography.bold },
+  strengthPill: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
+  strengthText: { fontSize: 10, fontWeight: 'bold' },
+
+  divider: { width: '100%', height: 1, backgroundColor: Colors.borderLight },
+
+  ratingSection: { width: '100%', alignItems: 'center', gap: Spacing.lg },
+  ratingTitle: { fontSize: Typography.sm, fontWeight: 'bold', color: Colors.textPrimary },
+  ratingRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 12 },
+  rateBtn: { alignItems: 'center', gap: 6, width: (width - 120) / 3 },
+  rateIcon: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  rateLabel: { fontSize: 9, fontWeight: 'bold' },
+  hint: { fontSize: Typography.xs, color: Colors.textTertiary, fontStyle: 'italic', textAlign: 'center' },
+
+  doneContainer: { flex: 1, padding: Spacing.xl, alignItems: 'center', justifyContent: 'center', gap: Spacing.md },
+  doneTitle: { fontSize: Typography.xl, fontWeight: 'bold', color: Colors.textPrimary },
+  doneText: { fontSize: Typography.base, color: Colors.textSecondary, textAlign: 'center', lineHeight: 22, marginBottom: Spacing.lg },
+  summaryCard: { width: '100%', backgroundColor: Colors.glass, borderRadius: 20, padding: Spacing.lg, borderWidth: 1, borderColor: Colors.glassBorder },
+  summaryTitle: { fontSize: Typography.sm, fontWeight: 'bold', color: Colors.textPrimary, marginBottom: 12, textAlign: 'center' },
+  sumRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: Colors.borderLight },
+  sumPage: { fontSize: Typography.sm, color: Colors.textSecondary },
+  sumMove: { flexDirection: 'row', alignItems: 'center', gap: 6 },
 });

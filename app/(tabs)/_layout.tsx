@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import { Typography, useTheme } from "../../src/theme";
+import { useAppStore } from "../../src/store/AppStore";
 
 // Filled vs outline icons for each tab
 const ICONS: Record<string, { outline: string; filled: string }> = {
@@ -76,13 +77,19 @@ function TabItem({
   };
   const iconName = isFocused ? icons.filled : icons.outline;
 
+  const { state } = useAppStore();
+
   const handlePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (state.settings.hapticsEnabled) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
     onPress();
   };
 
   const handleLongPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (state.settings.hapticsEnabled) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
     onLongPress();
   };
 
@@ -194,7 +201,6 @@ export default function TabsLayout() {
       <Tabs.Screen name="memorization" options={{ title: "الحفظ" }} />
       <Tabs.Screen name="review" options={{ title: "المراجعة" }} />
       <Tabs.Screen name="progress" options={{ title: "التقدم" }} />
-      <Tabs.Screen name="explore" options={{ href: null }} />
     </Tabs>
   );
 }

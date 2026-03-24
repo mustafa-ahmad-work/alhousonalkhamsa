@@ -4,660 +4,403 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Animated,
   StatusBar,
   Dimensions,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useAppStore } from '../store/AppStore';
+import { useSelectionStore } from '../store/selectionStore';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { useTheme, Typography, Spacing, BorderRadius, Shadow } from '../theme';
 import { formatTime } from '../utils/helpers';
 import { Ionicons } from '@expo/vector-icons';
+import { TaskSelection } from '../types';
+import * as Haptics from 'expo-haptics';
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withTiming, 
+  withRepeat, 
+  withSequence, 
+  interpolateColor,
+  withSpring
+} from 'react-native-reanimated';
 
 const { width, height } = Dimensions.get('window');
-const MIN_SESSION_SECONDS = 15 * 60; // 15 minutes
 
-type Phase = 'ready' | 'memorizing' | 'done';
+type Phase = 'warmup' | 'repeating' | 'testing' | 'done';
+
+const PHASES: Record<Phase, { title: string, desc: string, icon: string, color: string, gradient: [string, string] }> = {
+  warmup: { title: 'التحضير السريع', desc: 'اقرأ الصفحة 3 مرات بتركيز كامل مع الاستمتاع بالتلاوة', icon: 'book', color: '#3498db', gradient: ['#3498db', '#2980b9'] },
+  repeating: { title: 'مرحلة التكرار', desc: 'كرر الآيات الصعبة حتى ترسخ في الذاكرة القريبة', icon: 'refresh-circle', color: '#f39c12', gradient: ['#f39c12', '#e67e22'] },
+  testing: { title: 'الاختبار النهائي', desc: 'اقرأ الصفحة كاملة غيباً دون النظر للمصحف', icon: 'shield-checkmark', color: '#2ecc71', gradient: ['#2ecc71', '#27ae60'] },
+  done: { title: 'تم الحفظ!', desc: 'أحسنت! لقد ثبت حصنك اليوم بنجاح', icon: 'trophy', color: '#ffd700', gradient: ['#f1c40f', '#f39c12'] },
+};
 
 export default function MemorizationScreen() {
   const Colors = useTheme();
   const styles = React.useMemo(() => getStyles(Colors), [Colors]);
-  const { state, dispatch, getCurrentPagesForMemorization } = useAppStore();
-  const pages = getCurrentPagesForMemorization();
+  const { state, dispatch } = useAppStore();
+  const selectionStore = useSelectionStore();
   const { plan } = state;
 
-  const [phase, setPhase] = useState<Phase>('ready');
+  const [phase, setPhase] = useState<Phase>('warmup');
   const [elapsed, setElapsed] = useState(0);
-  const [currentPageIndex, setCurrentPageIndex] = useState(0);
-  const [canFinish, setCanFinish] = useState(false);
   const [repeatCount, setRepeatCount] = useState(0);
-
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 400,
-      useNativeDriver: true,
-    }).start();
-  }, []);
-
-  // Subtle pulse animation for timer
-  useEffect(() => {
-    if (phase === 'memorizing') {
-      const pulse = Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 1.02,
-            duration: 1500,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 1500,
-            useNativeDriver: true,
-          }),
-        ])
-      );
-      pulse.start();
-      return () => pulse.stop();
+  
+  const MIN_SECONDS = (state.settings.memorizationTimerMinutes || 15) * 60;
+  
+  const activeTask = selectionStore.getModuleSelections('memorization').find(s => !s.isCompleted);
+  const getPagesFromTask = (task: TaskSelection | undefined) => {
+    if (!task) {
+      if (!plan) return [];
+      const res = [];
+      const dailyPages = state.user?.dailyPages ?? plan.pagesPerDay;
+      for (let i = 0; i < dailyPages; i++) {
+        const p = plan.currentPage + i;
+        if (p <= plan.endPage) res.push(p);
+      }
+      return res;
     }
-  }, [phase]);
-
-  // Timer
-  useEffect(() => {
-    if (phase === 'memorizing') {
-      timerRef.current = setInterval(() => {
-        setElapsed((prev) => {
-          const next = prev + 1;
-          if (next >= MIN_SESSION_SECONDS) setCanFinish(true);
-          return next;
-        });
-      }, 1000);
-    } else {
-      if (timerRef.current) clearInterval(timerRef.current);
-    }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [phase]);
-
-  const handleStart = () => {
-    setPhase('memorizing');
-    setElapsed(0);
-    setCanFinish(false);
+    const res: number[] = [];
+    task.ranges.forEach(r => {
+      for (let p = r.start; p <= r.end; p++) res.push(p);
+    });
+    return res;
   };
 
-  const handleMarkMemorized = () => {
-    if (!canFinish) {
-      Alert.alert(
-        'لم تكتمل المدة بعد',
-        `يجب الاستمرار على الأقل ${Math.ceil(
-          (MIN_SESSION_SECONDS - elapsed) / 60
-        )} دقائق إضافية`,
-        [{ text: 'حسناً', style: 'cancel' }]
-      );
-      return;
-    }
+  const pages = getPagesFromTask(activeTask);
 
+  // Reanimated values
+  const bgIntensity = useSharedValue(0);
+  const cardScale = useSharedValue(1);
+  const cardRotate = useSharedValue(0);
+  const progressValue = useSharedValue(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setElapsed(prev => {
+        const next = prev + 1;
+        progressValue.value = withTiming(Math.min(next / MIN_SECONDS, 1));
+        return next;
+      });
+    }, 1000);
+    
+    bgIntensity.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 3000 }),
+        withTiming(0, { duration: 3000 })
+      ),
+      -1,
+      true
+    );
+
+    return () => clearInterval(timer);
+  }, [MIN_SECONDS]);
+
+  const triggerHaptic = (style: Haptics.ImpactFeedbackStyle = Haptics.ImpactFeedbackStyle.Light) => {
+    if (state.settings.hapticsEnabled) {
+      Haptics.impactAsync(style);
+    }
+  };
+
+  const handleNextPhase = () => {
+    triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);
+    cardScale.value = withSequence(withTiming(0.95, { duration: 100 }), withSpring(1));
+
+    if (phase === 'warmup') setPhase('repeating');
+    else if (phase === 'repeating') setPhase('testing');
+    else if (phase === 'testing') {
+      if (elapsed < MIN_SECONDS) {
+        Alert.alert('تمهل قليلاً', 'لم تنتهِ المدة الزمنية المخصصة للحفظ بعد. هل أنت متأكد من الإتقان؟', [
+          { text: 'إلغاء', style: 'cancel' },
+          { text: 'نعم، أتقنت', onPress: completeSession }
+        ]);
+      } else {
+        completeSession();
+      }
+    }
+  };
+
+  const completeSession = () => {
+    triggerHaptic(Haptics.ImpactFeedbackStyle.Heavy);
     if (pages.length > 0) {
-      dispatch({
-        type: 'MARK_PAGES_MEMORIZED',
-        payload: { pages },
-      });
-      dispatch({
-        type: 'TOGGLE_FORTRESS',
-        payload: { fortressId: 'memorization' },
-      });
+      selectionStore.markPagesMemorized(pages);
+      if (activeTask) selectionStore.completeTaskSelection(activeTask.id);
+      dispatch({ type: 'MARK_PAGES_MEMORIZED', payload: { pages } });
+      dispatch({ type: 'TOGGLE_FORTRESS', payload: { fortressId: 'memorization' } });
     }
-
     setPhase('done');
   };
 
-  const handleRepeat = () => {
-    setRepeatCount((prev) => prev + 1);
-    setCurrentPageIndex(0);
-  };
+  const currentPhaseInfo = PHASES[phase];
 
-  const handleFinish = () => {
-    router.back();
-  };
+  const animatedBackStyle = useAnimatedStyle(() => {
+    return {
+      backgroundColor: interpolateColor(
+        bgIntensity.value,
+        [0, 1],
+        [`${currentPhaseInfo.color}05`, `${currentPhaseInfo.color}15`]
+      ),
+    };
+  });
 
-  const progressPct = Math.min(elapsed / MIN_SESSION_SECONDS, 1);
-  const currentPage = pages[currentPageIndex] ?? (plan?.currentPage ?? 1);
+  const animatedCardStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { scale: cardScale.value },
+        { rotateZ: `${cardRotate.value}deg` }
+      ],
+    };
+  });
 
-  if (pages.length === 0 && plan) {
-    return (
-      <View style={styles.container}>
-        <LinearGradient colors={[Colors.background, Colors.surfaceElevated]} style={StyleSheet.absoluteFill} />
-        <View style={styles.emptyContainer}>
-          <Ionicons name="medal-outline" size={52} color={Colors.primary} style={{ marginBottom: Spacing.sm }} />
-          <Text style={styles.emptyTitle}>أحسنت!</Text>
-          <Text style={styles.emptySubtitle}>لقد أتممت خطة الحفظ لهذا الجزء</Text>
-          <PrimaryButton label="العودة للرئيسية" onPress={handleFinish} style={styles.backButton} />
-        </View>
-      </View>
-    );
-  }
+  const progressStyle = useAnimatedStyle(() => {
+    return {
+      width: `${progressValue.value * 100}%`,
+    };
+  });
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" hidden />
-      <LinearGradient
-        colors={[
-          Colors.background,
-          Colors.surface, // Replaced hardcoded #0A0F18
-          Colors.background,
-        ]}
-        style={StyleSheet.absoluteFill}
-      />
+      <StatusBar barStyle="light-content" />
+      <Animated.View style={[StyleSheet.absoluteFill, animatedBackStyle]} />
+      <LinearGradient colors={['transparent', Colors.background]} style={StyleSheet.absoluteFill} />
 
-      {/* Subtle top decoration */}
-      <View style={styles.patternTop} />
-
-      {/* PHASE: Ready */}
-      {phase === 'ready' && (
-        <Animated.View style={[styles.phaseContainer, { opacity: fadeAnim }]}>
-          {/* Close */}
-          <TouchableOpacity onPress={handleFinish} style={styles.closeBtn}>
-            <Ionicons name="close" size={20} color={Colors.textTertiary} />
-          </TouchableOpacity>
-
-          <Ionicons name="shield-checkmark-outline" size={56} color={Colors.primary} style={{ marginBottom: Spacing.lg, opacity: 0.9 }} />
-          <Text style={styles.readyTitle}>وقت الحفظ</Text>
-          <Text style={styles.readySubtitle}>
-            الجلسة الفعّالة تستغرق ١٥ دقيقة على الأقل
-          </Text>
-
-          {/* Pages Info */}
-          <View style={styles.pagesInfo}>
-            <Text style={styles.pagesLabel}>الصفحات المقررة اليوم</Text>
-            <Text style={styles.pagesNumbers}>
-              {pages.join(' — ')}
-            </Text>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="close" size={24} color={Colors.textSecondary} />
+        </TouchableOpacity>
+        <View style={styles.timerContainer}>
+          <Text style={styles.timerValue}>{formatTime(elapsed)}</Text>
+          <View style={styles.progressTrack}>
+            <Animated.View style={[styles.progressIndicator, progressStyle, { backgroundColor: currentPhaseInfo.color }]} />
           </View>
+        </View>
+        <View style={{ width: 40 }} />
+      </View>
 
-          {/* Tips */}
-          <View style={styles.tipsList}>
-            {[
-              { icon: 'notifications-off-outline', text: 'ضع هاتفك في وضع الصمت' },
-              { icon: 'cafe-outline', text: 'اجلس في مكان هادئ' },
-              { icon: 'water-outline', text: 'توضأ قبل الحفظ' },
-              { icon: 'book-outline', text: 'ابدأ بالبسملة' },
-            ].map((tip, i) => (
-              <View key={i} style={styles.tipItem}>
-                <Ionicons name={tip.icon as any} size={18} color={Colors.primary} style={{ opacity: 0.7 }} />
-                <Text style={styles.tipText}>{tip.text}</Text>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Phase Header */}
+        <View style={styles.phaseNav}>
+          {(['warmup', 'repeating', 'testing'] as Phase[]).map((p, i) => (
+            <View key={p} style={styles.phaseNavItem}>
+              <View style={[styles.phaseCircle, { 
+                backgroundColor: phase === p ? PHASES[p].color : Colors.borderLight,
+                borderColor: phase === p ? `${PHASES[p].color}40` : 'transparent',
+                borderWidth: phase === p ? 4 : 0
+              }]}>
+                <Ionicons name={PHASES[p].icon as any} size={14} color={phase === p ? '#FFF' : Colors.textTertiary} />
               </View>
-            ))}
+              {i < 2 && <View style={styles.phaseConnector} />}
+            </View>
+          ))}
+        </View>
+
+        {/* Main Card */}
+        <Animated.View style={[styles.card, animatedCardStyle]}>
+          <LinearGradient 
+            colors={[`${currentPhaseInfo.color}15`, 'transparent']} 
+            style={styles.cardGradient}
+          />
+          
+          <View style={[styles.iconContainer, { shadowColor: currentPhaseInfo.color }]}>
+            <Ionicons name={currentPhaseInfo.icon as any} size={48} color={currentPhaseInfo.color} />
           </View>
 
-          <PrimaryButton
-            label="ابدأ جلسة الحفظ"
-            onPress={handleStart}
-            style={styles.startBtn}
-          />
+          <Text style={[styles.title, { color: currentPhaseInfo.color }]}>{currentPhaseInfo.title}</Text>
+          <Text style={styles.description}>{currentPhaseInfo.desc}</Text>
+
+          <View style={styles.statsContainer}>
+            <View style={styles.statBox}>
+              <Text style={styles.statLabel}>الصفحات</Text>
+              <Text style={styles.statMain}>{pages.join(', ') || '—'}</Text>
+            </View>
+            <View style={styles.statLine} />
+            <View style={styles.statBox}>
+              <Text style={styles.statLabel}>المؤقت</Text>
+              <Text style={styles.statMain}>{Math.ceil(MIN_SECONDS / 60)}د</Text>
+            </View>
+          </View>
+
+          {phase === 'repeating' && (
+            <View style={styles.counterSection}>
+              <Text style={styles.counterHint}>سجل تكرارك الآلي</Text>
+              <View style={styles.counterControls}>
+                <TouchableOpacity 
+                  style={styles.controlBtn} 
+                  onPress={() => {
+                    setRepeatCount(Math.max(0, repeatCount - 1));
+                    triggerHaptic(Haptics.ImpactFeedbackStyle.Light);
+                  }}
+                >
+                  <Ionicons name="remove" size={24} color={Colors.textSecondary} />
+                </TouchableOpacity>
+                <View style={styles.countDisplay}>
+                  <Text style={styles.countNum}>{repeatCount}</Text>
+                </View>
+                <TouchableOpacity 
+                  style={[styles.controlBtn, { backgroundColor: Colors.primary }]} 
+                  onPress={() => {
+                    setRepeatCount(repeatCount + 1);
+                    triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);
+                    cardRotate.value = withSequence(withTiming(2, { duration: 50 }), withTiming(-2, { duration: 50 }), withTiming(0));
+                  }}
+                >
+                  <Ionicons name="add" size={24} color="#FFF" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
+          {phase === 'done' && (
+            <View style={styles.completionContainer}>
+              <Ionicons name="star" size={32} color={Colors.gold} />
+              <Text style={styles.completionText}>إنجاز رائع!</Text>
+            </View>
+          )}
         </Animated.View>
-      )}
 
-      {/* PHASE: Memorizing */}
-      {phase === 'memorizing' && (
-        <View style={styles.sessionContainer}>
-          {/* Timer Ring */}
-          <Animated.View
-            style={[styles.timerRing, { transform: [{ scale: pulseAnim }] }]}
-          >
-            <View
-              style={[
-                styles.timerInner,
-                canFinish && { borderColor: Colors.primary },
-              ]}
+        <View style={styles.actionSection}>
+          {phase !== 'done' ? (
+            <TouchableOpacity 
+              style={[styles.mainAction, { backgroundColor: currentPhaseInfo.color }]} 
+              onPress={handleNextPhase}
             >
-              <Text style={styles.timerText}>{formatTime(elapsed)}</Text>
-              <Text style={styles.timerLabel}>
-                {canFinish ? 'يمكنك الانهاء' : `دقيقة ${Math.floor(elapsed/60)} من ١٥`}
+              <Text style={styles.actionLabel}>
+                {phase === 'testing' ? 'تأكيد الحفظ النهائي' : 'المرحلة التالية'}
               </Text>
-            </View>
-
-            {/* Progress Arc (simulated) */}
-            <View
-              style={[
-                styles.timerProgress,
-                {
-                  borderColor: canFinish ? Colors.primary : Colors.primaryDark,
-                  opacity: 0.2 + progressPct * 0.6,
-                },
-              ]}
-            />
-          </Animated.View>
-
-          {/* Current Page Display */}
-          <View style={styles.pageDisplay}>
-            <Text style={styles.pageDisplayLabel}>الصفحة الحالية</Text>
-            <Text style={styles.pageDisplayNumber}>
-              {String(currentPage).padStart(3, '٠')}
-            </Text>
-            <View style={styles.pageNav}>
-              <TouchableOpacity
-                style={styles.pageNavBtn}
-                onPress={() =>
-                  setCurrentPageIndex((p) => Math.max(0, p - 1))
-                }
-                disabled={currentPageIndex === 0}
-              >
-                <Text style={styles.pageNavText}>→</Text>
-              </TouchableOpacity>
-              <Text style={styles.pageNavCount}>
-                {currentPageIndex + 1}/{pages.length}
-              </Text>
-              <TouchableOpacity
-                style={styles.pageNavBtn}
-                onPress={() =>
-                  setCurrentPageIndex((p) =>
-                    Math.min(pages.length - 1, p + 1)
-                  )
-                }
-                disabled={currentPageIndex === pages.length - 1}
-              >
-                <Text style={styles.pageNavText}>←</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Repeat Counter */}
-          <View style={styles.repeatInfo}>
-            <Text style={styles.repeatText}>
-              عدد مرات التكرار: {repeatCount}
-            </Text>
-            <TouchableOpacity onPress={handleRepeat} style={styles.repeatBtn}>
-              <Ionicons name="sync-outline" size={14} color={Colors.textPrimary} />
-              <Text style={styles.repeatBtnText}>كرّر من البداية</Text>
+              <Ionicons name="chevron-back" size={20} color="#FFF" />
             </TouchableOpacity>
-          </View>
-
-          {/* Actions */}
-          <View style={styles.sessionActions}>
-            <PrimaryButton
-              label={canFinish ? 'تم الحفظ' : `انتظر... ${formatTime(MIN_SESSION_SECONDS - elapsed)}`}
-              onPress={handleMarkMemorized}
-              disabled={!canFinish}
-              style={styles.doneBtn}
-            />
-            <TouchableOpacity
-              onPress={() => {
-                Alert.alert('إيقاف الجلسة', 'هل تريد إيقاف الجلسة؟', [
-                  { text: 'لا', style: 'cancel' },
-                  {
-                    text: 'نعم',
-                    onPress: () => {
-                      setPhase('ready');
-                      setElapsed(0);
-                    },
-                  },
-                ]);
-              }}
-              style={styles.cancelBtn}
-            >
-              <Text style={styles.cancelBtnText}>إيقاف</Text>
-            </TouchableOpacity>
-          </View>
+          ) : (
+            <PrimaryButton label="تم الحفظ والعودة" onPress={() => router.back()} />
+          )}
         </View>
-      )}
 
-      {/* PHASE: Done */}
-      {phase === 'done' && (
-        <View style={styles.doneContainer}>
-          <Ionicons name="medal-outline" size={64} color={Colors.primary} style={{ marginBottom: Spacing.sm, opacity: 0.9 }} />
-          <Text style={styles.doneTitle}>أحسنت!</Text>
-          <Text style={styles.doneSubtitle}>
-            لقد حفظت {pages.length} صفحة{'\n'}ووقت جلستك: {formatTime(elapsed)}
-          </Text>
-
-          {/* XP Gained */}
-          <View style={styles.xpGained}>
-            <View style={styles.xpGainedRow}>
-              <Ionicons name="star" size={16} color={Colors.gold} />
-              <Text style={styles.xpGainedText}>+50 نقطة خبرة</Text>
-            </View>
-          </View>
-
-          {/* Stats */}
-          <View style={styles.doneStats}>
-            <View style={styles.doneStat}>
-              <Text style={styles.doneStatValue}>{pages.length}</Text>
-              <Text style={styles.doneStatLabel}>صفحات محفوظة</Text>
-            </View>
-            <View style={styles.doneStatDivider} />
-            <View style={styles.doneStat}>
-              <Text style={styles.doneStatValue}>{repeatCount}</Text>
-              <Text style={styles.doneStatLabel}>مرات التكرار</Text>
-            </View>
-            <View style={styles.doneStatDivider} />
-            <View style={styles.doneStat}>
-              <Text style={styles.doneStatValue}>{Math.floor(elapsed / 60)}د</Text>
-              <Text style={styles.doneStatLabel}>وقت الجلسة</Text>
-            </View>
-          </View>
-
-          <PrimaryButton
-            label="العودة للرئيسية"
-            onPress={handleFinish}
-            style={styles.finishBtn}
-          />
-        </View>
-      )}
+        <View style={{ height: 60 }} />
+      </ScrollView>
     </View>
   );
 }
 
 const getStyles = (Colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  patternTop: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 180,
-    backgroundColor: `${Colors.primary}04`,
-    borderBottomLeftRadius: 180,
-    borderBottomRightRadius: 180,
-  },
-  emptyContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: Spacing.xl,
-    gap: Spacing.md,
-  },
-  emptyTitle: {
-    fontSize: Typography['2xl'],
-    fontWeight: Typography.bold,
-    color: Colors.primary,
-  },
-  emptySubtitle: {
-    fontSize: Typography.base,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-  },
-  backButton: { marginTop: Spacing.xl, width: '100%' },
-
-  // READY PHASE
-  phaseContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: Spacing.xl,
-    paddingTop: 80,
-    paddingBottom: 100,
-  },
-  closeBtn: {
-    position: 'absolute',
-    top: 56,
-    left: Spacing.xl,
-    width: 36,
-    height: 36,
-    backgroundColor: Colors.glass,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.glassBorder,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  readyTitle: {
-    fontSize: Typography['2xl'],
-    fontWeight: Typography.bold,
-    color: Colors.textPrimary,
-    marginBottom: 6,
-  },
-  readySubtitle: {
-    fontSize: Typography.base,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: Spacing.xl,
-  },
-  pagesInfo: {
-    width: '100%',
-    backgroundColor: Colors.primaryMuted,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    borderColor: `${Colors.primary}15`,
-    padding: Spacing.base,
-    alignItems: 'center',
-    marginBottom: Spacing.lg,
-  },
-  pagesLabel: {
-    fontSize: Typography.sm,
-    color: Colors.textSecondary,
-    marginBottom: 4,
-  },
-  pagesNumbers: {
-    fontSize: Typography.lg,
-    fontWeight: Typography.semibold,
-    color: Colors.primary,
-  },
-  tipsList: {
-    width: '100%',
-    gap: Spacing.sm,
-    marginBottom: Spacing.xl,
-  },
-  tipItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-    backgroundColor: Colors.glass,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: Colors.glassBorder,
-    padding: Spacing.md,
-  },
-  tipText: {
-    fontSize: Typography.sm,
-    color: Colors.textSecondary,
-    flex: 1,
-    textAlign: 'left',
-  },
-  startBtn: { width: '100%' },
-
-  // SESSION PHASE
-  sessionContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'space-evenly',
+  container: { flex: 1, backgroundColor: Colors.background },
+  header: {
+    paddingTop: 56,
     paddingHorizontal: Spacing.xl,
-    paddingVertical: 40,
-    paddingBottom: 100,
-  },
-  timerRing: {
-    width: 180,
-    height: 180,
+    paddingBottom: Spacing.md,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    justifyContent: 'center',
   },
-  timerProgress: {
-    position: 'absolute',
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    borderWidth: 3,
-    borderLeftColor: 'transparent',
-    borderBottomColor: 'transparent',
-  },
-  timerInner: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    borderWidth: 2,
-    borderColor: Colors.border,
-    backgroundColor: 'rgba(0,0,0,0.2)',
+  backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.glass, borderRadius: 12 },
+  timerContainer: { 
+    flex: 1, 
+    marginHorizontal: Spacing.xl, 
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
+    gap: 6
   },
-  timerText: {
-    fontSize: Typography['2xl'],
-    fontWeight: Typography.bold,
+  timerValue: { 
+    fontSize: Typography.lg, 
+    fontWeight: Typography.bold, 
     color: Colors.textPrimary,
     fontVariant: ['tabular-nums'],
+    letterSpacing: 1
   },
-  timerLabel: {
-    fontSize: Typography.xs,
-    color: Colors.textTertiary,
-    textAlign: 'center',
+  progressTrack: {
+    width: 120,
+    height: 4,
+    backgroundColor: Colors.borderLight,
+    borderRadius: 2,
+    overflow: 'hidden'
   },
-  pageDisplay: {
-    alignItems: 'center',
-    backgroundColor: Colors.glass,
-    borderRadius: BorderRadius.xl,
-    borderWidth: 1,
-    borderColor: Colors.glassBorder,
-    padding: Spacing.lg,
-    width: '100%',
-  },
-  pageDisplayLabel: {
-    fontSize: Typography.sm,
-    color: Colors.textSecondary,
-    marginBottom: 6,
-  },
-  pageDisplayNumber: {
-    fontSize: 60,
-    fontWeight: Typography.bold,
-    color: Colors.primary,
-    lineHeight: 68,
-  },
-  pageNav: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xl,
-    marginTop: Spacing.md,
-  },
-  pageNavBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: Colors.surfaceElevated,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pageNavText: {
-    color: Colors.textSecondary,
-    fontSize: Typography.base,
-  },
-  pageNavCount: {
-    color: Colors.textTertiary,
-    fontSize: Typography.sm,
-  },
-  repeatInfo: {
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
-  repeatText: {
-    color: Colors.textTertiary,
-    fontSize: Typography.sm,
-  },
-  repeatBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    backgroundColor: Colors.glass,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: Colors.glassBorder,
-    paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.sm,
-  },
-  repeatBtnText: {
-    color: Colors.textPrimary,
-    fontSize: Typography.sm,
-  },
-  sessionActions: {
-    width: '100%',
-    gap: Spacing.md,
-  },
-  doneBtn: { width: '100%' },
-  cancelBtn: {
-    alignItems: 'center',
-    padding: Spacing.md,
-  },
-  cancelBtnText: {
-    color: Colors.textTertiary,
-    fontSize: Typography.sm,
+  progressIndicator: {
+    height: '100%',
+    borderRadius: 2,
   },
 
-  // DONE PHASE
-  doneContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: Spacing.xl,
-    paddingBottom: 100,
-    gap: Spacing.md,
-  },
-  doneTitle: {
-    fontSize: Typography['3xl'],
-    fontWeight: Typography.bold,
-    color: Colors.primary,
-  },
-  doneSubtitle: {
-    fontSize: Typography.base,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: Typography.base * 1.7,
-  },
-  xpGained: {
-    backgroundColor: Colors.goldMuted,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1,
-    borderColor: `${Colors.gold}18`,
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.sm,
-  },
-  xpGainedRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  xpGainedText: {
-    fontSize: Typography.base,
-    fontWeight: Typography.semibold,
-    color: Colors.gold,
-  },
-  doneStats: {
-    flexDirection: 'row',
+  scrollContent: { padding: Spacing.xl, alignItems: 'center' },
+
+  phaseNav: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.xl * 1.5 },
+  phaseNavItem: { flexDirection: 'row', alignItems: 'center' },
+  phaseCircle: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
+  phaseConnector: { width: 30, height: 2, backgroundColor: Colors.borderLight, marginHorizontal: 8 },
+
+  card: {
+    width: '100%',
     backgroundColor: Colors.glass,
-    borderRadius: BorderRadius.xl,
+    borderRadius: 32,
+    padding: Spacing.xl,
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: Colors.glassBorder,
-    padding: Spacing.lg,
-    width: '100%',
-    alignItems: 'center',
-    marginTop: Spacing.sm,
+    overflow: 'hidden',
+    ...Shadow.lg,
   },
-  doneStat: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 3,
+  cardGradient: { ...StyleSheet.absoluteFillObject, opacity: 0.5 },
+  iconContainer: { 
+    width: 90, 
+    height: 90, 
+    borderRadius: 30, 
+    backgroundColor: Colors.surface, 
+    alignItems: 'center', 
+    justifyContent: 'center',
+    marginBottom: Spacing.xl,
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 8
   },
-  doneStatValue: {
-    fontSize: Typography.lg,
-    fontWeight: Typography.semibold,
-    color: Colors.textPrimary,
+  title: { fontSize: Typography.xl, fontWeight: Typography.bold, marginBottom: Spacing.sm },
+  description: { fontSize: Typography.base, color: Colors.textSecondary, textAlign: 'center', lineHeight: 24, paddingHorizontal: 10, marginBottom: Spacing.xl * 1.5 },
+
+  statsContainer: { 
+    flexDirection: 'row', 
+    width: '100%', 
+    backgroundColor: Colors.surface, 
+    padding: Spacing.lg, 
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    marginBottom: Spacing.xl
   },
-  doneStatLabel: {
-    fontSize: 10,
-    color: Colors.textTertiary,
+  statBox: { flex: 1, alignItems: 'center', gap: 4 },
+  statLabel: { fontSize: 10, color: Colors.textTertiary, textTransform: 'uppercase' },
+  statMain: { fontSize: Typography.sm, fontWeight: Typography.bold, color: Colors.textPrimary },
+  statLine: { width: 1, height: '60%', backgroundColor: Colors.borderLight },
+
+  counterSection: { width: '100%', alignItems: 'center', gap: Spacing.md },
+  counterHint: { fontSize: Typography.xs, color: Colors.textSecondary },
+  counterControls: { flexDirection: 'row', alignItems: 'center', gap: 20 },
+  controlBtn: { 
+    width: 50, 
+    height: 50, 
+    borderRadius: 18, 
+    backgroundColor: Colors.surface, 
+    alignItems: 'center', 
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border
   },
-  doneStatDivider: {
-    width: 1,
-    height: 36,
-    backgroundColor: Colors.border,
+  countDisplay: { minWidth: 60, alignItems: 'center' },
+  countNum: { fontSize: 32, fontWeight: Typography.bold, color: Colors.textPrimary },
+
+  completionContainer: { alignItems: 'center', gap: 8 },
+  completionText: { fontSize: Typography.md, fontWeight: Typography.bold, color: Colors.gold },
+
+  actionSection: { width: '100%', marginTop: Spacing.xl * 1.5 },
+  mainAction: { 
+    width: '100%', 
+    height: 56, 
+    borderRadius: 18, 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'center',
+    gap: 12,
+    ...Shadow.md
   },
-  finishBtn: { width: '100%', marginTop: Spacing.sm },
+  actionLabel: { color: '#FFF', fontSize: Typography.md, fontWeight: Typography.bold },
 });

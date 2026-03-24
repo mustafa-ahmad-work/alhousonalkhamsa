@@ -134,6 +134,18 @@ export type ModuleInfo = {
 // App State — Extended
 // ============================================================
 
+export type AppSettings = {
+  hapticsEnabled: boolean;
+  reviewStrategy: 'spaced' | 'random' | 'recency';
+  notificationsEnabled: boolean;
+  morningReminderTime: string;
+  nightReminderTime: string;
+  showDailyProgressOnDashboard: boolean;
+  memorizationTimerMinutes: number;
+  preparationTimerMinutes: number;
+  reviewTimerMinutes: number;
+};
+
 export type AppState = {
   user: User | null;
   plan: Plan | null;
@@ -141,6 +153,7 @@ export type AppState = {
   pageProgress: PageProgress[];
   streak: StreakData;
   isOnboarded: boolean;
+  isLoaded: boolean;
   themeMode: 'dark' | 'light';
   /** All task selections across modules */
   taskSelections: TaskSelection[];
@@ -152,6 +165,7 @@ export type AppState = {
     totalLaunches: number;
     totalPageViews: number;
   };
+  settings: AppSettings;
 };
 
 export type ReviewPage = {
@@ -228,7 +242,7 @@ export const MODULES: ModuleInfo[] = [
     nameEn: 'Pre-Memorization',
     icon: 'sunny-outline',
     color: '#F59E0B',
-    description: 'قراءة المقرر قبل الحفظ',
+    description: 'قراءة المقرر قبل الحفظ بـ ١٥ دقيقة لتنشيط الذهن',
     fortressId: 'preparation',
   },
   {
@@ -237,7 +251,7 @@ export const MODULES: ModuleInfo[] = [
     nameEn: 'Night Preparation',
     icon: 'moon-outline',
     color: '#8B5CF6',
-    description: 'قراءة المقرر قبل النوم',
+    description: '١٥ دقيقة قراءة و١٥ دقيقة استماع لصفحة الغد قبل النوم',
     fortressId: 'preparation',
   },
   {
@@ -246,16 +260,16 @@ export const MODULES: ModuleInfo[] = [
     nameEn: 'Weekly Preparation',
     icon: 'calendar-outline',
     color: '#6366F1',
-    description: 'تحضير مقرر الأسبوع القادم',
+    description: 'قراءة صفحات الأسبوع القادم يومياً طوال الأسبوع الحالي',
     fortressId: 'preparation',
   },
   {
     id: 'memorization',
-    nameAr: 'الحفظ',
-    nameEn: 'Memorization',
+    nameAr: 'الحفظ الجديد',
+    nameEn: 'New Memorization',
     icon: 'shield-checkmark-outline',
     color: '#EF4444',
-    description: 'حفظ الصفحات الجديدة',
+    description: 'تكرار الصفحة لمدة ١٥ دقيقة على الأقل لنقلها للذاكرة البعيدة',
     fortressId: 'memorization',
   },
   {
@@ -264,7 +278,7 @@ export const MODULES: ModuleInfo[] = [
     nameEn: 'Short-term Review',
     icon: 'refresh-outline',
     color: '#10B981',
-    description: 'مراجعة الحفظ الجديد',
+    description: 'مراجعة آخر جزء تم حفظه يومياً قبل البدء في الجديد',
     fortressId: 'review',
   },
   {
@@ -273,25 +287,25 @@ export const MODULES: ModuleInfo[] = [
     nameEn: 'Long-term Review',
     icon: 'sync-outline',
     color: '#8B5CF6',
-    description: 'مراجعة التكرار المتباعد',
+    description: 'مراجعة الأجزاء القديمة بمعدل جزئين يومياً للمتقدمين',
     fortressId: 'review',
   },
   {
     id: 'recitation',
-    nameAr: 'التلاوة (الختمة)',
-    nameEn: 'Recitation (Khatma)',
+    nameAr: 'ختمة التلاوة',
+    nameEn: 'Khatma Recitation',
     icon: 'book-outline',
     color: '#10B981',
-    description: 'تلاوة القرآن الكريم',
+    description: 'قراءة جزئين يومياً (٤٠ صفحة) لضبط الحفظ بصرياً',
     fortressId: 'recitation',
   },
   {
     id: 'listening',
-    nameAr: 'الاستماع',
-    nameEn: 'Listening',
+    nameAr: 'ختمة الاستماع',
+    nameEn: 'Khatma Listening',
     icon: 'headset-outline',
     color: '#6366F1',
-    description: 'الاستماع للقرآن الكريم',
+    description: 'الاستماع لحزب واحد يومياً لضبط مخارج الحروف',
     fortressId: 'listening',
   },
 ];
