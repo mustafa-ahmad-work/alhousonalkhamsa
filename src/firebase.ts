@@ -1,10 +1,13 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApp, getApps } from "firebase/app";
 import {
   initializeFirestore,
   persistentLocalCache,
   persistentMultipleTabManager,
+  memoryLocalCache,
+  getFirestore,
 } from "firebase/firestore";
 import { getAnalytics, isSupported } from "firebase/analytics";
+import { Platform } from "react-native";
 
 // TODO: Replace with your actual Firebase config
 const firebaseConfig = {
@@ -17,17 +20,37 @@ const firebaseConfig = {
   measurementId: "G-BS97Q7W49H",
 };
 
-export const app = initializeApp(firebaseConfig);
+// Initialize App only if not already initialized
+export const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Initialize Firestore with persistent cache for offline support
-export const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({
-    tabManager: persistentMultipleTabManager(),
-  }),
-});
+// Initialize Firestore safely
+const getDb = () => {
+  const firestoreApp = app;
+  try {
+    // Attempt to initialize with our custom settings
+    return initializeFirestore(firestoreApp, {
+      localCache:
+        Platform.OS === "web"
+          ? persistentLocalCache({
+              tabManager: persistentMultipleTabManager(),
+            })
+          : memoryLocalCache(),
+    });
+  } catch (err: any) {
+    // If it's already initialized, return the existing instance
+    if (err.code === "failed-precondition" || err.message?.includes("already been called")) {
+      return getFirestore(firestoreApp);
+    }
+    throw err;
+  }
+};
+
+export const db = getDb();
 
 // Initialize Analytics (Web only, fails gracefully on native if not configured)
 export const analyticsPromise = isSupported().then((supported) => {
   if (supported) return getAnalytics(app);
   return null;
 });
+
+

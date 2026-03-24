@@ -217,19 +217,25 @@ export default function AppExplanationScreen() {
           <View style={styles.socialRow}>
             <TouchableOpacity
               style={styles.socialBtn}
-              onPress={() => Linking.openURL("https://www.facebook.com/")}
+              onPress={() =>
+                Linking.openURL("https://www.facebook.com/Mostafa7Ahmad")
+              }
             >
               <Ionicons name="logo-facebook" size={20} color={Colors.primary} />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.socialBtn}
-              onPress={() => Linking.openURL("https://wa.me/")}
+              onPress={() => Linking.openURL("https://wa.me/+201120354592")}
             >
               <Ionicons name="logo-whatsapp" size={20} color={Colors.primary} />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.socialBtn}
-              onPress={() => Linking.openURL("https://www.linkedin.com/")}
+              onPress={() =>
+                Linking.openURL(
+                  "https://www.linkedin.com/in/mustafa-ahmad-work",
+                )
+              }
             >
               <Ionicons name="logo-linkedin" size={20} color={Colors.primary} />
             </TouchableOpacity>
