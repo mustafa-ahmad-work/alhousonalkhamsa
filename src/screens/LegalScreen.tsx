@@ -89,7 +89,9 @@ export default function LegalScreen() {
             </Text>
           </View>
           <TouchableOpacity style={styles.contactBtn}>
-            <Text style={styles.contactBtnText}>support@alhousonalkhamsa.com</Text>
+            <Text style={styles.contactBtnText}>
+              mustafa.ahmad.work@gmail.com
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -146,7 +148,7 @@ const getStyles = (Colors: any) =>
       fontWeight: Typography.bold,
       color: Colors.primary,
       marginBottom: Spacing.md,
-      textAlign: "right",
+      textAlign: "left",
     },
     paragraphContainer: {
       marginBottom: Spacing.md,
@@ -155,10 +157,10 @@ const getStyles = (Colors: any) =>
       fontSize: Typography.sm,
       color: Colors.textPrimary,
       lineHeight: Typography.sm * 1.6,
-      textAlign: "right",
+      textAlign: "left",
     },
     bulletRow: {
-      flexDirection: "row-reverse",
+      flexDirection: "row",
       alignItems: "flex-start",
       marginBottom: Spacing.base,
       gap: Spacing.sm,
@@ -174,7 +176,7 @@ const getStyles = (Colors: any) =>
       flex: 1,
       fontSize: Typography.sm,
       lineHeight: Typography.sm * 1.5,
-      textAlign: "right",
+      textAlign: "left",
       color: Colors.textSecondary,
     },
     contactBtn: {

@@ -11,6 +11,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  ScrollView,
 } from "react-native";
 import { useAppStore } from "../store/AppStore";
 import { BorderRadius, Spacing, Typography, useTheme } from "../theme";
@@ -108,7 +109,10 @@ export default function SettingsScreen() {
         <View style={{ width: 40 }} />
       </View>
 
-      <View style={styles.content}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false} 
+        contentContainerStyle={styles.content}
+      >
         <Text style={styles.sectionTitle}>معلومات الحساب</Text>
         <View style={styles.card}>
           <TouchableOpacity
@@ -232,7 +236,9 @@ export default function SettingsScreen() {
             <Text style={styles.dangerBtnText}>إعادة تعيين التقدم بالكامل</Text>
           </TouchableOpacity>
         </View>
-      </View>
+ 
+
+      </ScrollView>
 
       <Modal visible={editModalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>

@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, usePathname } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -16,6 +16,7 @@ import {
 import "../global.css";
 import { AppProvider } from "../src/store/AppStore";
 import { useTheme, Typography, Spacing, BorderRadius } from "../src/theme";
+import { StatisticsService } from "../src/store/StatisticsService";
 
 // Force RTL for Arabic
 I18nManager.allowRTL(true);
@@ -64,6 +65,14 @@ export default function RootLayout() {
 
 function MainLayout({ showCustomSplash, onFinish }: { showCustomSplash: boolean, onFinish: () => void }) {
   const Colors = useTheme();
+  const pathname = usePathname();
+
+  // Track page views
+  useEffect(() => {
+    if (pathname) {
+      StatisticsService.trackPageView(pathname);
+    }
+  }, [pathname]);
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.background }}>

@@ -3,6 +3,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React from "react";
 import {
+  Image,
   Linking,
   ScrollView,
   StatusBar,
@@ -89,7 +90,7 @@ export default function AppExplanationScreen() {
           style={styles.presentationCard}
           onPress={() =>
             Linking.openURL(
-              "https://drive.google.com/file/d/14qbC-np5qFv35H_FEofTCTnSyu1j4aap/view?usp=sharing"
+              "https://drive.google.com/file/d/14qbC-np5qFv35H_FEofTCTnSyu1j4aap/view?usp=sharing",
             )
           }
         >
@@ -195,6 +196,44 @@ export default function AppExplanationScreen() {
             </View>
             <Ionicons name="alarm-outline" size={24} color={Colors.primary} />
           </LinearGradient>
+        </View>
+
+        {/* Developer Section */}
+        <View style={styles.devCard}>
+          <Image
+            source={require("../../assets/images/moustafa.jpg")}
+            style={styles.devImage}
+          />
+          <Text style={styles.devName}>م/ مصطفى أحمد</Text>
+          <Text style={styles.devTitle}>مطور التطبيق</Text>
+
+          <View style={styles.sadaqahContainer}>
+            <Text style={styles.sadaqahText}>صدقة جارية</Text>
+            <Text style={styles.duaText}>
+              نسألكم الدعاء لي ولوالدي بظهر الغيب، وجزاكم الله خيراً.
+            </Text>
+          </View>
+
+          <View style={styles.socialRow}>
+            <TouchableOpacity
+              style={styles.socialBtn}
+              onPress={() => Linking.openURL("https://www.facebook.com/")}
+            >
+              <Ionicons name="logo-facebook" size={20} color={Colors.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.socialBtn}
+              onPress={() => Linking.openURL("https://wa.me/")}
+            >
+              <Ionicons name="logo-whatsapp" size={20} color={Colors.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.socialBtn}
+              onPress={() => Linking.openURL("https://www.linkedin.com/")}
+            >
+              <Ionicons name="logo-linkedin" size={20} color={Colors.primary} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={{ height: 40 }} />
@@ -378,5 +417,69 @@ const getStyles = (Colors: any) =>
       fontSize: Typography.sm,
       color: Colors.textSecondary,
       textAlign: "left",
+    },
+    devCard: {
+      marginTop: Spacing.xl,
+      backgroundColor: Colors.glass,
+      borderRadius: BorderRadius.xl,
+      padding: Spacing.xl,
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor: Colors.glassBorder,
+    },
+    devImage: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      marginBottom: Spacing.md,
+      borderWidth: 3,
+      borderColor: Colors.primary,
+    },
+    devName: {
+      fontSize: Typography.base,
+      fontWeight: Typography.bold,
+      color: Colors.textPrimary,
+      marginBottom: 2,
+    },
+    devTitle: {
+      fontSize: Typography.sm,
+      color: Colors.primary,
+      fontWeight: Typography.medium,
+      marginBottom: Spacing.lg,
+    },
+    sadaqahContainer: {
+      alignItems: "center",
+      backgroundColor: Colors.primarySubtle,
+      padding: Spacing.md,
+      borderRadius: BorderRadius.lg,
+      marginBottom: Spacing.xl,
+      width: "100%",
+    },
+    sadaqahText: {
+      fontSize: Typography.sm,
+      fontWeight: Typography.bold,
+      color: Colors.primary,
+      marginBottom: 4,
+    },
+    duaText: {
+      fontSize: Typography.xs,
+      color: Colors.textSecondary,
+      textAlign: "center",
+      lineHeight: 18,
+    },
+    socialRow: {
+      flexDirection: "row",
+      gap: Spacing.lg,
+      alignItems: "center",
+    },
+    socialBtn: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: Colors.background,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1,
+      borderColor: Colors.border,
     },
   });

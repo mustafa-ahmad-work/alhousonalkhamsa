@@ -28,6 +28,7 @@ import {
   strengthAfterReview,
   todayISO,
 } from "../utils/helpers";
+import { StatisticsService } from "./StatisticsService";
 // Storage Key ──────────────────────────────────────────
 const STORAGE_KEY = "husoon_app_state";
 
@@ -45,6 +46,13 @@ const initialState: AppState = {
   isOnboarded: false,
   themeMode: "light",
   taskSelections: [],
+  globalStats: {
+    totalUsers: 0,
+    totalTasks: 0,
+    totalPages: 0,
+    totalLaunches: 0,
+    totalPageViews: 0,
+  },
 };
 
 // ─── Action Types ─────────────────────────────────────────
@@ -62,7 +70,8 @@ type Action =
   | { type: "REVIEW_PAGE"; payload: { pageNumber: number; passed: boolean } }
   | { type: "TOGGLE_THEME" }
   | { type: "RESET" }
-  | { type: "UPDATE_USER"; payload: Partial<User> };
+  | { type: "UPDATE_USER"; payload: Partial<User> }
+  | { type: "UPDATE_GLOBAL_STATS"; payload: any };
 
 // ─── Reducer ──────────────────────────────────────────────
 function appReducer(state: AppState, action: Action): AppState {
@@ -103,6 +112,9 @@ function appReducer(state: AppState, action: Action): AppState {
       // Create today's progress
       const todayProgress: DailyProgress = createEmptyDailyProgress();
 
+      // Track new user in Firebase (Only once)
+      StatisticsService.trackNewUser();
+ 
       return {
         ...state,
         user,
@@ -147,10 +159,16 @@ function appReducer(state: AppState, action: Action): AppState {
         });
       }
 
-      // Update XP
-      const todayProg = updatedProgress.find((p) => p.date === today);
       const totalXP = updatedProgress.reduce((sum, p) => sum + p.xpEarned, 0);
       const newTitle = getTitleFromXP(totalXP);
+ 
+      const field = fortressToField(fortressId);
+      const todayProg = updatedProgress.find((p) => p.date === today);
+      const isCompleted = todayProg ? (todayProg as Record<string, unknown>)[field] : false;
+      
+      if (isCompleted) {
+        StatisticsService.trackTaskCompletion();
+      }
 
       // Update streak
       const completion = todayProg ? getDailyCompletionPercent(todayProg) : 0;
@@ -198,6 +216,9 @@ function appReducer(state: AppState, action: Action): AppState {
         ? { ...state.plan, currentPage: lastMemorized + 1 }
         : state.plan;
 
+      // Track memorized pages in Firebase
+      StatisticsService.trackPageMemorized(pages.length);
+
       return {
         ...state,
         pageProgress: updatedPageProgress,
@@ -238,6 +259,16 @@ function appReducer(state: AppState, action: Action): AppState {
       return {
         ...state,
         user: { ...state.user, ...action.payload },
+      };
+    }
+ 
+    case "UPDATE_GLOBAL_STATS": {
+      return {
+        ...state,
+        globalStats: {
+          ...state.globalStats,
+          ...action.payload,
+        },
       };
     }
 
@@ -287,10 +318,21 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 // ─── Provider ─────────────────────────────────────────────
 export function AppProvider({ children }: PropsWithChildren) {
   const [state, dispatch] = useReducer(appReducer, initialState);
+ 
+  // Listen to Global Stats when onboarded
+  useEffect(() => {
+    if (state.isOnboarded) {
+      const unsub = StatisticsService.subscribeToStats((stats) => {
+        dispatch({ type: "UPDATE_GLOBAL_STATS", payload: stats });
+      });
+      return unsub;
+    }
+  }, [state.isOnboarded]);
 
   // Load state from storage on mount
   useEffect(() => {
     loadState();
+    StatisticsService.trackAppLaunch();
   }, []);
 
   // Persist state on every change

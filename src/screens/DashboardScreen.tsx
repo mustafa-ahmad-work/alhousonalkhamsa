@@ -98,7 +98,11 @@ export default function DashboardScreen() {
         >
           <View style={styles.brandingHeader}>
             <View style={styles.headerLogoBox}>
-              <Ionicons name="shield-checkmark" size={20} color={Colors.primary} />
+              <Ionicons
+                name="shield-checkmark"
+                size={20}
+                color={Colors.primary}
+              />
               <Text style={styles.brandingText}>الحصون الخمسة</Text>
             </View>
             <TouchableOpacity
@@ -228,7 +232,6 @@ export default function DashboardScreen() {
           </LinearGradient>
         </Animated.View>
 
-        {/* Streak */}
         <StreakBadge
           currentStreak={streak.currentStreak}
           longestStreak={streak.longestStreak}
@@ -558,5 +561,49 @@ const getStyles = (Colors: any) =>
       fontWeight: Typography.bold,
       color: Colors.textPrimary,
       letterSpacing: 0.5,
+    },
+    communityCard: {
+      backgroundColor: Colors.glass,
+      borderRadius: BorderRadius.lg,
+      padding: Spacing.lg,
+      borderWidth: 1,
+      borderColor: Colors.glassBorder,
+      marginTop: Spacing.sm,
+    },
+    communityHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.sm,
+      marginBottom: Spacing.md,
+    },
+    communityTitle: {
+      fontSize: Typography.sm,
+      fontWeight: Typography.semibold,
+      color: Colors.textSecondary,
+    },
+    communityRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    communityItem: {
+      flex: 1,
+      alignItems: "center",
+    },
+    communityValue: {
+      fontSize: Typography.md,
+      fontWeight: Typography.bold,
+      color: Colors.primary,
+    },
+    communityLabel: {
+      fontSize: 10,
+      color: Colors.textTertiary,
+      marginTop: 2,
+    },
+    communityDivider: {
+      width: 1,
+      height: 20,
+      backgroundColor: Colors.border,
+      opacity: 0.5,
     },
   });

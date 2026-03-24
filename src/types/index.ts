@@ -144,6 +144,14 @@ export type AppState = {
   themeMode: 'dark' | 'light';
   /** All task selections across modules */
   taskSelections: TaskSelection[];
+  /** Real-time statistics from backend */
+  globalStats: {
+    totalUsers: number;
+    totalTasks: number;
+    totalPages: number;
+    totalLaunches: number;
+    totalPageViews: number;
+  };
 };
 
 export type ReviewPage = {
