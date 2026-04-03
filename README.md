@@ -758,3 +758,5 @@ _"Recite and ascend, and recite as you used to recite in the world"_
 إن أعجبك التطبيق، شاركه مع أحبابك — If you found this helpful, please share it with others
 
 </div>
+
+MIT License
