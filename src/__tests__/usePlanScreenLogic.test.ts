@@ -8,6 +8,9 @@
  */
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
+import { buildRanges, getSurahSegments, formatRanges } from '../utils/planLogic';
+import { getMushafEdition } from '../data/mushafEditions';
+
 jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn(), getItem: jest.fn(), removeItem: jest.fn(),
 }));
@@ -18,9 +21,6 @@ jest.mock('../store/NotificationService', () => ({
   NotificationService: { scheduleFortressReminders: jest.fn() },
 }));
 jest.mock('../developerConfig', () => ({ DEV_CONFIG: { unlockAllPlans: false } }));
-
-import { buildRanges, getSurahSegments, formatRanges } from '../utils/planLogic';
-import { getMushafEdition } from '../data/mushafEditions';
 
 const edition = getMushafEdition('madani_604' as any);
 

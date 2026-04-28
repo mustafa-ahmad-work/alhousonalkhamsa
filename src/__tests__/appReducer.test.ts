@@ -5,25 +5,6 @@
  */
 
 // ─── Mocks (must come before imports) ────────────────────────────────────────
-jest.mock('@react-native-async-storage/async-storage', () => ({
-  setItem: jest.fn(),
-  getItem: jest.fn(),
-  removeItem: jest.fn(),
-}));
-jest.mock('expo-constants', () => ({ expoConfig: { version: '1.0.0' }, appOwnership: 'standalone' }));
-jest.mock('expo-notifications', () => ({}));
-jest.mock('react-native', () => ({
-  Platform: { OS: 'ios' },
-  Linking: {},
-}));
-jest.mock('../store/NotificationService', () => ({
-  NotificationService: {
-    registerForPushNotificationsAsync: jest.fn(),
-    scheduleFortressReminders: jest.fn(),
-    clearSavedHash: jest.fn(),
-  },
-}));
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 import { todayISO, addDays, getNextReviewDate } from '../utils/helpers';
 import { AppState, DailyProgress, MemorizationStrength, PageProgress } from '../types';
@@ -43,6 +24,25 @@ import {
   strengthAfterReview,
   getTitleFromXP,
 } from '../utils/helpers';
+
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  setItem: jest.fn(),
+  getItem: jest.fn(),
+  removeItem: jest.fn(),
+}));
+jest.mock('expo-constants', () => ({ expoConfig: { version: '1.0.0' }, appOwnership: 'standalone' }));
+jest.mock('expo-notifications', () => ({}));
+jest.mock('react-native', () => ({
+  Platform: { OS: 'ios' },
+  Linking: {},
+}));
+jest.mock('../store/NotificationService', () => ({
+  NotificationService: {
+    registerForPushNotificationsAsync: jest.fn(),
+    scheduleFortressReminders: jest.fn(),
+    clearSavedHash: jest.fn(),
+  },
+}));
 
 // ─── SECTION 1: XP & Title System ────────────────────────────────────────────
 describe('XP & Title system', () => {

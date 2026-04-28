@@ -28,6 +28,19 @@ import { PlanHeader } from "../components/plan/PlanHeader";
 import { WeekGroupCard } from "../components/plan/WeekGroupCard";
 import type { DayItem, WeekGroup } from "../components/plan/types";
 
+// ============================================================
+// Helpers
+// ============================================================
+
+// Shared helpers imported from ../utils/planLogic
+import { buildWeeklyCalendar } from "../utils/planLogic";
+
+// ============================================================
+// Main Screen
+// ============================================================
+
+import { usePlanScreenLogic } from "../hooks/usePlanScreenLogic";
+
 const { width } = Dimensions.get("window");
 
 // ============================================================
@@ -191,13 +204,6 @@ const CelebrationOverlay = ({ onComplete }: { onComplete: () => void }) => {
 };
 
 // ============================================================
-// Helpers
-// ============================================================
-
-// Shared helpers imported from ../utils/planLogic
-import { buildWeeklyCalendar } from "../utils/planLogic";
-
-// ============================================================
 // View Mode Toggle
 // ============================================================
 
@@ -256,12 +262,6 @@ const viewToggleStyle = StyleSheet.create({
     fontWeight: "600",
   },
 });
-
-// ============================================================
-// Main Screen
-// ============================================================
-
-import { usePlanScreenLogic } from "../hooks/usePlanScreenLogic";
 
 export default function PlanScreen() {
   const Colors = useTheme();

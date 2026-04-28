@@ -8,6 +8,9 @@
  */
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
+import { getMushafEdition } from '../data/mushafEditions';
+import { SURAHS } from '../data/quranMeta';
+
 jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn(), getItem: jest.fn(), removeItem: jest.fn(), clear: jest.fn(),
 }));
@@ -24,9 +27,6 @@ jest.mock('../store/NotificationService', () => ({
   },
 }));
 jest.mock('expo-router', () => ({ router: { replace: jest.fn(), back: jest.fn() } }));
-
-import { getMushafEdition } from '../data/mushafEditions';
-import { SURAHS } from '../data/quranMeta';
 
 // ─── Pure logic helpers mirroring useSettingsLogic ───────────────────────────
 

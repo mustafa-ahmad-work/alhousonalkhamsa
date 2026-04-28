@@ -17,10 +17,10 @@ export default function Index() {
   }
 
   if (!state.isOnboarded) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return <Redirect href={'/onboarding' as any} />;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return <Redirect href={'/(tabs)/dashboard' as any} />;
 }

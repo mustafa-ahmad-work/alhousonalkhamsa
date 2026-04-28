@@ -16,9 +16,11 @@ import {
 import { PrimaryButton } from "../components/shared/PrimaryButton";
 import { SURAHS } from "../data/quranMeta";
 import { useAppStore } from "../store/AppStore";
-import { BorderRadius, Spacing, Typography, useTheme } from "../theme";
+import { BorderRadius, Spacing, Typography, useTheme , darkColors } from "../theme";
 import { QURAN_GOALS, UserLevel } from "../types";
 import { toArabicNumerals } from "../utils/helpers";
+
+
 
 const { width } = Dimensions.get("window");
 
@@ -56,7 +58,7 @@ const DAILY_PAGES_LABELS: Record<number, string> = {
   5: "٥ صفحات",
 };
 
-const STEPS = ["الترحيب", "مستواك", "محفوظك", "هدفك", "طاقتك", "البداية"];
+const STEPS = ["الترحيب", "مستواك", "محفوظك", "طاقتك", "البداية"];
 
 export default function OnboardingScreen() {
   const Colors = useTheme();
@@ -65,17 +67,10 @@ export default function OnboardingScreen() {
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [selectedLevel, setSelectedLevel] = useState<UserLevel>("مبتدئ");
-  const [selectedGoal, setSelectedGoal] = useState(QURAN_GOALS[0]);
-  const [customGoal, setCustomGoal] = useState("");
-  const [isCustomGoal, setIsCustomGoal] = useState(false);
+  const [selectedGoal] = useState(QURAN_GOALS[0]);
   const [selectedPages, setSelectedPages] = useState<number>(1);
-  const [selectionType, setSelectionType] = useState<
-    "range" | "surahs" | "complete"
-  >("complete");
   const [selectedSurahIds, setSelectedSurahIds] = useState<number[]>([]);
-  const [tempStartPage, setTempStartPage] = useState("1");
-  const [tempEndPage, setTempEndPage] = useState("604");
-  const [planDirection, setPlanDirection] = useState<"forward" | "backward">(
+  const [planDirection] = useState<"forward" | "backward">(
     "forward",
   );
   const [surahModalVisible, setSurahModalVisible] = useState(false);
@@ -133,30 +128,8 @@ export default function OnboardingScreen() {
     let pages: number[] = [];
     let label = "";
 
-    if (selectionType === "complete") {
-      pages = Array.from({ length: 604 }, (_, i) => i + 1);
-      label = "القرآن الكريم كاملاً";
-    } else if (selectionType === "range") {
-      const start = parseInt(tempStartPage, 10) || 1;
-      const end = parseInt(tempEndPage, 10) || 604;
-      const min = Math.min(start, end);
-      const max = Math.max(start, end);
-      for (let p = min; p <= max; p++) pages.push(p);
-      label = `من صفحة ${min} إلى ${max}`;
-    } else if (selectionType === "surahs") {
-      const selected = SURAHS.filter((s) =>
-        selectedSurahIds.includes(s.id),
-      ).sort((a, b) => a.id - b.id);
-      selected.forEach((s) => {
-        for (let p = s.startPage; p <= s.endPage; p++) {
-          if (!pages.includes(p)) pages.push(p);
-        }
-      });
-      label =
-        selected.length === 1
-          ? `سورة ${selected[0].nameAr}`
-          : `مجموعة سور (${selected.length})`;
-    }
+    pages = Array.from({ length: 604 }, (_, i) => i + 1);
+    label = "القرآن الكريم كاملاً";
 
     dispatch({
       type: "COMPLETE_ONBOARDING",
@@ -183,10 +156,12 @@ export default function OnboardingScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar 
-        barStyle={Colors.background === "#07090F" ? "light-content" : "dark-content"} 
-        translucent 
-        backgroundColor="transparent" 
+      <StatusBar
+        barStyle={
+          Colors.background === "#07090F" ? "light-content" : "dark-content"
+        }
+        translucent
+        backgroundColor="transparent"
       />
       <View style={StyleSheet.absoluteFill} />
 
@@ -408,169 +383,8 @@ export default function OnboardingScreen() {
             </View>
           )}
 
-          {/* STEP 3: Goal/Plan Selection */}
+          {/* STEP 3: Daily Capacity */}
           {step === 3 && (
-            <View style={styles.stepContainer}>
-              <Ionicons
-                name="flag-outline"
-                size={48}
-                color={Colors.primary}
-                style={{ marginBottom: Spacing.lg, opacity: 0.85 }}
-              />
-              <Text style={styles.stepTitle}>ما هو هدف حفظك؟</Text>
-              <Text style={styles.stepSubtitle}>
-                حدد النطاق والاتجاه المفضل لك
-              </Text>
-
-              <View style={[styles.card, { width: "100%" }]}>
-                <View style={styles.tabRow}>
-                  <TouchableOpacity
-                    style={[
-                      styles.tab,
-                      selectionType === "complete" && styles.activeTab,
-                    ]}
-                    onPress={() => setSelectionType("complete")}
-                  >
-                    <Text
-                      style={[
-                        styles.tabText,
-                        selectionType === "complete" && styles.activeTabText,
-                      ]}
-                    >
-                      الختم الكامل
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[
-                      styles.tab,
-                      selectionType === "surahs" && styles.activeTab,
-                    ]}
-                    onPress={() => setSelectionType("surahs")}
-                  >
-                    <Text
-                      style={[
-                        styles.tabText,
-                        selectionType === "surahs" && styles.activeTabText,
-                      ]}
-                    >
-                      سور محددة
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[
-                      styles.tab,
-                      selectionType === "range" && styles.activeTab,
-                    ]}
-                    onPress={() => setSelectionType("range")}
-                  >
-                    <Text
-                      style={[
-                        styles.tabText,
-                        selectionType === "range" && styles.activeTabText,
-                      ]}
-                    >
-                      نطاق صفحات
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                {selectionType === "range" && (
-                  <View style={styles.rangeInputs}>
-                    <View style={styles.inputGroup}>
-                      <Text style={styles.inputLabelSmall}>من صفحة</Text>
-                      <TextInput
-                        style={styles.smallInput}
-                        value={tempStartPage}
-                        onChangeText={setTempStartPage}
-                        keyboardType="numeric"
-                        placeholder="1"
-                      />
-                    </View>
-                    <View style={styles.inputGroup}>
-                      <Text style={styles.inputLabelSmall}>إلى صفحة</Text>
-                      <TextInput
-                        style={styles.smallInput}
-                        value={tempEndPage}
-                        onChangeText={setTempEndPage}
-                        keyboardType="numeric"
-                        placeholder="604"
-                      />
-                    </View>
-                  </View>
-                )}
-
-                {selectionType === "surahs" && (
-                  <TouchableOpacity
-                    style={styles.surahSelectBtn}
-                    onPress={() => setSurahModalVisible(true)}
-                  >
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        gap: 8,
-                      }}
-                    >
-                      <Ionicons name="list" size={18} color={Colors.primary} />
-                      <Text style={styles.surahSelectText}>
-                        {selectedSurahIds.length === 0
-                          ? "اختر السور التي تود حفظها"
-                          : `تم اختيار ${selectedSurahIds.length} سورة`}
-                      </Text>
-                    </View>
-                    <Ionicons
-                      name="chevron-back"
-                      size={16}
-                      color={Colors.textTertiary}
-                    />
-                  </TouchableOpacity>
-                )}
-
-                <View style={styles.divider} />
-
-                <View style={styles.directionRow}>
-                  <Text style={styles.inputLabelSmall}>اتجاه الحفظ</Text>
-                  <View style={styles.directionToggle}>
-                    <TouchableOpacity
-                      style={[
-                        styles.dirBtn,
-                        planDirection === "forward" && styles.activeDirBtn,
-                      ]}
-                      onPress={() => setPlanDirection("forward")}
-                    >
-                      <Text
-                        style={[
-                          styles.dirText,
-                          planDirection === "forward" && styles.activeDirText,
-                        ]}
-                      >
-                        من الفاتحة للناس
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[
-                        styles.dirBtn,
-                        planDirection === "backward" && styles.activeDirBtn,
-                      ]}
-                      onPress={() => setPlanDirection("backward")}
-                    >
-                      <Text
-                        style={[
-                          styles.dirText,
-                          planDirection === "backward" && styles.activeDirText,
-                        ]}
-                      >
-                        من الناس للفاتحة
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-            </View>
-          )}
-
-          {/* STEP 4: Daily Capacity */}
-          {step === 4 && (
             <View style={styles.stepContainer}>
               <Ionicons
                 name="flash-outline"
@@ -615,8 +429,7 @@ export default function OnboardingScreen() {
                     ? `تقريباً ${Math.ceil(
                         (() => {
                           // ... estimating total items ...
-                          const count =
-                            selectionType === "complete" ? 604 : 100; // Simplified
+                          const count = 604;
                           return count / selectedPages;
                         })(),
                       )} يوم`
@@ -626,8 +439,8 @@ export default function OnboardingScreen() {
             </View>
           )}
 
-          {/* STEP 5: Ready */}
-          {step === 5 && (
+          {/* STEP 4: Ready */}
+          {step === 4 && (
             <View style={styles.stepContainer}>
               <Ionicons
                 name="shield-checkmark-outline"
@@ -656,12 +469,7 @@ export default function OnboardingScreen() {
                   <Text style={styles.summaryLabel}>الهدف</Text>
                   <Text style={styles.summaryValue}>
                     {(() => {
-                      if (selectionType === "complete") return "القرآن كاملاً";
-                      if (selectionType === "range")
-                        return `من ص ${tempStartPage} إلى ${tempEndPage}`;
-                      if (selectionType === "surahs")
-                        return `مجموعة سور (${selectedSurahIds.length})`;
-                      return "—";
+                      return "القرآن كاملاً";
                     })()}
                   </Text>
                 </View>
@@ -692,7 +500,7 @@ export default function OnboardingScreen() {
                 <Text style={styles.planPreviewText}>
                   {(() => {
                     const pagesPerDay = selectedPages;
-                    const totalPages = selectionType === "complete" ? 604 : 100; // Simplified for preview
+                    const totalPages = 604;
                     const days = Math.ceil(totalPages / pagesPerDay);
                     return `ستحفظ تقريباً خلال ${days} يوماً حسب وردك اليومي.`;
                   })()}
@@ -700,7 +508,7 @@ export default function OnboardingScreen() {
               </View>
 
               <Text style={styles.hadith}>
-                "اقرأ وارقَ ورتِّل كما كنتَ تُرتِّلُ في الدنيا"
+                &quot;اقرأ وارقَ ورتِّل كما كنتَ تُرتِّلُ في الدنيا&quot;
               </Text>
             </View>
           )}
@@ -851,8 +659,6 @@ export default function OnboardingScreen() {
     </View>
   );
 }
-
-import { darkColors } from "../theme";
 
 const getStyles = (Colors: typeof darkColors) =>
   StyleSheet.create({

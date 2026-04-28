@@ -4,6 +4,14 @@
  */
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
+import {
+  calculateStabilityIndex,
+  getXPProgressToNextLevel,
+  getTitleFromXP,
+} from '../utils/helpers';
+import { JUZ_META } from '../data/quranMeta';
+import { MemorizationStrength, PageProgress } from '../types';
+
 jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn(), getItem: jest.fn(), removeItem: jest.fn(),
 }));
@@ -13,14 +21,6 @@ jest.mock('react-native', () => ({ Platform: { OS: 'ios' } }));
 jest.mock('../store/NotificationService', () => ({
   NotificationService: { scheduleFortressReminders: jest.fn(), clearSavedHash: jest.fn() },
 }));
-
-import {
-  calculateStabilityIndex,
-  getXPProgressToNextLevel,
-  getTitleFromXP,
-} from '../utils/helpers';
-import { JUZ_META } from '../data/quranMeta';
-import { MemorizationStrength, PageProgress } from '../types';
 
 // ─── Helper: build a fake PageProgress entry ─────────────────────────────────
 const makePage = (

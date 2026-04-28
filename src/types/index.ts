@@ -157,7 +157,7 @@ export type AppSettings = {
   memorizationMethod: 'standard' | 'linking';
   chunksPerPage: number;
   /** طبعة المصحف المختارة */
-  mushafEdition: 'madani_604' | 'madani_612' | 'warsh_622' | 'indopak_604' | 'tajweed_604' | 'shamerly_522';
+  mushafEdition: 'madani_604';
   /** نوع الخطة: يومية أو أسبوعية */
   planMode: 'daily' | 'weekly';
   /** أيام الأسبوع النشطة: 0=أحد، 1=اثنين ... 6=سبت */

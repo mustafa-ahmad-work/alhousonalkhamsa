@@ -5,6 +5,10 @@
  */
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
+import { useSelectionStore } from '../store/selectionStore';
+import { todayISO, addDays } from '../utils/helpers';
+import { MemorizationStrength } from '../types';
+
 jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn().mockResolvedValue(undefined),
   getItem: jest.fn().mockResolvedValue(null),
@@ -16,10 +20,6 @@ jest.mock('../data/quranMeta', () => ({
   }),
   SURAHS: [],
 }));
-
-import { useSelectionStore } from '../store/selectionStore';
-import { todayISO, addDays } from '../utils/helpers';
-import { MemorizationStrength } from '../types';
 
 // Helper to get a fresh store state for each test
 const getStore = () => useSelectionStore.getState();

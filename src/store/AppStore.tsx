@@ -678,21 +678,26 @@ export function AppProvider({ children }: PropsWithChildren) {
     const wasOnboarded = prevOnboardedRef.current;
     prevOnboardedRef.current = state.isOnboarded;
     if (!wasOnboarded && state.isOnboarded) {
-      // Just transitioned: not-onboarded → onboarded. Clear hash so the
-      // scheduling useEffect below always re-schedules with a clean slate.
+      // Transitioned: not-onboarded → onboarded.
+      // Clear stored hash so the scheduling effect below always runs a full
+      // reschedule on the very first launch after onboarding.
       NotificationService.clearSavedHash();
     }
   }, [state.isOnboarded]);
 
-  // Schedule / update notifications whenever settings change.
-  // – Only fire after the app is fully loaded AND the user is onboarded
-  //   (avoids scheduling during the onboarding wizard or on a fresh install).
-  // – Debounced 1500 ms to coalesce rapid Redux updates (e.g., template buttons
-  //   or rapidly toggling rows in SettingsScreen).
-  // – The service itself uses a persistent AsyncStorage hash so it does nothing
-  //   if the settings haven't actually changed since the last schedule.
-  // – The scheduling lock inside NotificationService suppresses the instant
-  //   catch-up fires that expo emits when a daily trigger's time has passed.
+  // Schedule / update notifications whenever notification settings change.
+  //
+  // Design:
+  // • Only fires after the app is fully loaded AND the user is onboarded.
+  //   This prevents any scheduling during the onboarding wizard.
+  // • Debounced 800 ms to coalesce rapid successive Redux dispatches
+  //   (e.g., applying a template that updates 7 time fields at once).
+  // • The service uses a persistent AsyncStorage hash — if the settings
+  //   haven't changed since the last run it exits immediately (no-op).
+  // • Uses expo-notifications SchedulableTriggerInputTypes.DAILY trigger,
+  //   which schedules for the next upcoming occurrence of the specified
+  //   hour:minute WITHOUT firing an immediate catch-up notification.
+  //   No scheduling-lock mechanism is required.
   useEffect(() => {
     if (!state.isLoaded || !state.isOnboarded) return;
 
@@ -700,14 +705,15 @@ export function AppProvider({ children }: PropsWithChildren) {
       NotificationService.scheduleFortressReminders(
         state.settings.notifications,
       );
-    }, 1500);
+    }, 800);
 
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     state.isLoaded,
     state.isOnboarded,
-    // Serialize only the notification sub-tree to avoid running on every unrelated state change
+    // Only re-run when the notification sub-tree actually changes.
+    // Serialising here avoids triggering on unrelated state mutations.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(state.settings.notifications),
   ]);

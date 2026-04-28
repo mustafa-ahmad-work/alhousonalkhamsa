@@ -36,13 +36,7 @@ export function useSettingsLogic() {
   const [editType, setEditType] = useState<EditType>("name");
   const [editValue, setEditValue] = useState("");
 
-  const [surahModalVisible, setSurahModalVisible] = useState(false);
-  const [selectedSurahIds, setSelectedSurahIds] = useState<number[]>([]);
 
-  const [selectionType, setSelectionType] = useState<"range" | "surahs" | "complete">("complete");
-  const [tempStartPage, setTempStartPage] = useState("1");
-  const [tempEndPage, setTempEndPage] = useState("");
-  const [planDirection, setPlanDirection] = useState<"forward" | "backward">("forward");
 
   const [planMode, setPlanMode] = useState<"daily" | "weekly">((state.settings as any).planMode ?? "daily");
   const [dailyPages, setDailyPages] = useState<number>(state.user?.dailyPages ?? 1);
@@ -55,34 +49,7 @@ export function useSettingsLogic() {
   const [permStatus, setPermStatus] = useState<string>("undetermined");
 
   useEffect(() => {
-    if (state.plan) {
-      setPlanDirection(state.plan.direction);
-      const pages = state.plan.targetPages;
-      if (pages.length > 0) {
-        setTempStartPage(Math.min(...pages).toString());
-        setTempEndPage(Math.max(...pages).toString());
-      }
-      if (state.plan.label.includes("سور محددة") || state.plan.label.includes("سورة")) {
-        setSelectionType("surahs");
-        const editionId = state.plan.mushafEditionId || state.settings.mushafEdition || "madani_604";
-        const edition = getMushafEdition(editionId as any);
-        const pageSet = new Set(pages);
-        const surahIds: number[] = [];
-        Object.entries(edition.surahPages).forEach(([id, [start, end]]) => {
-          for (let p = start; p <= end; p++) {
-            if (pageSet.has(p)) {
-              surahIds.push(Number(id));
-              break;
-            }
-          }
-        });
-        setSelectedSurahIds(surahIds);
-      } else if (state.plan.label.includes("من صفحة")) {
-        setSelectionType("range");
-      } else {
-        setSelectionType("complete");
-      }
-    }
+    // Selection type is now always complete
   }, [state.plan, state.settings.mushafEdition]);
 
   useEffect(() => {
@@ -148,28 +115,8 @@ export function useSettingsLogic() {
     let pages: number[] = [];
     let label = "";
 
-    if (selectionType === "complete") {
-      pages = Array.from({ length: totalPages }, (_, i) => i + 1);
-      label = `القرآن الكريم كاملاً — ${edition.nameAr}`;
-    } else if (selectionType === "range") {
-      const start = parseInt(tempStartPage, 10) || 1;
-      const end = parseInt(tempEndPage, 10) || totalPages;
-      const min = Math.max(1, Math.min(start, end));
-      const max = Math.min(totalPages, Math.max(start, end));
-      for (let p = min; p <= max; p++) pages.push(p);
-      label = `من صفحة ${min} إلى ${max} — ${edition.nameAr}`;
-    } else if (selectionType === "surahs") {
-      const selected = SURAHS.filter((s) => selectedSurahIds.includes(s.id)).sort((a, b) => a.id - b.id);
-      selected.forEach((s) => {
-        const editionRange = edition.surahPages[s.id];
-        const start = editionRange ? editionRange[0] : s.startPage;
-        const end = editionRange ? editionRange[1] : s.endPage;
-        for (let p = start; p <= end; p++) {
-          if (!pages.includes(p)) pages.push(p);
-        }
-      });
-      label = selected.length === 1 ? `سورة ${selected[0].nameAr} — ${edition.nameAr}` : `مجموعة سور (${selected.length}) — ${edition.nameAr}`;
-    }
+    pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+    label = `القرآن الكريم كاملاً — ${edition.nameAr}`;
 
     if (pages.length === 0) {
       Alert.alert("خطأ", "يرجى اختيار نطاق صحيح");
@@ -178,7 +125,7 @@ export function useSettingsLogic() {
 
     dispatch({
       type: "REGENERATE_PLAN",
-      payload: { pageNumbers: pages, label, direction: planDirection },
+      payload: { pageNumbers: pages, label, direction: "forward" },
     });
     Alert.alert("تم التحديث", `تم إنشاء خطة جديدة بتبعية ${edition.nameAr} (${edition.totalPages} صفحة) بنجاح`);
   };
@@ -253,18 +200,6 @@ export function useSettingsLogic() {
     setEditType,
     editValue,
     setEditValue,
-    surahModalVisible,
-    setSurahModalVisible,
-    selectedSurahIds,
-    setSelectedSurahIds,
-    selectionType,
-    setSelectionType,
-    tempStartPage,
-    setTempStartPage,
-    tempEndPage,
-    setTempEndPage,
-    planDirection,
-    setPlanDirection,
     planMode,
     setPlanMode,
     dailyPages,

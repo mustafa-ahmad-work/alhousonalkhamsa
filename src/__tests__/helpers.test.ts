@@ -1,5 +1,12 @@
 import { calculateStreak, generatePlan, strengthAfterReview, toArabicNumerals } from '../utils/helpers';
 
+// ─── calculateStabilityIndex ──────────────────────────────────────────────────
+import { calculateStabilityIndex, getXPProgressToNextLevel, formatTime, getDailyCompletionPercent } from '../utils/helpers';
+import { PageProgress, MemorizationStrength, TaskSelection, DailyProgress } from '../types';
+
+// ─── getPlanDayDate ───────────────────────────────────────────────────────────
+import { getPlanDayDate } from '../utils/helpers';
+
 describe('helpers', () => {
   describe('calculateStreak', () => {
     const today = new Date().toISOString().split('T')[0];
@@ -101,10 +108,6 @@ describe('helpers', () => {
   });
 });
 
-// ─── calculateStabilityIndex ──────────────────────────────────────────────────
-import { calculateStabilityIndex, getXPProgressToNextLevel, formatTime, getDailyCompletionPercent } from '../utils/helpers';
-import { PageProgress, MemorizationStrength, TaskSelection, DailyProgress } from '../types';
-
 describe('calculateStabilityIndex', () => {
   it('returns 0 for empty pages array', () => {
     expect(calculateStabilityIndex([])).toBe(0);
@@ -153,9 +156,6 @@ describe('calculateStabilityIndex', () => {
     expect(withBonus).toBe(18);
   });
 });
-
-// ─── getPlanDayDate ───────────────────────────────────────────────────────────
-import { getPlanDayDate } from '../utils/helpers';
 
 describe('getPlanDayDate', () => {
   it('returns the start date itself for dayIndex=0 if that day is active', () => {

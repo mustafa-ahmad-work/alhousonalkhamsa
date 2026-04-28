@@ -78,7 +78,7 @@ export default function AppExplanationScreen() {
             <View>
               <Text style={styles.subParagraph}>
                 • <Text style={styles.bold}>ختمة التلاوة:</Text> قراءة جزئين
-                يومياً بنظام "الحدر" السريع؛ الهدف منها تعويد العين على رسم
+                يومياً بنظام &quot;الحدر&quot; السريع؛ الهدف منها تعويد العين على رسم
                 المصحف وتسهيل انسياب الآيات في العقل وربطها ببعضها.
               </Text>
               <Text style={styles.subParagraph}>

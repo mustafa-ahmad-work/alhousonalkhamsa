@@ -8,6 +8,9 @@
  */
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
+import { todayISO } from '../utils/helpers';
+import { PageProgress, MemorizationStrength } from '../types';
+
 jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn(), getItem: jest.fn(), removeItem: jest.fn(),
 }));
@@ -17,9 +20,6 @@ jest.mock('react-native', () => ({ Platform: { OS: 'ios' } }));
 jest.mock('../store/NotificationService', () => ({
   NotificationService: { scheduleFortressReminders: jest.fn() },
 }));
-
-import { todayISO } from '../utils/helpers';
-import { PageProgress, MemorizationStrength } from '../types';
 
 // ─── Pure helpers mirroring useQuizLogic internals ───────────────────────────
 
@@ -33,7 +33,7 @@ const calcQuestionCount = (pageCount: number): number => {
 
 /** Calculates weighted pool from pages + progress */
 const buildWeightedPool = (
-  pages: Array<{ pageNumber: number }>,
+  pages: { pageNumber: number }[],
   pageProgress: PageProgress[],
 ) => {
   return pages.map((p) => {
@@ -45,7 +45,7 @@ const buildWeightedPool = (
 
 /** Filters pages reviewed today */
 const filterTodayPages = (
-  pages: Array<{ pageNumber: number }>,
+  pages: { pageNumber: number }[],
   pageProgress: PageProgress[],
 ) => {
   const today = todayISO();

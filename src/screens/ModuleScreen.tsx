@@ -14,23 +14,22 @@ import {
 } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
-import { getMushafEdition } from "../data/mushafEditions";
+import { useModuleLogic } from "../hooks/useModuleLogic";
 import { useAppStore } from "../store/AppStore";
 import { useSelectionStore } from "../store/selectionStore";
 import { BorderRadius, Spacing, Typography, useTheme } from "../theme";
 import { MODULES, ModuleId, TaskSelection } from "../types";
-import { toArabicNumerals, todayISO } from "../utils/helpers";
-import { buildRanges, formatRanges } from "../utils/planLogic";
-import { useModuleLogic } from "../hooks/useModuleLogic";
-
-const { width } = Dimensions.get("window");
+import { toArabicNumerals } from "../utils/helpers";
+import { formatRanges } from "../utils/planLogic";
 
 import { AudioPlayer } from "../components/shared/AudioPlayer";
+import { InteractiveQuran } from "../components/shared/InteractiveQuran";
 import { RangeChip } from "../components/shared/RangeChip";
 import { TaskCard } from "../components/shared/TaskCard";
 import { TaskTimer } from "../components/shared/TaskTimer";
-import { InteractiveQuran } from "../components/shared/InteractiveQuran";
 import { SelectionScreen } from "../features/selection/SelectionScreen";
+
+const { width } = Dimensions.get("window");
 
 export default function ModuleScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -48,7 +47,8 @@ export default function ModuleScreen() {
 
   const { plan, pageProgress, settings } = state;
 
-  const { todayPlanItem, getPagesFromTask, getRecommendedTime } = useModuleLogic(id);
+  const { todayPlanItem, getPagesFromTask, getRecommendedTime } =
+    useModuleLogic(id);
 
   const handleAddTodayPlan = () => {
     if (!todayPlanItem || !moduleInfo) return;
@@ -61,10 +61,10 @@ export default function ModuleScreen() {
     Alert.alert("تم الإضافة", "تمت إضافة ورد الخطة إلى الأوراد الحالية");
   };
 
-
-
   const moduleInfo = MODULES.find((m) => m.id === id);
-  const selections = moduleInfo ? selectionStore.getModuleSelections(moduleInfo.id as ModuleId) : [];
+  const selections = moduleInfo
+    ? selectionStore.getModuleSelections(moduleInfo.id as ModuleId)
+    : [];
   const activeSelections = selections.filter((s) => !s.isCompleted);
   const completedSelections = selections.filter((s) => s.isCompleted);
 
@@ -183,10 +183,12 @@ export default function ModuleScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar 
-        barStyle={Colors.background === "#07090F" ? "light-content" : "dark-content"} 
-        translucent 
-        backgroundColor="transparent" 
+      <StatusBar
+        barStyle={
+          Colors.background === "#07090F" ? "light-content" : "dark-content"
+        }
+        translucent
+        backgroundColor="transparent"
       />
       {/* Background Glow */}
       <View
@@ -211,18 +213,7 @@ export default function ModuleScreen() {
              <Text style={[styles.moduleBadgeText, { color: moduleInfo.color }]}>{moduleInfo.fortressId}</Text>
           </View> */}
         </View>
-        <TouchableOpacity
-          style={[
-            styles.headerBtn,
-            {
-              backgroundColor: Colors.primaryMuted,
-              borderColor: `${Colors.primary}20`,
-            },
-          ]}
-          onPress={() => setShowSelectionModal(true)}
-        >
-          <Ionicons name="add" size={24} color={Colors.primary} />
-        </TouchableOpacity>
+        <View style={{ width: 44 }} />
       </View>
 
       <ScrollView
@@ -294,17 +285,6 @@ export default function ModuleScreen() {
               <Text style={styles.emptyText}>
                 لم تحدد أوراداً لهذا القسم بعد
               </Text>
-              <TouchableOpacity
-                style={[
-                  styles.addBtnSmall,
-                  { backgroundColor: `${Colors.primary}15` },
-                ]}
-                onPress={() => setShowSelectionModal(true)}
-              >
-                <Text style={{ color: Colors.primary, fontWeight: "bold" }}>
-                  أضف ورد الآن
-                </Text>
-              </TouchableOpacity>
             </Animated.View>
           ) : (
             activeSelections.map((task) => (
@@ -469,7 +449,7 @@ export default function ModuleScreen() {
         moduleName={moduleInfo.nameAr}
         onClose={() => setQuranReaderVisible(false)}
         onComplete={() => {
-           if (selectedTask) handleComplete(selectedTask);
+          if (selectedTask) handleComplete(selectedTask);
         }}
       />
     </View>

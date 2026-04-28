@@ -1,10 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
-  Alert,
   Linking,
   Platform,
   ScrollView,
@@ -14,11 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { getMushafEdition } from "../data/mushafEditions";
-import { SURAHS } from "../data/quranMeta";
-import { useAppStore } from "../store/AppStore";
 import { NotificationService } from "../store/NotificationService";
-import { useSelectionStore } from "../store/selectionStore";
 import { BorderRadius, Shadow, Spacing, Typography, useTheme } from "../theme";
 
 // ── Extracted Components ─────────────────────────────────────────────────────
@@ -27,12 +21,11 @@ import { MushafEditionPicker } from "../components/settings/MushafEditionPicker"
 import { NotificationRow } from "../components/settings/NotificationRow";
 import { PlanModeSelector } from "../components/settings/PlanModeSelector";
 import { TimePickerModal } from "../components/settings/TimePickerModal";
-import { PlanRangeSelector } from "../components/shared/PlanRangeSelector";
-import { SurahSelectModal } from "../components/shared/SurahSelectModal";
+
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-import { useSettingsLogic, EditType } from "../hooks/useSettingsLogic";
+import { useSettingsLogic } from "../hooks/useSettingsLogic";
 
 const NOTIFICATION_ROWS = [
   {
@@ -92,18 +85,6 @@ export default function SettingsScreen() {
     editType,
     editValue,
     setEditValue,
-    surahModalVisible,
-    setSurahModalVisible,
-    selectedSurahIds,
-    setSelectedSurahIds,
-    selectionType,
-    setSelectionType,
-    tempStartPage,
-    setTempStartPage,
-    tempEndPage,
-    setTempEndPage,
-    planDirection,
-    setPlanDirection,
     planMode,
     setPlanMode,
     dailyPages,
@@ -127,7 +108,7 @@ export default function SettingsScreen() {
     handleToggleTheme,
     toggleNotifField,
     currentEditionId,
-    isMasterEnabled
+    isMasterEnabled,
   } = useSettingsLogic();
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -166,7 +147,6 @@ export default function SettingsScreen() {
         <View style={styles.card}>
           {[
             { key: "name", label: "الاسم", value: state.user?.name ?? "—" },
-            { key: "goal", label: "الهدف", value: state.user?.goal ?? "—" },
             {
               key: "dailyPages",
               label: "طاقتك اليومية (صفحات)",
@@ -212,28 +192,6 @@ export default function SettingsScreen() {
               });
               applyPlanChanges(id);
             }}
-          />
-        </View>
-
-        {/* ── Plan Range ───────────────────────────────────────────────── */}
-        <Text style={[styles.sectionTitle, { marginTop: Spacing.xl }]}>
-          نطاق الحفظ والاتجاه
-        </Text>
-        <View style={styles.card}>
-          <PlanRangeSelector
-            selectionType={selectionType}
-            onSelectionTypeChange={setSelectionType}
-            startPage={tempStartPage}
-            endPage={tempEndPage}
-            onStartPageChange={setTempStartPage}
-            onEndPageChange={setTempEndPage}
-            endPagePlaceholder={getMushafEdition(
-              currentEditionId as any,
-            ).totalPages.toString()}
-            selectedSurahCount={selectedSurahIds.length}
-            onOpenSurahModal={() => setSurahModalVisible(true)}
-            planDirection={planDirection}
-            onDirectionChange={setPlanDirection}
           />
         </View>
 
@@ -706,16 +664,6 @@ export default function SettingsScreen() {
         onCancel={() => setTimePickerVisible(false)}
       />
 
-      <SurahSelectModal
-        visible={surahModalVisible}
-        selectedIds={selectedSurahIds}
-        onToggle={(id) =>
-          setSelectedSurahIds((prev) =>
-            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-          )
-        }
-        onDone={() => setSurahModalVisible(false)}
-      />
     </View>
   );
 }

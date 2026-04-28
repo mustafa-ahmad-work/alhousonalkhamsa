@@ -10,18 +10,17 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
+ TextStyle, ViewStyle } from "react-native";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { SURAHS } from "../data/quranMeta";
 import { useAppStore } from "../store/AppStore";
 import { BorderRadius, Spacing, Typography, useTheme } from "../theme";
 import { toArabicNumerals, todayISO } from "../utils/helpers";
 
-const { width } = Dimensions.get("window");
-
-import { TextStyle, ViewStyle } from "react-native";
 import { Verse } from "../store/QuranStore";
 import { useQuizLogic } from "../hooks/useQuizLogic";
+
+const { width } = Dimensions.get("window");
 
 const truncateVerseStart = (text: string, wordCount: number = 5) => {
   const words = text.split(" ");
