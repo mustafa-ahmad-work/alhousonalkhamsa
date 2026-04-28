@@ -13,6 +13,9 @@ import {
 import Animated, {
   FadeIn,
   FadeInDown,
+  FadeOut,
+  SlideOutDown,
+  ZoomIn,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
@@ -79,6 +82,7 @@ const CELEBRATION_MESSAGES = [
 
 const CelebrationOverlay = ({ onComplete }: { onComplete: () => void }) => {
   const Colors = useTheme();
+  const [active, setActive] = useState(true);
   const [msg] = useState(
     () =>
       CELEBRATION_MESSAGES[
@@ -86,119 +90,145 @@ const CelebrationOverlay = ({ onComplete }: { onComplete: () => void }) => {
       ],
   );
 
+  const handleClose = () => {
+    setActive(false);
+    // Wait for SlideOutDown duration (250ms) plus a small buffer
+    setTimeout(onComplete, 300);
+  };
+
   return (
     <View
       style={[
         StyleSheet.absoluteFill,
         {
           zIndex: 10000,
-          backgroundColor: "rgba(0,0,0,0.5)",
           justifyContent: "center",
           alignItems: "center",
         },
       ]}
+      pointerEvents={active ? "auto" : "none"}
     >
-      <Animated.View
-        entering={FadeInDown.duration(400).springify()}
-        style={{
-          width: width * 0.88,
-          maxWidth: 380,
-          backgroundColor: Colors.surface,
-          borderRadius: 32,
-          padding: 32,
-          alignItems: "center",
-          borderWidth: 1,
-          borderColor: Colors.borderLight,
-        }}
-      >
-        <View
-          style={{
-            width: 80,
-            height: 80,
-            borderRadius: 40,
-            backgroundColor: `${Colors.primary}15`,
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: 24,
-          }}
-        >
-          <Ionicons name="medal-outline" size={48} color={Colors.primary} />
-        </View>
+      {active && (
+        <>
+          <Animated.View
+            entering={FadeIn.duration(300)}
+            exiting={FadeOut.duration(200)}
+            style={[
+              StyleSheet.absoluteFill,
+              { backgroundColor: "rgba(0,0,0,0.6)" },
+            ]}
+          />
 
-        <Text
-          style={{
-            fontFamily: Typography.heading,
-            fontSize: 26,
-            fontWeight: "bold",
-            color: Colors.textPrimary,
-            textAlign: "center",
-            marginBottom: 8,
-          }}
-        >
-          {msg.title}
-        </Text>
-        <Text
-          style={{
-            fontFamily: Typography.body,
-            fontSize: 14,
-            color: Colors.textSecondary,
-            textAlign: "center",
-            lineHeight: 22,
-            marginBottom: 24,
-          }}
-        >
-          {msg.subtitle}
-        </Text>
-
-        <View
-          style={{
-            padding: 20,
-            backgroundColor: Colors.glass,
-            borderRadius: 20,
-            width: "100%",
-            borderWidth: 1,
-            borderColor: Colors.glassBorder,
-            marginBottom: 24,
-          }}
-        >
-          <Text
+          <Animated.View
+            entering={FadeInDown.springify().damping(15).stiffness(100)}
+            exiting={SlideOutDown.duration(250)}
             style={{
-              color: Colors.textPrimary,
-              fontFamily: Typography.body,
-              fontSize: 14,
-              lineHeight: 24,
-              textAlign: "center",
-              fontWeight: "500",
-              fontStyle: "italic",
+              width: width * 0.88,
+              maxWidth: 380,
+              backgroundColor: Colors.surface,
+              borderRadius: 32,
+              padding: 32,
+              alignItems: "center",
+              borderWidth: 1,
+              borderColor: "rgba(255,255,255,0.1)",
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.2,
+              shadowRadius: 20,
+              elevation: 10,
             }}
           >
-            {msg.dua}
-          </Text>
-        </View>
+            <Animated.View
+              entering={ZoomIn.delay(300).springify()}
+              style={{
+                width: 80,
+                height: 80,
+                borderRadius: 40,
+                backgroundColor: `${Colors.primary}15`,
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 24,
+              }}
+            >
+              <Ionicons name="medal-outline" size={48} color={Colors.primary} />
+            </Animated.View>
 
-        <TouchableOpacity
-          onPress={onComplete}
-          activeOpacity={0.8}
-          style={{
-            backgroundColor: Colors.primary,
-            width: "100%",
-            paddingVertical: 16,
-            borderRadius: 18,
-            alignItems: "center",
-          }}
-        >
-          <Text
-            style={{
-              color: "#FFFFFF",
-              fontFamily: Typography.heading,
-              fontSize: 16,
-              fontWeight: "bold",
-            }}
-          >
-            الحمد لله، استمرار
-          </Text>
-        </TouchableOpacity>
-      </Animated.View>
+            <Text
+              style={{
+                fontFamily: Typography.heading,
+                fontSize: 26,
+                fontWeight: "bold",
+                color: Colors.textPrimary,
+                textAlign: "center",
+                marginBottom: 8,
+              }}
+            >
+              {msg.title}
+            </Text>
+            <Text
+              style={{
+                fontFamily: Typography.body,
+                fontSize: 14,
+                color: Colors.textSecondary,
+                textAlign: "center",
+                lineHeight: 22,
+                marginBottom: 24,
+              }}
+            >
+              {msg.subtitle}
+            </Text>
+
+            <View
+              style={{
+                padding: 20,
+                backgroundColor: Colors.glass,
+                borderRadius: 20,
+                width: "100%",
+                borderWidth: 1,
+                borderColor: Colors.glassBorder,
+                marginBottom: 24,
+              }}
+            >
+              <Text
+                style={{
+                  color: Colors.textPrimary,
+                  fontFamily: Typography.body,
+                  fontSize: 14,
+                  lineHeight: 24,
+                  textAlign: "center",
+                  fontWeight: "500",
+                  fontStyle: "italic",
+                }}
+              >
+                {msg.dua}
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              onPress={handleClose}
+              activeOpacity={0.8}
+              style={{
+                backgroundColor: Colors.primary,
+                width: "100%",
+                paddingVertical: 16,
+                borderRadius: 18,
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  color: "#FFFFFF",
+                  fontFamily: Typography.heading,
+                  fontSize: 16,
+                  fontWeight: "bold",
+                }}
+              >
+                الحمد لله، استمرار
+              </Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </>
+      )}
     </View>
   );
 };
@@ -297,7 +327,7 @@ export default function PlanScreen() {
     );
     barWidth.value = withTiming(1, { duration: 1500 });
 
-    const timer = setTimeout(() => setIsReady(true), 1800);
+    const timer = setTimeout(() => setIsReady(true), 600);
     return () => clearTimeout(timer);
   }, []);
 

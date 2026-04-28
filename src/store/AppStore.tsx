@@ -46,7 +46,6 @@ const DEFAULT_INITIAL_STATE: AppState = {
   },
   isOnboarded: false,
   isLoaded: false,
-  themeMode: "light",
   taskSelections: [],
   globalStats: {
     totalUsers: 0,
@@ -114,8 +113,7 @@ type Action =
     }
   | { type: "TOGGLE_FORTRESS"; payload: { fortressId: FortressId } }
   | { type: "MARK_PAGES_MEMORIZED"; payload: { pages: number[] } }
-  | { type: "REVIEW_PAGE"; payload: { pageNumber: number; passed: boolean } }
-  | { type: "TOGGLE_THEME" }
+  | { type: "REVIEW_PAGE" ; payload: { pageNumber: number; passed: boolean } }
   | { type: "RESET" }
   | { type: "UPDATE_USER"; payload: Partial<User> }
   | { type: "UPDATE_SETTINGS"; payload: Partial<AppState["settings"]> }
@@ -482,10 +480,7 @@ function appReducer(state: AppState, action: Action): AppState {
       return { ...state, pageProgress: updatedPageProgress };
     }
 
-    case "TOGGLE_THEME": {
-      const newMode = state.themeMode === "dark" ? "light" : "dark";
-      return { ...state, themeMode: newMode };
-    }
+
 
     case "UPDATE_USER": {
       if (!state.user) return state;

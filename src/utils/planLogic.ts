@@ -36,33 +36,49 @@ export function formatRanges(ranges: { start: number; end: number }[]): string {
     .join(" و ");
 }
 
+// Pre-calculate surah list for faster lookup
+const SORTED_SURAHS = [...SURAHS].sort((a, b) => a.id - b.id);
+
 export function getSurahSegments(
   pages: number[],
   edition: MushafEdition,
 ): SurahSegment[] {
-  const pageSet = new Set(pages);
+  if (!pages.length) return [];
+  
   const segments: SurahSegment[] = [];
+  const processedSurahs = new Map<number, number[]>();
 
-  const surahEntries = Object.entries(edition.surahPages)
-    .map(([id, [s, e]]) => ({ id: Number(id), startPage: s, endPage: e }))
-    .sort((a, b) => a.id - b.id);
+  // Map of page number to surah ID for this edition
+  // We can optimize this further by caching it per editionId
+  const surahPagesEntries = Object.entries(edition.surahPages);
 
-  surahEntries.forEach(({ id, startPage, endPage }) => {
-    const surahPages: number[] = [];
-    for (let p = startPage; p <= endPage; p++) {
-      if (pageSet.has(p)) surahPages.push(p);
-    }
-    if (surahPages.length > 0) {
-      const surahMeta = SURAHS.find((s) => s.id === id);
-      segments.push({
-        surahId: id,
-        nameAr: surahMeta?.nameAr ?? `سورة ${id}`,
-        pages: surahPages,
-      });
+  pages.forEach(p => {
+    // Find which surah this page belongs to
+    // In most editions, surahs are sequential, but we can just find the match
+    for (const [idStr, [start, end]] of surahPagesEntries) {
+      if (p >= start && p <= end) {
+        const id = Number(idStr);
+        if (!processedSurahs.has(id)) {
+          processedSurahs.set(id, [p]);
+        } else {
+          processedSurahs.get(id)!.push(p);
+        }
+        break;
+      }
     }
   });
 
-  return segments;
+  // Convert map to segments
+  processedSurahs.forEach((surahPages, id) => {
+    const surahMeta = SORTED_SURAHS[id - 1]; // IDs are 1-indexed
+    segments.push({
+      surahId: id,
+      nameAr: surahMeta?.nameAr ?? `سورة ${id}`,
+      pages: surahPages,
+    });
+  });
+
+  return segments.sort((a, b) => a.surahId - b.surahId);
 }
 
 export function buildWeeklyCalendar(

@@ -172,7 +172,6 @@ export type AppState = {
   streak: StreakData;
   isOnboarded: boolean;
   isLoaded: boolean;
-  themeMode: 'dark' | 'light';
   /** All task selections across modules */
   taskSelections: TaskSelection[];
   /** Real-time statistics from backend */

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Alert } from 'react-native';
+import { HusoonAlert } from '../components/shared/CustomAlert';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { useAppStore } from '../store/AppStore';
@@ -7,6 +7,7 @@ import { useSelectionStore } from '../store/selectionStore';
 import { NotificationService } from '../store/NotificationService';
 import { getMushafEdition } from '../data/mushafEditions';
 import { SURAHS } from '../data/quranMeta';
+import { useThemeStore } from '../store/ThemeStore';
 
 export type EditType =
   | "name"
@@ -119,7 +120,7 @@ export function useSettingsLogic() {
     label = `القرآن الكريم كاملاً — ${edition.nameAr}`;
 
     if (pages.length === 0) {
-      Alert.alert("خطأ", "يرجى اختيار نطاق صحيح");
+      HusoonAlert.alert("خطأ", "يرجى اختيار نطاق صحيح", [], "error");
       return;
     }
 
@@ -127,7 +128,7 @@ export function useSettingsLogic() {
       type: "REGENERATE_PLAN",
       payload: { pageNumbers: pages, label, direction: "forward" },
     });
-    Alert.alert("تم التحديث", `تم إنشاء خطة جديدة بتبعية ${edition.nameAr} (${edition.totalPages} صفحة) بنجاح`);
+    HusoonAlert.alert("تم التحديث", `تم إنشاء خطة جديدة بنجاح`, [], "success");
   };
 
   const applyPlanModeSettings = () => {
@@ -141,7 +142,7 @@ export function useSettingsLogic() {
   };
 
   const handleReset = () => {
-    Alert.alert(
+    HusoonAlert.alert(
       "مسح البيانات بالكامل",
       "هل أنت متأكد من مسح جميع بيانات الحفظ والتقدم؟ هذا الإجراء لا يمكن التراجع عنه.",
       [
@@ -157,23 +158,19 @@ export function useSettingsLogic() {
               useSelectionStore.getState().reset();
               router.replace("/" as any);
             } catch (e) {
-              Alert.alert("خطأ", "فشل مسح البيانات، يرجى المحاولة مرة أخرى.");
+              HusoonAlert.alert("خطأ", "فشل مسح البيانات، يرجى المحاولة مرة أخرى.", [], "error");
             }
           },
         },
-      ]
+      ],
+      "delete"
     );
   };
 
+  const toggleTheme = useThemeStore((state) => state.toggleTheme);
+
   const handleToggleTheme = () => {
-    Alert.alert(
-      "تغيير المظهر",
-      "سيتم حفظ المظهر الجديد الآن. يرجى إغلاق التطبيق كلياً وإعادة فتحه لتطبيق الألوان الجديدة بشكل كامل.",
-      [
-        { text: "إلغاء", style: "cancel" },
-        { text: "تبديل وحفظ", onPress: () => dispatch({ type: "TOGGLE_THEME" }) },
-      ]
-    );
+    toggleTheme();
   };
 
   const toggleNotifField = (field: string) => {

@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -11,8 +11,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import Animated, { FadeInDown, FadeIn } from "react-native-reanimated";
-import { Shadow, Spacing, Typography, useTheme } from "../../theme";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import quranData from "../../data/quran_pages.json";
+import {
+  BorderRadius,
+  Shadow,
+  Spacing,
+  Typography,
+  useTheme,
+} from "../../theme";
 import { toArabicNumerals } from "../../utils/helpers";
 
 const { width } = Dimensions.get("window");
@@ -33,6 +40,7 @@ interface InteractiveQuranProps {
   pages: number[];
   moduleId: string;
   moduleName: string;
+  moduleDescription?: string;
   onClose: () => void;
   onComplete?: () => void;
 }
@@ -42,6 +50,7 @@ export function InteractiveQuran({
   pages,
   moduleId,
   moduleName,
+  moduleDescription,
   onClose,
   onComplete,
 }: InteractiveQuranProps) {
@@ -49,34 +58,39 @@ export function InteractiveQuran({
   const styles = React.useMemo(() => getStyles(Colors), [Colors]);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState("");
   const [pagesData, setPagesData] = useState<PageData[]>([]);
+  const [readingMode, setReadingMode] = useState<"app" | "physical" | null>(
+    null,
+  );
 
   // Features state
   const isMemorizationOrReview =
     moduleId === "memorization" || moduleId.includes("review");
   const isPreparation = moduleId.includes("preparation");
-  
+
   const [isMasked, setIsMasked] = useState(false);
   const [revealedVerses, setRevealedVerses] = useState<Set<string>>(new Set());
-  
+
   // Timer & Reps
   const [secondsElapsed, setSecondsElapsed] = useState(0);
   const [reps, setReps] = useState(0);
 
   useEffect(() => {
     let interval: any;
-    if (visible) {
+    if (visible && readingMode) {
       interval = setInterval(() => {
         setSecondsElapsed((prev) => prev + 1);
       }, 1000);
     } else {
-      setSecondsElapsed(0);
-      setRevealedVerses(new Set());
-      setReps(0);
+      if (!visible) {
+        setSecondsElapsed(0);
+        setRevealedVerses(new Set());
+        setReps(0);
+        setReadingMode(null);
+      }
     }
     return () => clearInterval(interval);
-  }, [visible]);
+  }, [visible, readingMode]);
 
   useEffect(() => {
     if (visible && pages.length > 0) {
@@ -84,28 +98,24 @@ export function InteractiveQuran({
     }
   }, [visible, pages]);
 
-  const loadPagesData = async () => {
+  const loadPagesData = () => {
     setIsLoading(true);
-    setErrorMsg("");
-    setPagesData([]);
-    
     try {
-      let fetched: PageData[] = [];
-      // Fetch pages consecutively to keep order
+      const fetched: PageData[] = [];
+      const typedData = quranData as Record<string, Verse[]>;
+
       for (const pageNum of pages) {
-        const res = await fetch(
-          `https://api.quran.com/api/v4/quran/verses/uthmani?page_number=${pageNum}`
-        );
-        if (!res.ok) throw new Error("Failed");
-        const data = await res.json();
-        fetched.push({
-          pageNumber: pageNum,
-          verses: data.verses,
-        });
+        const verses = typedData[pageNum.toString()];
+        if (verses) {
+          fetched.push({
+            pageNumber: pageNum,
+            verses: verses,
+          });
+        }
       }
       setPagesData(fetched);
     } catch (e) {
-      setErrorMsg("حدث خطأ في تحميل الصفحات. يرجى التحقق من اتصال الإنترنت.");
+      console.error("Error loading local Quran data", e);
     } finally {
       setIsLoading(false);
     }
@@ -114,7 +124,6 @@ export function InteractiveQuran({
   const toggleMask = () => {
     setIsMasked(!isMasked);
     if (!isMasked) {
-      // hiding all
       setRevealedVerses(new Set());
     }
   };
@@ -141,144 +150,270 @@ export function InteractiveQuran({
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.overlay}>
         <SafeAreaView style={styles.safeContainer}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-              <Ionicons name="close" size={24} color={Colors.textPrimary} />
-            </TouchableOpacity>
-            
-            <View style={styles.headerTitleBox}>
-              <Text style={styles.headerTitle}>{moduleName}</Text>
-              <View style={styles.timerChip}>
-                <Ionicons name="time-outline" size={14} color={Colors.textTertiary} />
-                <Text style={styles.timerText}>{formatTimer(secondsElapsed)}</Text>
-              </View>
-            </View>
-
-            {/* End Session Button inside header to save space */}
-            <TouchableOpacity 
-              style={[styles.finishBtn, { backgroundColor: Colors.success }]} 
-              onPress={() => {
-                if (onComplete) onComplete();
-                onClose();
-              }}
-            >
-              <Text style={styles.finishBtnText}>إنهاء</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Tools Bar (Contextual) */}
-          <View style={styles.toolsBar}>
-            {isMemorizationOrReview && (
-              <TouchableOpacity 
-                style={[styles.toolBtn, isMasked && { backgroundColor: Colors.primaryMuted }]}
-                onPress={toggleMask}
-              >
-                <Ionicons 
-                  name={isMasked ? "eye-off" : "eye"} 
-                  size={20} 
-                  color={isMasked ? Colors.primary : Colors.textSecondary} 
-                />
-                <Text style={[styles.toolBtnText, isMasked && { color: Colors.primary }]}>
-                  {isMasked ? "إظهار الكل" : "إخفاء (اختبار)"}
-                </Text>
-              </TouchableOpacity>
-            )}
-
-            {isPreparation && (
-              <View style={styles.infoModeChip}>
-                <Ionicons name="book-outline" size={18} color={Colors.primary} />
-                <Text style={styles.infoModeText}>وضع التهيئة</Text>
-              </View>
-            )}
-            
-            {/* Pages count info */}
-            <View style={{ flex: 1 }} />
-            <Text style={styles.pagesCount}>
-              {toArabicNumerals(pages.length)} صفحات
-            </Text>
-          </View>
-
-          {/* Main Content */}
-          <View style={styles.mainContent}>
-            {isLoading ? (
-              <View style={styles.centerArea}>
-                <ActivityIndicator size="large" color={Colors.primary} />
-                <Text style={styles.loaderText}>جاري تحميل الصفحات...</Text>
-              </View>
-            ) : errorMsg ? (
-              <View style={styles.centerArea}>
-                <Ionicons name="cloud-offline-outline" size={60} color={Colors.textTertiary} />
-                <Text style={styles.errorText}>{errorMsg}</Text>
-                <TouchableOpacity style={styles.retryBtn} onPress={loadPagesData}>
-                  <Text style={styles.retryBtnText}>إعادة المحاولة</Text>
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <ScrollView 
-                style={styles.textScroll}
-                contentContainerStyle={styles.textScrollContent}
-                showsVerticalScrollIndicator={false}
-              >
-                {pagesData.map((pageData, pIdx) => (
-                  <View key={`page-${pageData.pageNumber}`} style={styles.pageContainer}>
-                    <View style={styles.pageHeader}>
-                      <Text style={styles.pageHeaderText}>
-                        صفحة {toArabicNumerals(pageData.pageNumber)}
-                      </Text>
-                      <View style={styles.pageHeaderLine} />
-                    </View>
-
-                    <Text style={styles.quranTextContainer}>
-                      {pageData.verses.map((v) => {
-                        const isHidden = isMasked && !revealedVerses.has(v.verse_key);
-                        
-                        return (
-                          <Text
-                            key={v.verse_key}
-                            onPress={() => toggleVerseReveal(v.verse_key)}
-                            style={[
-                              styles.quranText,
-                              isHidden && styles.quranTextHidden
-                            ]}
-                          >
-                            {isHidden ? " ┄┄┄ " : ` ${v.text_uthmani} `}
-                            <Text style={styles.ayahNumberBadge}>
-                               {toArabicNumerals(parseInt(v.verse_key.split(":")[1]))} 
-                            </Text>
-                          </Text>
-                        );
-                      })}
-                    </Text>
+          {/* Mode Selection */}
+          {!readingMode && (
+            <View style={styles.modeSelectionContainer}>
+              <Text style={styles.modeSelectionTitle}>
+                كيف ستؤدي وردك اليوم؟
+              </Text>
+              <View style={styles.modeOptions}>
+                <TouchableOpacity
+                  style={styles.modeCard}
+                  onPress={() => setReadingMode("app")}
+                >
+                  <View
+                    style={[
+                      styles.modeIconCircle,
+                      { backgroundColor: Colors.primaryMuted },
+                    ]}
+                  >
+                    <Ionicons
+                      name="phone-portrait-outline"
+                      size={32}
+                      color={Colors.primary}
+                    />
                   </View>
-                ))}
-                <View style={{ height: 120 }} />
-              </ScrollView>
-            )}
-          </View>
-
-          {/* Floating Repetition Counter (only for memorization) */}
-          {moduleId === 'memorization' && !isLoading && !errorMsg && (
-            <Animated.View entering={FadeInDown} style={styles.repContainer}>
-              <Text style={styles.repLabel}>مرات التكرار</Text>
-              <View style={styles.repControls}>
-                <TouchableOpacity 
-                  onPress={() => setReps(r => Math.max(0, r - 1))}
-                  style={styles.repBtn}
-                >
-                  <Ionicons name="remove" size={24} color={Colors.textPrimary} />
+                  <Text style={styles.modeLabel}>من داخل التطبيق</Text>
+                  <Text style={styles.modeSubLabel}>عرض الآيات بخط المصحف</Text>
                 </TouchableOpacity>
-                <Text style={styles.repCount}>{reps}</Text>
-                <TouchableOpacity 
-                  onPress={() => setReps(r => r + 1)}
-                  style={styles.repBtn}
+
+                <TouchableOpacity
+                  style={styles.modeCard}
+                  onPress={() => setReadingMode("physical")}
                 >
-                  <Ionicons name="add" size={24} color={Colors.textPrimary} />
+                  <View
+                    style={[
+                      styles.modeIconCircle,
+                      { backgroundColor: Colors.goldMuted },
+                    ]}
+                  >
+                    <Ionicons
+                      name="book-outline"
+                      size={32}
+                      color={Colors.gold}
+                    />
+                  </View>
+                  <Text style={styles.modeLabel}>من مصحف ورقي</Text>
+                  <Text style={styles.modeSubLabel}>استخدام التايمر فقط</Text>
                 </TouchableOpacity>
               </View>
-            </Animated.View>
+              <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
+                <Text style={styles.cancelBtnText}>إلغاء</Text>
+              </TouchableOpacity>
+            </View>
           )}
 
+          {readingMode && (
+            <>
+              {/* Header */}
+              <View style={styles.header}>
+                <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
+                  <Ionicons name="close" size={24} color={Colors.textPrimary} />
+                </TouchableOpacity>
+
+                <View style={styles.headerTitleBox}>
+                  <Text style={styles.headerTitle}>{moduleName}</Text>
+                  <View style={styles.timerChip}>
+                    <Ionicons
+                      name="time-outline"
+                      size={14}
+                      color={Colors.textTertiary}
+                    />
+                    <Text style={styles.timerText}>
+                      {formatTimer(secondsElapsed)}
+                    </Text>
+                  </View>
+                </View>
+
+                <TouchableOpacity
+                  style={[
+                    styles.finishBtn,
+                    { backgroundColor: Colors.success },
+                  ]}
+                  onPress={() => {
+                    if (onComplete) onComplete();
+                    onClose();
+                  }}
+                >
+                  <Text style={styles.finishBtnText}>إنهاء</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Module Description & Info */}
+              <View style={styles.descriptionBar}>
+                <View style={styles.descriptionContent}>
+                  <Ionicons
+                    name="information-circle-outline"
+                    size={18}
+                    color={Colors.primary}
+                  />
+                  <Text style={styles.descriptionText} numberOfLines={2}>
+                    {moduleDescription || "اتبع خطوات الورد المحددة بعناية"}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Tools Bar (Only in App mode) */}
+              {readingMode === "app" && (
+                <View style={styles.toolsBar}>
+                  {isMemorizationOrReview && (
+                    <TouchableOpacity
+                      style={[
+                        styles.toolBtn,
+                        isMasked && { backgroundColor: Colors.primaryMuted },
+                      ]}
+                      onPress={toggleMask}
+                    >
+                      <Ionicons
+                        name={isMasked ? "eye-off" : "eye"}
+                        size={20}
+                        color={isMasked ? Colors.primary : Colors.textSecondary}
+                      />
+                      <Text
+                        style={[
+                          styles.toolBtnText,
+                          isMasked && { color: Colors.primary },
+                        ]}
+                      >
+                        {isMasked ? "إظهار الكل" : "إخفاء (اختبار)"}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {isPreparation && (
+                    <View style={styles.infoModeChip}>
+                      <Ionicons
+                        name="book-outline"
+                        size={18}
+                        color={Colors.primary}
+                      />
+                      <Text style={styles.infoModeText}>وضع التهيئة</Text>
+                    </View>
+                  )}
+
+                  <View style={{ flex: 1 }} />
+                  <Text style={styles.pagesCount}>
+                    {toArabicNumerals(pages.length)} صفحات
+                  </Text>
+                </View>
+              )}
+
+              {/* Main Content */}
+              <View style={styles.mainContent}>
+                {readingMode === "physical" ? (
+                  <View style={styles.physicalModeContainer}>
+                    <Ionicons
+                      name="book"
+                      size={80}
+                      color={Colors.goldMuted}
+                      style={{ marginBottom: 20 }}
+                    />
+                    <Text style={styles.physicalTitle}>
+                      أنت تقرأ الآن من المصحف الورقي
+                    </Text>
+                    <View style={styles.rangeInfoCard}>
+                      <Text style={styles.rangeInfoLabel}>النطاق المطلوب:</Text>
+                      <Text style={styles.rangeInfoValue}>
+                        من صفحة {toArabicNumerals(pages[0])} إلى{" "}
+                        {toArabicNumerals(pages[pages.length - 1])}
+                      </Text>
+                    </View>
+                    <View style={styles.largeTimerContainer}>
+                      <Text style={styles.largeTimerLabel}>الوقت المنقضي</Text>
+                      <Text style={styles.largeTimerValue}>
+                        {formatTimer(secondsElapsed)}
+                      </Text>
+                    </View>
+                  </View>
+                ) : isLoading ? (
+                  <View style={styles.centerArea}>
+                    <ActivityIndicator size="large" color={Colors.primary} />
+                    <Text style={styles.loaderText}>جاري تجهيز المصحف...</Text>
+                  </View>
+                ) : (
+                  <ScrollView
+                    style={styles.textScroll}
+                    contentContainerStyle={styles.textScrollContent}
+                    showsVerticalScrollIndicator={false}
+                  >
+                    {pagesData.map((pageData) => (
+                      <View
+                        key={`page-${pageData.pageNumber}`}
+                        style={styles.pageContainer}
+                      >
+                        <View style={styles.pageHeader}>
+                          <Text style={styles.pageHeaderText}>
+                            صفحة {toArabicNumerals(pageData.pageNumber)}
+                          </Text>
+                          <View style={styles.pageHeaderLine} />
+                        </View>
+
+                        <View style={styles.quranTextContainer}>
+                          {pageData.verses.map((v) => {
+                            const isHidden =
+                              isMasked && !revealedVerses.has(v.verse_key);
+                            const ayahNum = v.verse_key.split(":")[1];
+
+                            return (
+                              <Text
+                                key={v.verse_key}
+                                onPress={() => toggleVerseReveal(v.verse_key)}
+                                style={[
+                                  styles.quranText,
+                                  isHidden && styles.quranTextHidden,
+                                ]}
+                              >
+                                {isHidden ? " ┄┄┄ " : ` ${v.text_uthmani} `}
+                                <View style={styles.ayahCircle}>
+                                  <Text style={styles.ayahNumberText}>
+                                    {toArabicNumerals(parseInt(ayahNum))}
+                                  </Text>
+                                </View>
+                              </Text>
+                            );
+                          })}
+                        </View>
+                      </View>
+                    ))}
+                    <View style={{ height: 120 }} />
+                  </ScrollView>
+                )}
+              </View>
+
+              {/* Floating Repetition Counter (only for memorization) */}
+              {moduleId === "memorization" && !isLoading && (
+                <Animated.View
+                  entering={FadeInDown}
+                  style={styles.repContainer}
+                >
+                  <Text style={styles.repLabel}>مرات التكرار</Text>
+                  <View style={styles.repControls}>
+                    <TouchableOpacity
+                      onPress={() => setReps((r) => Math.max(0, r - 1))}
+                      style={styles.repBtn}
+                    >
+                      <Ionicons
+                        name="remove"
+                        size={24}
+                        color={Colors.textPrimary}
+                      />
+                    </TouchableOpacity>
+                    <Text style={styles.repCount}>{reps}</Text>
+                    <TouchableOpacity
+                      onPress={() => setReps((r) => r + 1)}
+                      style={styles.repBtn}
+                    >
+                      <Ionicons
+                        name="add"
+                        size={24}
+                        color={Colors.textPrimary}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </Animated.View>
+              )}
+            </>
+          )}
         </SafeAreaView>
       </View>
     </Modal>
@@ -293,6 +428,61 @@ const getStyles = (Colors: any) =>
     },
     safeContainer: {
       flex: 1,
+    },
+    // Mode Selection Styles
+    modeSelectionContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      padding: Spacing.xl,
+    },
+    modeSelectionTitle: {
+      fontFamily: Typography.heading,
+      fontSize: Typography.xl,
+      color: Colors.textPrimary,
+      marginBottom: Spacing["2xl"],
+      textAlign: "center",
+    },
+    modeOptions: {
+      width: "100%",
+      gap: Spacing.lg,
+    },
+    modeCard: {
+      backgroundColor: Colors.surface,
+      borderRadius: BorderRadius.xl,
+      padding: Spacing.xl,
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor: Colors.border,
+      // ...Shadow.md,
+    },
+    modeIconCircle: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: Spacing.md,
+    },
+    modeLabel: {
+      fontFamily: Typography.heading,
+      fontSize: Typography.lg,
+      color: Colors.textPrimary,
+      marginBottom: 4,
+    },
+    modeSubLabel: {
+      fontFamily: Typography.body,
+      fontSize: Typography.sm,
+      color: Colors.textSecondary,
+    },
+    cancelBtn: {
+      marginTop: Spacing["2xl"],
+      padding: Spacing.md,
+    },
+    cancelBtnText: {
+      fontFamily: Typography.body,
+      fontSize: Typography.base,
+      color: Colors.textTertiary,
     },
     header: {
       flexDirection: "row",
@@ -343,12 +533,32 @@ const getStyles = (Colors: any) =>
       fontSize: 13,
       fontWeight: "bold",
     },
+    descriptionBar: {
+      backgroundColor: Colors.surfaceElevated,
+      paddingHorizontal: Spacing.xl,
+      paddingVertical: Spacing.sm,
+      borderBottomWidth: 1,
+      borderBottomColor: Colors.border,
+    },
+    descriptionContent: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    descriptionText: {
+      flex: 1,
+      fontFamily: Typography.body,
+      fontSize: 12,
+      color: Colors.textSecondary,
+      lineHeight: 18,
+      textAlign: "left",
+    },
     toolsBar: {
       flexDirection: "row",
       alignItems: "center",
       paddingHorizontal: Spacing.xl,
       paddingVertical: Spacing.sm,
-      backgroundColor: Colors.surfaceElevated,
+      backgroundColor: Colors.surface,
       borderBottomWidth: 1,
       borderBottomColor: Colors.border,
     },
@@ -356,7 +566,7 @@ const getStyles = (Colors: any) =>
       flexDirection: "row",
       alignItems: "center",
       gap: 6,
-      backgroundColor: Colors.surface,
+      backgroundColor: Colors.surfaceElevated,
       paddingHorizontal: Spacing.md,
       paddingVertical: 6,
       borderRadius: 20,
@@ -398,23 +608,6 @@ const getStyles = (Colors: any) =>
       fontSize: 14,
       color: Colors.textSecondary,
     },
-    errorText: {
-      fontFamily: Typography.body,
-      fontSize: 14,
-      color: Colors.textSecondary,
-      textAlign: "center",
-    },
-    retryBtn: {
-      paddingHorizontal: Spacing.xl,
-      paddingVertical: Spacing.sm,
-      backgroundColor: Colors.primary,
-      borderRadius: 12,
-      marginTop: Spacing.md,
-    },
-    retryBtnText: {
-      color: "#FFF",
-      fontWeight: "bold",
-    },
     textScroll: {
       flex: 1,
     },
@@ -442,35 +635,98 @@ const getStyles = (Colors: any) =>
       backgroundColor: Colors.border,
     },
     quranTextContainer: {
-      textAlign: "center",
-      lineHeight: 60, // adequate leading for Uthmani scripts
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "center",
       direction: "rtl",
     },
     quranText: {
       fontFamily: Typography.quran,
-      fontSize: 22,
+      fontSize: 24,
       color: Colors.textPrimary,
+      lineHeight: 52,
+      textAlign: "center",
     },
     quranTextHidden: {
-      color: Colors.borderLight, // Looks like a placeholder
+      color: Colors.borderLight,
       backgroundColor: Colors.surfaceElevated,
-      borderRadius: 4,
     },
-    ayahNumberBadge: {
+    ayahCircle: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: Colors.gold,
+      justifyContent: "center",
+      alignItems: "center",
+      marginHorizontal: 4,
+      transform: [{ translateY: 4 }],
+    },
+    ayahNumberText: {
       fontFamily: Typography.body,
-      fontSize: 14,
+      fontSize: 10,
+      fontWeight: "bold",
+      color: Colors.gold,
+    },
+    physicalModeContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      padding: Spacing.xl,
+    },
+    physicalTitle: {
+      fontFamily: Typography.heading,
+      fontSize: Typography.lg,
+      color: Colors.textPrimary,
+      textAlign: "center",
+      marginBottom: Spacing.xl,
+    },
+    rangeInfoCard: {
+      backgroundColor: Colors.surface,
+      borderRadius: BorderRadius.lg,
+      padding: Spacing.lg,
+      width: "100%",
+      alignItems: "center",
+      marginBottom: Spacing["3xl"],
+      borderWidth: 1,
+      borderColor: Colors.border,
+    },
+    rangeInfoLabel: {
+      fontFamily: Typography.body,
+      fontSize: Typography.sm,
       color: Colors.textTertiary,
+      marginBottom: 4,
+    },
+    rangeInfoValue: {
+      fontFamily: Typography.heading,
+      fontSize: Typography.md,
+      color: Colors.primary,
+    },
+    largeTimerContainer: {
+      alignItems: "center",
+    },
+    largeTimerLabel: {
+      fontFamily: Typography.body,
+      fontSize: Typography.base,
+      color: Colors.textSecondary,
+      marginBottom: Spacing.sm,
+    },
+    largeTimerValue: {
+      fontFamily: Typography.heading,
+      fontSize: 64,
+      color: Colors.textPrimary,
+      fontWeight: "bold",
     },
     repContainer: {
-      position: 'absolute',
+      position: "absolute",
       bottom: Spacing.xl,
-      alignSelf: 'center',
+      alignSelf: "center",
       backgroundColor: Colors.surfaceElevated,
       borderRadius: 30,
       paddingHorizontal: Spacing.lg,
       paddingVertical: Spacing.sm,
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       gap: Spacing.md,
       borderWidth: 1,
       borderColor: Colors.border,
@@ -478,13 +734,13 @@ const getStyles = (Colors: any) =>
     },
     repLabel: {
       fontSize: 12,
-      fontWeight: 'bold',
+      fontWeight: "bold",
       color: Colors.textSecondary,
       marginRight: Spacing.sm,
     },
     repControls: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       gap: Spacing.md,
     },
     repBtn: {
@@ -492,16 +748,16 @@ const getStyles = (Colors: any) =>
       height: 36,
       borderRadius: 18,
       backgroundColor: Colors.surface,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       borderWidth: 1,
       borderColor: Colors.borderLight,
     },
     repCount: {
       fontSize: 20,
-      fontWeight: '900',
+      fontWeight: "900",
       color: Colors.primary,
       minWidth: 24,
-      textAlign: 'center',
-    }
+      textAlign: "center",
+    },
   });

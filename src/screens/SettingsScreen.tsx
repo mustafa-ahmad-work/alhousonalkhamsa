@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { NotificationService } from "../store/NotificationService";
 import { BorderRadius, Shadow, Spacing, Typography, useTheme } from "../theme";
+import { useThemeStore } from "../store/ThemeStore";
 
 // ── Extracted Components ─────────────────────────────────────────────────────
 import { EditModal } from "../components/settings/EditModal";
@@ -111,11 +112,13 @@ export default function SettingsScreen() {
     isMasterEnabled,
   } = useSettingsLogic();
 
+  const themeMode = useThemeStore((s) => s.themeMode);
+
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <View style={styles.container}>
       <StatusBar
-        barStyle={state.themeMode === "dark" ? "light-content" : "dark-content"}
+        barStyle={themeMode === "dark" ? "light-content" : "dark-content"}
         translucent
         backgroundColor="transparent"
       />
@@ -185,13 +188,7 @@ export default function SettingsScreen() {
           </Text>
           <MushafEditionPicker
             currentEditionId={currentEditionId}
-            onSelect={(id) => {
-              dispatch({
-                type: "UPDATE_SETTINGS",
-                payload: { mushafEdition: id } as any,
-              });
-              applyPlanChanges(id);
-            }}
+            onSelect={() => {}}
           />
         </View>
 
@@ -371,7 +368,7 @@ export default function SettingsScreen() {
             <View>
               <Text style={styles.label}>مظهر التطبيق</Text>
               <Text style={styles.value}>
-                {state.themeMode === "light" ? "الوضع الفاتح" : "الوضع الداكن"}
+                {themeMode === "light" ? "الوضع الفاتح" : "الوضع الداكن"}
               </Text>
             </View>
             <TouchableOpacity
@@ -379,7 +376,7 @@ export default function SettingsScreen() {
               onPress={handleToggleTheme}
             >
               <Ionicons
-                name={state.themeMode === "light" ? "sunny" : "moon"}
+                name={themeMode === "light" ? "sunny" : "moon"}
                 size={18}
                 color={Colors.primary}
               />

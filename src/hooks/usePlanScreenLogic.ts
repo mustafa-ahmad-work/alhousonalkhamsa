@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { getMushafEdition } from '../data/mushafEditions';
+import { SURAHS } from '../data/quranMeta';
 import { useAppStore } from '../store/AppStore';
 import { useSelectionStore } from '../store/selectionStore';
 import { DEV_CONFIG } from '../developerConfig';
@@ -39,6 +40,34 @@ export function usePlanScreenLogic() {
     );
     if (activeDows.size === 0) activeDows.add(new Date().getDay());
 
+    // Optimization: Pre-calculate page-to-surah mapping for the entire edition
+    const surahEntries = Object.entries(edition.surahPages);
+    const pageToSurahMap = new Map<number, { id: number; name: string }>();
+    
+    // This is only ~600 iterations, done once per roadmap calc
+    surahEntries.forEach(([idStr, [start, end]]) => {
+      const id = Number(idStr);
+      const name = SURAHS.find(s => s.id === id)?.nameAr ?? `سورة ${id}`;
+      for (let p = start; p <= end; p++) {
+        pageToSurahMap.set(p, { id, name });
+      }
+    });
+
+    const getFastSegments = (pages: number[]) => {
+      const segments: Record<number, { surahId: number; nameAr: string; pages: number[] }> = {};
+      pages.forEach(p => {
+        const meta = pageToSurahMap.get(p);
+        if (meta) {
+          if (!segments[meta.id]) {
+            segments[meta.id] = { surahId: meta.id, nameAr: meta.name, pages: [p] };
+          } else {
+            segments[meta.id].pages.push(p);
+          }
+        }
+      });
+      return Object.values(segments).sort((a, b) => a.surahId - b.surahId);
+    };
+
     const planDates: string[] = [];
     const _rawDate = plan.startDate ?? new Date().toISOString().split('T')[0];
     const [y, m, d] = _rawDate.split('-').map(Number);
@@ -66,7 +95,7 @@ export function usePlanScreenLogic() {
       if (dayPages.length === 0) continue;
 
       const ranges = buildRanges(dayPages);
-      const surahSegments = getSurahSegments(dayPages, edition);
+      const surahSegments = getFastSegments(dayPages);
       const surahLabel = surahSegments
         .map((s) => s.nameAr)
         .slice(0, 2)
@@ -90,7 +119,7 @@ export function usePlanScreenLogic() {
         (i + 2) * plan.pagesPerDay,
       );
       const nextSegments =
-        nextDayPages.length > 0 ? getSurahSegments(nextDayPages, edition) : [];
+        nextDayPages.length > 0 ? getFastSegments(nextDayPages) : [];
       const nextLabel =
         nextSegments.length > 0
           ? nextSegments
@@ -107,7 +136,7 @@ export function usePlanScreenLogic() {
       );
       const weeklyLabel =
         weeklyPages.length > 0
-          ? getSurahSegments(weeklyPages, edition)
+          ? getFastSegments(weeklyPages)
               .map((s) => s.nameAr)
               .slice(0, 2)
               .join(' + ') +
@@ -168,7 +197,7 @@ export function usePlanScreenLogic() {
       }
 
       const nearSegments =
-        nearPages.length > 0 ? getSurahSegments(nearPages, edition) : [];
+        nearPages.length > 0 ? getFastSegments(nearPages) : [];
       const nearLabel =
         nearSegments.length > 0
           ? nearSegments
@@ -181,7 +210,7 @@ export function usePlanScreenLogic() {
           : 'لا يوجد (بداية الخطة)';
 
       const distantSegments =
-        farPages.length > 0 ? getSurahSegments(farPages, edition) : [];
+        farPages.length > 0 ? getFastSegments(farPages) : [];
       const distantLabel =
         distantSegments.length > 0
           ? distantSegments

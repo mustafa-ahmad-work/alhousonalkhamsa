@@ -6,9 +6,9 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   TouchableOpacity,
 } from 'react-native';
+import { HusoonAlert } from '../../components/shared/CustomAlert';
 import { useTheme, Typography, Spacing, BorderRadius } from '../../theme';
 import { RangeSelection, ModuleId } from '../../types';
 import { SurahMeta, TOTAL_PAGES } from '../../data/quranMeta';
@@ -61,14 +61,14 @@ export function SelectionScreen({
   const handleAddRange = () => {
     if (selectionType === 'surah') {
       if (!selectedSurah) {
-        Alert.alert('خطأ', 'الرجاء اختيار السورة أولاً');
+        HusoonAlert.alert('خطأ', 'الرجاء اختيار السورة أولاً', [], 'error');
         return;
       }
       const sAyah = parseInt(startAyah) || 1;
       const eAyah = parseInt(endAyah) || selectedSurah.ayahCount;
 
       if (eAyah < sAyah || sAyah < 1 || eAyah > selectedSurah.ayahCount) {
-        Alert.alert('خطأ', 'نطاق الآيات غير صحيح');
+        HusoonAlert.alert('خطأ', 'نطاق الآيات غير صحيح', [], 'error');
         return;
       }
       const newRange = createSurahRange(selectedSurah.id, sAyah, eAyah);
@@ -83,7 +83,7 @@ export function SelectionScreen({
       const ePage = parseInt(endPage);
 
       if (!sPage || !ePage || ePage < sPage || sPage < 1 || ePage > TOTAL_PAGES) {
-        Alert.alert('خطأ', 'نطاق الصفحات غير صحيح');
+        HusoonAlert.alert('خطأ', 'نطاق الصفحات غير صحيح', [], 'error');
         return;
       }
 
@@ -103,7 +103,7 @@ export function SelectionScreen({
   // ─── Save Task Selection ──────────────────────────────────
   const handleSave = () => {
     if (draftRanges.length === 0) {
-      Alert.alert('تنبيه', 'أضف نطاقاً واحداً على الأقل للمتابعة');
+      HusoonAlert.alert('تنبيه', 'أضف نطاقاً واحداً على الأقل للمتابعة', [], 'warning');
       return;
     }
     addTaskSelection(moduleId, draftRanges);

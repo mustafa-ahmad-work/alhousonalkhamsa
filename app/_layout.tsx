@@ -20,6 +20,7 @@ import {
 } from "react-native";
 import "../global.css";
 import VersionOverlay from "../src/components/shared/VersionOverlay";
+import { CustomAlertProvider } from "../src/components/shared/CustomAlert";
 import { AppProvider } from "../src/store/AppStore";
 import { UpdateInfo, UpdateService } from "../src/store/UpdateService";
 import { Spacing, Typography, useTheme } from "../src/theme";
@@ -150,6 +151,7 @@ function MainLayout({
           contentStyle: { backgroundColor: "transparent" },
         }}
       />
+      <CustomAlertProvider />
       {showCustomSplash && <CustomSplashScreen onFinish={onFinish} />}
 
       {updateInfo && blockType && (

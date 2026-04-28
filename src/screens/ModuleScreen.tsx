@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
-  Alert,
   Dimensions,
   Modal,
   ScrollView,
@@ -12,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { HusoonAlert } from "../components/shared/CustomAlert";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { useModuleLogic } from "../hooks/useModuleLogic";
@@ -58,7 +58,7 @@ export default function ModuleScreen() {
         selectionStore.createPageRange(r.start, r.end),
       ),
     );
-    Alert.alert("تم الإضافة", "تمت إضافة ورد الخطة إلى الأوراد الحالية");
+    HusoonAlert.alert("تم الإضافة", "تمت إضافة ورد الخطة إلى الأوراد الحالية", [], "success");
   };
 
   const moduleInfo = MODULES.find((m) => m.id === id);
@@ -99,18 +99,18 @@ export default function ModuleScreen() {
       type: "TOGGLE_FORTRESS",
       payload: { fortressId: moduleInfo.fortressId },
     });
-    Alert.alert("إنجاز عظيم!", `أتممت ورد ${moduleInfo.nameAr}`);
+    HusoonAlert.alert("إنجاز عظيم!", `أتممت ورد ${moduleInfo.nameAr}`, [], "success");
   };
 
   const handleRemove = (taskId: string) => {
-    Alert.alert("تأكيد", "هل تريد حذف هذا النطاق؟", [
+    HusoonAlert.alert("تأكيد", "هل تريد حذف هذا النطاق؟", [
       { text: "إلغاء", style: "cancel" },
       {
         text: "حذف",
         style: "destructive",
         onPress: () => selectionStore.removeTaskSelection(taskId),
       },
-    ]);
+    ], "delete");
   };
 
   const groupedCompleted = useMemo(() => {
@@ -138,7 +138,7 @@ export default function ModuleScreen() {
 
   const handleClearAll = () => {
     if (!moduleInfo) return;
-    Alert.alert(
+    HusoonAlert.alert(
       "مسح السجل",
       "هل أنت متأكد من حذف سجل الإنجاز بالكامل لهذا القسم؟ لا يمكن التراجع عن هذه الخطوة.",
       [
@@ -150,6 +150,7 @@ export default function ModuleScreen() {
             selectionStore.clearModuleSelections(moduleInfo.id as ModuleId),
         },
       ],
+      "delete"
     );
   };
 
@@ -447,6 +448,7 @@ export default function ModuleScreen() {
         pages={getPagesFromTask(selectedTask)}
         moduleId={moduleInfo.id}
         moduleName={moduleInfo.nameAr}
+        moduleDescription={moduleInfo.description}
         onClose={() => setQuranReaderVisible(false)}
         onComplete={() => {
           if (selectedTask) handleComplete(selectedTask);
