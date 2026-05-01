@@ -52,10 +52,10 @@ export const UpdateService = {
         } catch (e) {}
       }
 
-      const freshUrl = `https://raw.githubusercontent.com/mustafa-ahmad-work/mafateeh-tathbeet-alquran/main/version.json?cb=${Date.now()}`;
+      const freshUrl = `https://raw.githubusercontent.com/mustafa-ahmad-work/mafateeh-tathbeet-alquran/main/version.json?v=${Date.now()}&r=${Math.random()}`;
       
       try {
-        // Check if we should skip fetch (e.g. checked in last 12 hours)
+        // Check if we should skip fetch (e.g. checked in last 24 hours)
         const lastCheck = await AsyncStorage.getItem(LAST_CHECK_KEY);
         const now = Date.now();
         const twentyFourHours = 24 * 60 * 60 * 1000;
@@ -70,8 +70,10 @@ export const UpdateService = {
             }
           }
         }
-
+        
         const response = await fetch(freshUrl, {
+          method: 'GET',
+          cache: 'no-store',
           headers: { 
             "Cache-Control": "no-cache, no-store, must-revalidate",
             "Pragma": "no-cache",
