@@ -74,15 +74,50 @@ const SCHOLAR_SAYINGS = [
   },
 ];
 
+const INTENTION_QUOTES = [
+  {
+    text: "اللهم اجعل عملي كله صالحاً، واجعله لوجهك خالصاً، ولا تجعل لأحد فيه شيئاً.",
+    source: "دعاء مأثور",
+  },
+  {
+    text: "إنما الأعمال بالنيات، وإنما لكل امرئ ما نوى.",
+    source: "حديث شريف (عن عمر بن الخطاب)",
+  },
+  {
+    text: "اللهم إني أعوذ بك أن أشرك بك وأنا أعلم، وأستغفرك لما لا أعلم.",
+    source: "دعاء النبي ﷺ",
+  },
+  {
+    text: "ترك العمل من أجل الناس رياء، والعمل من أجل الناس شرك، والإخلاص أن يعافيك الله منهما.",
+    source: "الفضيل بن عياض",
+  },
+  {
+    text: "يا بني: أخلص النية في العمل؛ فإن الناقد بصير بصير.",
+    source: "لقمان الحكيم لابنه",
+  },
+  {
+    text: "من أراد أن ينظر إلى منزلته عند الله فلينظر إلى منزلة القرآن في قلبه.",
+    source: "أقوال السلف",
+  },
+  {
+    text: "اللهم ارزقني الإخلاص في القول والعمل، وفي السر والعلن.",
+    source: "دعاء الصالحين",
+  },
+];
+
 export default function ReviewScreen() {
   const Colors = useTheme();
   const styles = React.useMemo(() => getStyles(Colors), [Colors]);
   const [tappedIntention, setTappedIntention] = useState(false);
+  const [currentQuote, setCurrentQuote] = useState(INTENTION_QUOTES[0]);
 
   const handleRenewIntention = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    const randomIdx = Math.floor(Math.random() * INTENTION_QUOTES.length);
+    setCurrentQuote(INTENTION_QUOTES[randomIdx]);
     setTappedIntention(true);
-    setTimeout(() => setTappedIntention(false), 4000);
+    // Increased timeout so it doesn't disappear quickly
+    setTimeout(() => setTappedIntention(false), 15000);
   };
 
   return (
@@ -184,6 +219,7 @@ export default function ReviewScreen() {
           tapped={tappedIntention}
           onPress={handleRenewIntention}
           Colors={Colors}
+          quote={currentQuote}
         />
 
         <View style={{ height: 100 }} />
