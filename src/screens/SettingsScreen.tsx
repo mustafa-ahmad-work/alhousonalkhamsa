@@ -614,7 +614,7 @@ export default function SettingsScreen() {
           <View style={styles.infoRow}>
             <Text style={styles.label}>الإصدار</Text>
             <Text style={styles.value}>
-              {Constants.expoConfig?.version || "1.0.0"} (BETA)
+              {Constants.expoConfig?.version || "1.0.0"}
             </Text>
           </View>
         </View>
