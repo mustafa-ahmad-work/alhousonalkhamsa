@@ -149,11 +149,6 @@ export default function SettingsScreen() {
         <View style={styles.card}>
           {[
             { key: "name", label: "الاسم", value: state.user?.name ?? "—" },
-            {
-              key: "dailyPages",
-              label: "طاقتك اليومية (صفحات)",
-              value: `${state.user?.dailyPages} صفحة/صفحات`,
-            },
           ].map(({ key, label, value }, idx, arr) => (
             <React.Fragment key={key}>
               <TouchableOpacity
@@ -679,7 +674,6 @@ const getStyles = (Colors: any) =>
     headerTitle: {
       fontFamily: Typography.heading,
       fontSize: Typography.lg,
-      fontWeight: Typography.semibold,
       color: Colors.textPrimary,
     },
     backBtn: {
@@ -696,7 +690,6 @@ const getStyles = (Colors: any) =>
     sectionTitle: {
       fontFamily: Typography.heading,
       fontSize: Typography.md,
-      fontWeight: Typography.semibold,
       color: Colors.textPrimary,
       marginBottom: Spacing.sm,
       textAlign: "left",
@@ -725,7 +718,6 @@ const getStyles = (Colors: any) =>
       fontFamily: Typography.body,
       fontSize: Typography.sm,
       color: Colors.textPrimary,
-      fontWeight: Typography.medium,
     },
     smallValue: {
       fontFamily: Typography.body,
@@ -766,7 +758,6 @@ const getStyles = (Colors: any) =>
       color: Colors.red,
       fontFamily: Typography.heading,
       fontSize: Typography.base,
-      fontWeight: Typography.semibold,
     },
     applyBtn: {
       backgroundColor: Colors.primary,

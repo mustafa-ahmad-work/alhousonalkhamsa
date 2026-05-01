@@ -253,7 +253,6 @@ const getStyles = (Colors: any) =>
     headerTitle: {
       fontFamily: Typography.heading,
       fontSize: Typography.lg,
-      fontWeight: Typography.semibold,
       color: Colors.textPrimary,
       textAlign: "center",
     },
@@ -288,12 +287,10 @@ const getStyles = (Colors: any) =>
     sectionTitle: {
       fontFamily: Typography.heading,
       fontSize: 16,
-      fontWeight: "bold",
       textAlign: "center",
       paddingHorizontal: Spacing.md,
     },
     bold: {
-      fontWeight: "bold",
       color: Colors.textPrimary,
     },
     subParagraph: {

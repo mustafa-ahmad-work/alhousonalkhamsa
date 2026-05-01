@@ -158,7 +158,6 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: Typography.heading, fontSize: Typography.base,
-    fontWeight: Typography.semibold,
     color: '#FFFFFF',
     textAlign: 'center',
     letterSpacing: 0.3,
@@ -181,7 +180,6 @@ const styles = StyleSheet.create({
   },
   secondaryLabel: {
     fontFamily: Typography.body, fontSize: Typography.base,
-    fontWeight: Typography.medium,
     textAlign: 'center',
   },
 
@@ -196,7 +194,6 @@ const styles = StyleSheet.create({
   },
   ghostLabel: {
     fontFamily: Typography.body, fontSize: Typography.base,
-    fontWeight: Typography.medium,
     textAlign: 'center',
   },
 });

@@ -498,7 +498,6 @@ const getStyles = (Colors: any) =>
     headerTitle: {
       fontFamily: Typography.heading,
       fontSize: 16,
-      fontWeight: "bold",
       color: Colors.textPrimary,
     },
     timerChip: {
@@ -529,7 +528,6 @@ const getStyles = (Colors: any) =>
     finishBtnText: {
       color: "#FFF",
       fontSize: 13,
-      fontWeight: "bold",
     },
     descriptionBar: {
       backgroundColor: Colors.surfaceElevated,
@@ -573,7 +571,6 @@ const getStyles = (Colors: any) =>
     },
     toolBtnText: {
       fontSize: 12,
-      fontWeight: "bold",
       color: Colors.textSecondary,
     },
     infoModeChip: {
@@ -583,7 +580,6 @@ const getStyles = (Colors: any) =>
     },
     infoModeText: {
       fontSize: 12,
-      fontWeight: "bold",
       color: Colors.primary,
     },
     pagesCount: {
@@ -623,7 +619,6 @@ const getStyles = (Colors: any) =>
     },
     pageHeaderText: {
       fontSize: 14,
-      fontWeight: "bold",
       color: Colors.textTertiary,
       fontFamily: Typography.body,
     },
@@ -652,7 +647,6 @@ const getStyles = (Colors: any) =>
     ayahNumberText: {
       fontFamily: Typography.body,
       fontSize: 20,
-      fontWeight: "bold",
       color: Colors.primary,
     },
     physicalModeContainer: {
@@ -702,7 +696,6 @@ const getStyles = (Colors: any) =>
       fontFamily: Typography.heading,
       fontSize: 64,
       color: Colors.textPrimary,
-      fontWeight: "bold",
     },
     repContainer: {
       position: "absolute",
@@ -721,7 +714,6 @@ const getStyles = (Colors: any) =>
     },
     repLabel: {
       fontSize: 12,
-      fontWeight: "bold",
       color: Colors.textSecondary,
       marginRight: Spacing.sm,
     },
@@ -742,7 +734,6 @@ const getStyles = (Colors: any) =>
     },
     repCount: {
       fontSize: 20,
-      fontWeight: "900",
       color: Colors.primary,
       minWidth: 24,
       textAlign: "center",

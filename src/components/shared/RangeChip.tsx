@@ -57,7 +57,6 @@ const getStyles = (Colors: any) =>
     },
     chipText: {
       fontFamily: Typography.body, fontSize: Typography.sm,
-      fontWeight: Typography.medium,
       maxWidth: 180,
     },
     removeBtn: {

@@ -317,7 +317,6 @@ const getStyles = (Colors: any) =>
     },
     sectionTitle: {
       fontSize: 18,
-      fontWeight: "bold",
       color: Colors.textPrimary,
     },
     pillBadge: {
@@ -326,7 +325,7 @@ const getStyles = (Colors: any) =>
       paddingVertical: 4,
       borderRadius: 12,
     },
-    pillText: { fontSize: 11, fontWeight: "bold", color: Colors.primary },
+    pillText: { fontSize: 11, color: Colors.primary },
     modulesGrid: {
       flexDirection: "row",
       flexWrap: "wrap",
@@ -353,7 +352,6 @@ const getStyles = (Colors: any) =>
     completionTitle: {
       color: Colors.success,
       fontSize: 18,
-      fontWeight: "900",
       marginBottom: 6,
     },
     completionDesc: {

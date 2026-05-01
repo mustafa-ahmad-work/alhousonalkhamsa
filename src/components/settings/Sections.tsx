@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   sectionHint: { padding: Spacing.md, fontSize: 13, lineHeight: 20, textAlign: "left" },
   advancedRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: Spacing.lg },
   advancedLabelCol: { flex: 1, alignItems: "flex-start" },
-  rowLabel: { fontSize: 14, fontWeight: "500", marginBottom: 2 },
-  rowVal: { fontSize: 12, fontWeight: "bold" },
+  rowLabel: { fontSize: 14, marginBottom: 2 },
+  rowVal: { fontSize: 12},
   divider: { height: 1, marginHorizontal: Spacing.lg },
 });

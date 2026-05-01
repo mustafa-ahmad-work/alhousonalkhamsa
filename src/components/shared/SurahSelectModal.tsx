@@ -95,7 +95,6 @@ const getStyles = (Colors: any) =>
     title: {
       fontFamily: Typography.heading,
       fontSize: Typography.lg,
-      fontWeight: Typography.bold,
       color: Colors.textPrimary,
       marginBottom: Spacing.lg,
       textAlign: "center",
@@ -112,7 +111,6 @@ const getStyles = (Colors: any) =>
       fontFamily: Typography.body,
       fontSize: Typography.base,
       color: Colors.textPrimary,
-      fontWeight: Typography.medium,
       textAlign: "left",
       paddingRight: Spacing.md,
     },
@@ -135,6 +133,5 @@ const getStyles = (Colors: any) =>
       color: "#FFF",
       fontFamily: Typography.body,
       fontSize: Typography.sm,
-      fontWeight: Typography.medium,
     },
   });

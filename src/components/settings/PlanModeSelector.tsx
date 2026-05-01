@@ -73,7 +73,7 @@ export function PlanModeSelector({
           <Text
             style={[
               styles.modeBtnText,
-              planMode === "daily" && { color: "#FFF", fontWeight: "bold" },
+              planMode === "daily" && { color: "#FFF"},
             ]}
           >
             خطة يومية
@@ -99,7 +99,7 @@ export function PlanModeSelector({
           <Text
             style={[
               styles.modeBtnText,
-              planMode === "weekly" && { color: "#FFF", fontWeight: "bold" },
+              planMode === "weekly" && { color: "#FFF"},
             ]}
           >
             خطة أسبوعية
@@ -114,40 +114,42 @@ export function PlanModeSelector({
           : "تحدد عدد الصفحات أسبوعياً وتختار أيام الحفظ وأيام الراحة."}
       </Text>
 
-      {/* ─── Weekly Settings ─── */}
-      {planMode === "weekly" && (
-        <View style={styles.weeklySection}>
-          {/* Pages Per Day */}
-          <Text style={styles.sectionLabel}>
-            عدد الصفحات اليومية (في أيام الحفظ)
-          </Text>
-          <View style={styles.stepperRow}>
-            <TouchableOpacity
-              style={styles.stepperBtn}
-              onPress={() => onDailyPagesChange(Math.max(1, dailyPages - 1))}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="remove" size={18} color={Colors.primary} />
-            </TouchableOpacity>
+      {/* ─── Pages Per Day (Always Visible) ─── */}
+      <View style={styles.pagesSection}>
+        <Text style={styles.sectionLabel}>
+          {planMode === "daily" ? "عدد الصفحات اليومية" : "عدد الصفحات في أيام الحفظ"}
+        </Text>
+        <View style={styles.stepperRow}>
+          <TouchableOpacity
+            style={styles.stepperBtn}
+            onPress={() => onDailyPagesChange(Math.max(1, dailyPages - 1))}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="remove" size={18} color={Colors.primary} />
+          </TouchableOpacity>
 
-            <View style={styles.stepperValue}>
-              <Text style={[styles.stepperNum, { color: Colors.primary }]}>
-                {dailyPages}
-              </Text>
-              <Text style={styles.stepperUnit}>صفحة/يوم</Text>
-            </View>
-
-            <TouchableOpacity
-              style={styles.stepperBtn}
-              onPress={() => onDailyPagesChange(Math.min(20, dailyPages + 1))}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="add" size={18} color={Colors.primary} />
-            </TouchableOpacity>
+          <View style={styles.stepperValue}>
+            <Text style={[styles.stepperNum, { color: Colors.primary }]}>
+              {dailyPages}
+            </Text>
+            <Text style={styles.stepperUnit}>صفحة/يوم</Text>
           </View>
 
+          <TouchableOpacity
+            style={styles.stepperBtn}
+            onPress={() => onDailyPagesChange(Math.min(20, dailyPages + 1))}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="add" size={18} color={Colors.primary} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* ─── Weekly Settings (Days of Week) ─── */}
+      {planMode === "weekly" && (
+        <View style={styles.weeklySection}>
           {/* Days of Week Selector */}
-          <Text style={[styles.sectionLabel, { marginTop: Spacing.md }]}>
+          <Text style={[styles.sectionLabel, { marginTop: Spacing.sm }]}>
             أيام الحفظ الأسبوعية
           </Text>
           <Text style={styles.daysSub}>
@@ -170,12 +172,9 @@ export function PlanModeSelector({
                   activeOpacity={0.75}
                 >
                   <Text
-                    style={[
-                      styles.dayBtnText,
-                      isActive && { color: "#FFF", fontWeight: "bold" },
-                    ]}
+                    style={[styles.dayBtnText, isActive && { color: "#FFF" }]}
                   >
-                    {day.short}
+                    {day.full}
                   </Text>
                 </TouchableOpacity>
               );
@@ -259,6 +258,10 @@ const getStyles = (Colors: any) =>
       lineHeight: 17,
       marginBottom: Spacing.md,
     },
+    pagesSection: {
+      marginTop: Spacing.sm,
+      marginBottom: Spacing.md,
+    },
     weeklySection: {
       marginTop: Spacing.sm,
     },
@@ -312,8 +315,7 @@ const getStyles = (Colors: any) =>
       marginBottom: Spacing.md,
     },
     dayBtn: {
-      minWidth: 42,
-      paddingHorizontal: 10,
+      paddingHorizontal: 12,
       paddingVertical: 10,
       borderRadius: 12,
       borderWidth: 1.5,

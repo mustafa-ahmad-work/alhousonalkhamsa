@@ -107,7 +107,6 @@ const getStyles = (Colors: any) =>
     title: {
       fontFamily: Typography.heading,
       fontSize: Typography.lg,
-      fontWeight: Typography.bold,
       color: Colors.textPrimary,
       marginBottom: Spacing.lg,
       textAlign: "center",
@@ -144,12 +143,10 @@ const getStyles = (Colors: any) =>
       color: Colors.textSecondary,
       fontFamily: Typography.body,
       fontSize: Typography.sm,
-      fontWeight: Typography.medium,
     },
     saveText: {
       color: "#FFF",
       fontFamily: Typography.body,
       fontSize: Typography.sm,
-      fontWeight: Typography.medium,
     },
   });

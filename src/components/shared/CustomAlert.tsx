@@ -222,7 +222,6 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: Typography.heading,
     fontSize: 20,
-    fontWeight: "bold",
     textAlign: "center",
     marginBottom: Spacing.sm,
   },
@@ -251,6 +250,5 @@ const styles = StyleSheet.create({
   buttonText: {
     fontFamily: Typography.body,
     fontSize: 16,
-    fontWeight: "bold",
   },
 });

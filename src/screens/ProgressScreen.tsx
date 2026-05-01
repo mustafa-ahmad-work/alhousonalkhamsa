@@ -12,10 +12,12 @@ import { CircularProgress } from "../components/progress/CircularProgress";
 import { JuzRoadmap } from "../components/progress/JuzRoadmap";
 import { JUZ_META } from "../data/quranMeta";
 import { useAppStore } from "../store/AppStore";
-import { Spacing, useTheme } from "../theme";
-import { MemorizationStrength } from "../types";
-import { toArabicNumerals } from "../utils/helpers";
+import { Spacing, useTheme, Typography } from "../theme";
+import { MemorizationStrength, TITLE_XP_REQUIREMENTS, UserTitle } from "../types";
+import { toArabicNumerals, TITLE_ICONS, getTitleFromXP } from "../utils/helpers";
 import { useProgressLogic } from "../hooks/useProgressLogic";
+
+
 
 const { width } = Dimensions.get("window");
 const CIRCLE_SIZE = width * 0.45;
@@ -92,7 +94,7 @@ export default function ProgressScreen() {
           <View style={styles.predictionBox}>
             <Text style={styles.predictionText}>
               تاريخ الختم المتوقع:{" "}
-              <Text style={{ fontWeight: "bold", color: Colors.gold }}>
+              <Text style={{ color: Colors.gold }}>
                 {finishDate.toLocaleDateString("ar-EG", {
                   month: "long",
                   year: "numeric",
@@ -105,15 +107,25 @@ export default function ProgressScreen() {
         {/* Level Banner */}
         <View style={styles.levelCard}>
           <View style={styles.levelIconBox}>
-            <Ionicons name="medal" size={24} color={Colors.primary} />
+            <Ionicons
+              name={
+                (TITLE_ICONS[getTitleFromXP(totalXP)] as any) || "medal"
+              }
+              size={24}
+              color={Colors.primary}
+            />
           </View>
           <View style={styles.levelInfo}>
             <Text style={styles.levelTitle}>
               {user?.name || "يا حامل القرآن"}
             </Text>
             <Text style={styles.levelSubtitle}>
-              المستوى {toArabicNumerals(Math.floor(totalXP / 1000) + 1)} —{" "}
-              {user?.title || "مبتدئ"}
+              المستوى{" "}
+              {toArabicNumerals(
+                Object.values(TITLE_XP_REQUIREMENTS).filter((xp) => totalXP >= xp)
+                  .length,
+              )}{" "}
+              — {getTitleFromXP(totalXP)}
             </Text>
             <View style={styles.xpTrack}>
               <View
@@ -127,6 +139,65 @@ export default function ProgressScreen() {
               {toArabicNumerals(xpProgress.current)} /{" "}
               {toArabicNumerals(xpProgress.required)} XP للتالي
             </Text>
+          </View>
+        </View>
+
+        {/* Achievements Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>الألقاب والأوسمة</Text>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>
+                {toArabicNumerals(
+                  Object.values(TITLE_XP_REQUIREMENTS).filter((xp) => totalXP >= xp)
+                    .length,
+                )}{" "}
+                / ٢٠ لقباً
+              </Text>
+            </View>
+          </View>
+          <View style={styles.titlesGrid}>
+            {Object.entries(TITLE_XP_REQUIREMENTS).map(([title, reqXp]) => {
+              const isUnlocked = totalXP >= reqXp;
+              return (
+                <View
+                  key={title}
+                  style={[
+                    styles.titleCard,
+                    !isUnlocked && styles.titleCardLocked,
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.titleIconBox,
+                      {
+                        backgroundColor: isUnlocked
+                          ? `${Colors.primary}15`
+                          : Colors.borderLight,
+                      },
+                    ]}
+                  >
+                    <Ionicons
+                      name={(TITLE_ICONS[title] as any) || "star"}
+                      size={20}
+                      color={isUnlocked ? Colors.primary : Colors.textTertiary}
+                    />
+                  </View>
+                  <Text
+                    style={[
+                      styles.titleName,
+                      { color: isUnlocked ? Colors.textPrimary : Colors.textTertiary },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {title}
+                  </Text>
+                  <Text style={styles.titleXp}>
+                    {toArabicNumerals(reqXp)} XP
+                  </Text>
+                </View>
+              );
+            })}
           </View>
         </View>
 
@@ -309,7 +380,7 @@ const getStyles = (Colors: any) =>
       marginVertical: Spacing.lg,
     },
     metaItem: { alignItems: "center" },
-    metaValue: { fontSize: 24, fontWeight: "bold", color: Colors.textPrimary },
+    metaValue: { fontSize: 24, color: Colors.textPrimary },
     metaLabel: { fontSize: 11, color: Colors.textSecondary, marginTop: 4 },
     metaDivider: { width: 1, height: 30, backgroundColor: Colors.glassBorder },
     predictionBox: {
@@ -345,7 +416,6 @@ const getStyles = (Colors: any) =>
     levelInfo: { flex: 1, alignItems: "flex-start" },
     levelTitle: {
       fontSize: 18,
-      fontWeight: "bold",
       color: Colors.textPrimary,
       textAlign: "left",
       width: "100%",
@@ -388,7 +458,6 @@ const getStyles = (Colors: any) =>
     },
     statMiniValue: {
       fontSize: 16,
-      fontWeight: "bold",
       color: Colors.textPrimary,
       marginVertical: 4,
     },
@@ -398,7 +467,7 @@ const getStyles = (Colors: any) =>
       paddingVertical: 2,
       borderRadius: 8,
     },
-    stabilityBadgeText: { fontSize: 11, fontWeight: "bold" },
+    stabilityBadgeText: { fontSize: 11},
     stabilityCard: {
       backgroundColor: Colors.surface,
       borderRadius: 20,
@@ -428,11 +497,10 @@ const getStyles = (Colors: any) =>
       color: Colors.textSecondary,
       marginBottom: 2,
     },
-    qualityValue: { fontSize: 14, fontWeight: "bold" },
+    qualityValue: { fontSize: 14},
     qualityDivider: { width: 1, height: 20, backgroundColor: Colors.border },
     subsectionTitle: {
       fontSize: 13,
-      fontWeight: "bold",
       color: Colors.textSecondary,
       marginBottom: Spacing.md,
       textAlign: "left",
@@ -449,7 +517,7 @@ const getStyles = (Colors: any) =>
       minWidth: 70,
     },
     juzMiniName: { fontSize: 10, color: Colors.textSecondary, marginBottom: 2 },
-    juzMiniStability: { fontSize: 13, fontWeight: "bold" },
+    juzMiniStability: { fontSize: 13},
     section: { marginBottom: Spacing.lg },
     sectionHeader: {
       flexDirection: "row",
@@ -459,7 +527,6 @@ const getStyles = (Colors: any) =>
     },
     sectionTitle: {
       fontSize: 20,
-      fontWeight: "900",
       color: Colors.textPrimary,
       textAlign: "left",
     },
@@ -469,7 +536,7 @@ const getStyles = (Colors: any) =>
       paddingVertical: 4,
       borderRadius: 12,
     },
-    badgeText: { fontSize: 13, color: Colors.primary, fontWeight: "bold" },
+    badgeText: { fontSize: 13, color: Colors.primary},
     detailedCard: {
       backgroundColor: Colors.surface,
       borderRadius: 24,
@@ -489,8 +556,44 @@ const getStyles = (Colors: any) =>
     },
     detailValue: {
       fontSize: 14,
-      fontWeight: "bold",
       color: Colors.textPrimary,
     },
     detailDivider: { height: 1, backgroundColor: Colors.border, opacity: 0.5 },
+    titlesGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 10,
+      marginTop: Spacing.sm,
+    },
+    titleCard: {
+      width: (width - 2 * Spacing.xl - 30) / 4,
+      backgroundColor: Colors.surface,
+      borderRadius: 16,
+      padding: 8,
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor: Colors.border,
+    },
+    titleCardLocked: {
+      opacity: 0.5,
+      borderColor: "transparent",
+    },
+    titleIconBox: {
+      width: 40,
+      height: 40,
+      borderRadius: 12,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 6,
+    },
+    titleName: {
+      fontFamily: Typography.heading,
+      fontSize: 9,
+      textAlign: "center",
+      marginBottom: 2,
+    },
+    titleXp: {
+      fontSize: 8,
+      color: Colors.textTertiary,
+    },
   });

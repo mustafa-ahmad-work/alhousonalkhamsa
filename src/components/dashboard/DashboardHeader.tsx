@@ -10,7 +10,11 @@ import {
   View,
 } from "react-native";
 import { Spacing, Typography } from "../../theme";
-import { getMotivationalMessage } from "../../utils/helpers";
+import {
+  TITLE_ICONS,
+  getMotivationalMessage,
+  getTitleFromXP,
+} from "../../utils/helpers";
 
 interface DashboardHeaderProps {
   user: any;
@@ -60,12 +64,31 @@ export function DashboardHeader({
 
       <View style={styles.greetingSection}>
         <View>
-          <Text style={styles.greetingText}>{greeting}،</Text>
-          <Text style={styles.userName}>{user?.name ?? "يا حامل القرآن"}</Text>
+          <Text style={styles.greetingText}>{greeting}</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <Text style={styles.userName}>
+              {user?.name ?? "يا حامل القرآن"}
+            </Text>
+          </View>
         </View>
-        <View style={styles.xpBadge}>
-          <Ionicons name="sparkles" size={12} color={Colors.gold} />
-          <Text style={styles.xpBadgeText}>{user?.totalXP ?? 0} نقطة</Text>
+        <View style={{ alignItems: "flex-end", gap: 6 }}>
+          <View style={styles.titleBadge}>
+            <Ionicons
+              name={
+                (TITLE_ICONS[getTitleFromXP(user?.totalXP ?? 0)] as any) ||
+                "star"
+              }
+              size={12}
+              color={Colors.primary}
+            />
+            <Text style={styles.titleBadgeText}>
+              {getTitleFromXP(user?.totalXP ?? 0)}
+            </Text>
+          </View>
+          <View style={styles.xpBadge}>
+            <Ionicons name="sparkles" size={12} color={Colors.gold} />
+            <Text style={styles.xpBadgeText}>{user?.totalXP ?? 0} نقطة</Text>
+          </View>
         </View>
       </View>
 
@@ -134,6 +157,36 @@ const getStyles = (Colors: any) =>
       marginBottom: 4,
     },
     xpBadgeText: { fontSize: 12, color: Colors.gold },
+    titleBadge: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: `${Colors.primary}15`,
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: `${Colors.primary}30`,
+      gap: 4,
+    },
+    titleBadgeText: {
+      fontFamily: Typography.heading,
+      fontSize: 10,
+      color: Colors.primary,
+    },
+    levelBadge: {
+      backgroundColor: `${Colors.blue}15`,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: `${Colors.blue}30`,
+      marginTop: 4,
+    },
+    levelBadgeText: {
+      fontFamily: Typography.body,
+      fontSize: 10,
+      color: Colors.blue,
+    },
     quoteCard: {
       flexDirection: "row",
       alignItems: "flex-start",

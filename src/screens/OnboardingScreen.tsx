@@ -16,11 +16,16 @@ import {
 import { PrimaryButton } from "../components/shared/PrimaryButton";
 import { SURAHS } from "../data/quranMeta";
 import { useAppStore } from "../store/AppStore";
-import { BorderRadius, Spacing, Typography, useTheme , darkColors } from "../theme";
+import {
+  BorderRadius,
+  darkColors,
+  Spacing,
+  Typography,
+  useTheme,
+} from "../theme";
 import { QURAN_GOALS, UserLevel } from "../types";
 import { toArabicNumerals } from "../utils/helpers";
-
-
+import { PlanModeSelector } from "../components/settings/PlanModeSelector";
 
 const { width } = Dimensions.get("window");
 
@@ -70,15 +75,17 @@ export default function OnboardingScreen() {
   const [selectedGoal] = useState(QURAN_GOALS[0]);
   const [selectedPages, setSelectedPages] = useState<number>(1);
   const [selectedSurahIds, setSelectedSurahIds] = useState<number[]>([]);
-  const [planDirection] = useState<"forward" | "backward">(
-    "forward",
-  );
+  const [planDirection] = useState<"forward" | "backward">("forward");
   const [surahModalVisible, setSurahModalVisible] = useState(false);
   const [alreadyMemorizedSurahIds, setAlreadyMemorizedSurahIds] = useState<
     number[]
   >([]);
   const [alreadyMemorizedModalVisible, setAlreadyMemorizedModalVisible] =
     useState(false);
+  const [planMode, setPlanMode] = useState<"daily" | "weekly">("daily");
+  const [activeDaysOfWeek, setActiveDaysOfWeek] = useState<number[]>([
+    0, 1, 2, 3, 4, 5, 6,
+  ]);
   const slideAnim = React.useRef(new Animated.Value(0)).current;
   const fadeAnim = React.useRef(new Animated.Value(1)).current;
 
@@ -144,6 +151,12 @@ export default function OnboardingScreen() {
         label,
         direction: planDirection,
         alreadyMemorizedSurahIds,
+        settings: {
+          planMode,
+          activeDaysOfWeek,
+          mushafEdition: "madani_604",
+          reviewStrategy: "spaced",
+        },
       },
     });
     router.replace("/(tabs)/dashboard" as any);
@@ -397,29 +410,15 @@ export default function OnboardingScreen() {
                 كم صفحة تستطيع حفظها يومياً؟
               </Text>
 
-              <View style={styles.pagesGrid}>
-                {DAILY_PAGES.map((p) => (
-                  <TouchableOpacity
-                    key={p}
-                    style={[
-                      styles.pageOption,
-                      selectedPages === p && styles.pageOptionSelected,
-                    ]}
-                    onPress={() => setSelectedPages(p)}
-                  >
-                    <Text
-                      style={[
-                        styles.pageNum,
-                        selectedPages === p && { color: Colors.primary },
-                      ]}
-                    >
-                      {p}
-                    </Text>
-                    <Text style={styles.pageLabel}>
-                      {DAILY_PAGES_LABELS[p]}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+              <View style={{ width: "100%", marginBottom: Spacing.xl }}>
+                <PlanModeSelector
+                  planMode={planMode}
+                  onModeChange={setPlanMode}
+                  dailyPages={selectedPages}
+                  onDailyPagesChange={setSelectedPages}
+                  activeDaysOfWeek={activeDaysOfWeek}
+                  onActiveDaysChange={setActiveDaysOfWeek}
+                />
               </View>
 
               <View style={styles.estimateBox}>
@@ -476,7 +475,7 @@ export default function OnboardingScreen() {
                 <View style={styles.summaryRow}>
                   <Text style={styles.summaryLabel}>يومياً</Text>
                   <Text style={styles.summaryValue}>
-                    {DAILY_PAGES_LABELS[selectedPages]}
+                    {selectedPages} صفحات ({planMode === "daily" ? "يومياً" : `${activeDaysOfWeek.length} أيام/أسبوع`})
                   </Text>
                 </View>
 
@@ -568,9 +567,7 @@ export default function OnboardingScreen() {
                 ]}
                 onPress={() => setSurahModalVisible(false)}
               >
-                <Text style={{ color: "#FFF", fontWeight: "bold" }}>
-                  تم الاختيار
-                </Text>
+                <Text style={{ color: "#FFF" }}>تم الاختيار</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -585,7 +582,42 @@ export default function OnboardingScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { height: "90%", width: "90%" }]}>
-            <Text style={styles.modalTitle}>اختر السور المحفوظة</Text>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>اختر السور المحفوظة</Text>
+              <View style={styles.selectionControls}>
+                <TouchableOpacity
+                  style={[
+                    styles.controlBtn,
+                    { backgroundColor: `${Colors.primary}15` },
+                  ]}
+                  onPress={() =>
+                    setAlreadyMemorizedSurahIds(SURAHS.map((s) => s.id))
+                  }
+                >
+                  <Text
+                    style={[styles.controlBtnText, { color: Colors.primary }]}
+                  >
+                    تحديد الكل
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.controlBtn,
+                    { backgroundColor: Colors.border },
+                  ]}
+                  onPress={() => setAlreadyMemorizedSurahIds([])}
+                >
+                  <Text
+                    style={[
+                      styles.controlBtnText,
+                      { color: Colors.textSecondary },
+                    ]}
+                  >
+                    إلغاء الكل
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
             <ScrollView showsVerticalScrollIndicator={false}>
               {SURAHS.map((surah) => {
                 const isSelected = alreadyMemorizedSurahIds.includes(surah.id);
@@ -639,9 +671,7 @@ export default function OnboardingScreen() {
                 ]}
                 onPress={() => setAlreadyMemorizedModalVisible(false)}
               >
-                <Text style={{ color: "#FFF", fontWeight: "bold" }}>
-                  تم الاختيار
-                </Text>
+                <Text style={{ color: "#FFF" }}>تم الاختيار</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -734,7 +764,6 @@ const getStyles = (Colors: typeof darkColors) =>
     stepTitle: {
       fontFamily: Typography.heading,
       fontSize: Typography["2xl"],
-      fontWeight: Typography.bold,
       color: Colors.textPrimary,
       textAlign: "center",
       marginBottom: Spacing.sm,
@@ -742,7 +771,6 @@ const getStyles = (Colors: typeof darkColors) =>
     appName: {
       fontFamily: Typography.heading,
       fontSize: Typography["3xl"],
-      fontWeight: Typography.extrabold,
       color: Colors.primary,
       textAlign: "center",
     },
@@ -831,7 +859,6 @@ const getStyles = (Colors: typeof darkColors) =>
     optionLabel: {
       fontFamily: Typography.body,
       fontSize: Typography.base,
-      fontWeight: Typography.medium,
       color: Colors.textPrimary,
     },
     optionDescription: {
@@ -893,7 +920,6 @@ const getStyles = (Colors: typeof darkColors) =>
     pageNum: {
       fontFamily: Typography.heading,
       fontSize: Typography.lg,
-      fontWeight: Typography.semibold,
       color: Colors.textPrimary,
     },
     pageLabel: {
@@ -920,7 +946,6 @@ const getStyles = (Colors: typeof darkColors) =>
     estimateValue: {
       fontFamily: Typography.heading,
       fontSize: Typography.lg,
-      fontWeight: Typography.semibold,
       color: Colors.primary,
     },
     summaryBox: {
@@ -936,7 +961,6 @@ const getStyles = (Colors: typeof darkColors) =>
     summaryTitle: {
       fontFamily: Typography.heading,
       fontSize: Typography.base,
-      fontWeight: Typography.semibold,
       color: Colors.textPrimary,
       textAlign: "left",
       marginBottom: Spacing.sm,
@@ -958,7 +982,6 @@ const getStyles = (Colors: typeof darkColors) =>
     summaryValue: {
       fontFamily: Typography.body,
       fontSize: Typography.sm,
-      fontWeight: Typography.medium,
       color: Colors.textPrimary,
       textAlign: "right",
     },
@@ -1025,7 +1048,7 @@ const getStyles = (Colors: typeof darkColors) =>
       fontSize: 10,
       color: Colors.textTertiary,
     },
-    activeTabText: { color: Colors.primary, fontWeight: "bold" },
+    activeTabText: { color: Colors.primary },
     rangeInputs: {
       flexDirection: "row",
       justifyContent: "space-between",
@@ -1085,7 +1108,7 @@ const getStyles = (Colors: typeof darkColors) =>
       fontSize: 11,
       color: Colors.textSecondary,
     },
-    activeDirText: { color: Colors.primary, fontWeight: "bold" },
+    activeDirText: { color: Colors.primary },
     modalOverlay: {
       flex: 1,
       backgroundColor: "rgba(0,0,0,0.5)",
@@ -1102,10 +1125,28 @@ const getStyles = (Colors: typeof darkColors) =>
     modalTitle: {
       fontFamily: Typography.heading,
       fontSize: Typography.lg,
-      fontWeight: Typography.bold,
       color: Colors.textPrimary,
-      marginBottom: Spacing.lg,
       textAlign: "center",
+    },
+    modalHeader: {
+      marginBottom: Spacing.lg,
+      gap: Spacing.md,
+    },
+    selectionControls: {
+      flexDirection: "row",
+      justifyContent: "center",
+      gap: Spacing.sm,
+    },
+    controlBtn: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: BorderRadius.md,
+      minWidth: 80,
+      alignItems: "center",
+    },
+    controlBtnText: {
+      fontFamily: Typography.body,
+      fontSize: 11,
     },
     modalActions: {
       flexDirection: "row",
@@ -1137,7 +1178,6 @@ const getStyles = (Colors: typeof darkColors) =>
       fontFamily: Typography.body,
       fontSize: Typography.base,
       color: Colors.textPrimary,
-      fontWeight: Typography.medium,
       textAlign: "left",
       paddingRight: Spacing.md,
     },

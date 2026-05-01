@@ -151,7 +151,7 @@ const getStyles = (Colors: any) =>
     content: { marginBottom: Spacing.md },
     title: {
       fontFamily: Typography.heading,
-      fontSize: 15,
+      fontSize: 13,
       color: Colors.textPrimary,
       marginBottom: 2,
     },

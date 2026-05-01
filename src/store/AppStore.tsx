@@ -113,6 +113,8 @@ type Action =
     }
   | { type: "TOGGLE_FORTRESS"; payload: { fortressId: FortressId } }
   | { type: "MARK_PAGES_MEMORIZED"; payload: { pages: number[] } }
+  | { type: "UNMARK_PAGES_MEMORIZED"; payload: { pages: number[] } }
+  | { type: "UNREVIEW_PAGE"; payload: { pageNumber: number } }
   | { type: "REVIEW_PAGE" ; payload: { pageNumber: number; passed: boolean } }
   | { type: "RESET" }
   | { type: "UPDATE_USER"; payload: Partial<User> }
@@ -249,6 +251,7 @@ function appReducer(state: AppState, action: Action): AppState {
         });
       }
 
+      const initialXP = 30; // Onboarding bonus to reach first title immediately
       const user: User = {
         id: Date.now().toString(),
         name: userData.name,
@@ -256,12 +259,15 @@ function appReducer(state: AppState, action: Action): AppState {
         goal: label,
         dailyPages: userData.dailyPages,
         createdAt: todayISO(),
-        title: "مبتدئ",
-        totalXP: 0,
+        title: getTitleFromXP(initialXP),
+        totalXP: initialXP,
       };
 
-      // Create today's progress
-      const todayProgress: DailyProgress = createEmptyDailyProgress();
+      // Create today's progress with onboarding bonus
+      const todayProgress: DailyProgress = {
+        ...createEmptyDailyProgress(),
+        xpEarned: initialXP,
+      };
 
       return {
         ...cleanState,
@@ -479,7 +485,32 @@ function appReducer(state: AppState, action: Action): AppState {
 
       return { ...state, pageProgress: updatedPageProgress };
     }
+    case "UNMARK_PAGES_MEMORIZED": {
+      const { pages } = action.payload;
+      const updatedPageProgress = state.pageProgress.map((p) => {
+        if (!pages.includes(p.pageNumber)) return p;
+        return {
+          ...p,
+          memorized: false,
+          strength: 1 as MemorizationStrength,
+          nextReviewDate: "",
+        };
+      });
+      return { ...state, pageProgress: updatedPageProgress };
+    }
 
+    case "UNREVIEW_PAGE": {
+      const { pageNumber } = action.payload;
+      const updatedPageProgress = state.pageProgress.map((p) => {
+        if (p.pageNumber !== pageNumber) return p;
+        return {
+          ...p,
+          strength: Math.max(1, p.strength - 1) as MemorizationStrength,
+          reviewCount: Math.max(0, p.reviewCount - 1),
+        };
+      });
+      return { ...state, pageProgress: updatedPageProgress };
+    }
 
 
     case "UPDATE_USER": {

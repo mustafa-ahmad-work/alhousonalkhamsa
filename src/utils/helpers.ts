@@ -6,7 +6,32 @@ import {
   Plan,
   PlanDirection,
   TaskSelection,
+  TITLE_XP_REQUIREMENTS,
+  UserTitle,
 } from "../types";
+
+export const TITLE_ICONS: Record<string, string> = {
+  مبتدئ: "leaf-outline",
+  ساعي: "footsteps-outline",
+  طالب: "book-outline",
+  مجتهد: "fitness-outline",
+  مثابر: "infinite-outline",
+  مرابط: "shield-outline",
+  ملازم: "link-outline",
+  حارس: "shield-checkmark-outline",
+  قوي: "barbell-outline",
+  ثابت: "anchor-outline",
+  متمكن: "ribbon-outline",
+  متقن: "star-outline",
+  ضابط: "key-outline",
+  راوي: "mic-outline",
+  ماهر: "flash-outline",
+  "خادم القرآن": "heart-outline",
+  حافظ: "medal-outline",
+  جامع: "briefcase-outline",
+  "صاحب القرآن": "trophy-outline",
+  "تاج الوقار": "sparkles-outline",
+};
 
 // ─── Date Helpers ─────────────────────────────────────────
 
@@ -172,11 +197,27 @@ export function getPagesDueForReview(pages: PageProgress[]): PageProgress[] {
 
 // ─── XP & Title ───────────────────────────────────────────
 
-export function getTitleFromXP(xp: number): string {
-  if (xp >= 5000) return 'حافظ';
-  if (xp >= 2000) return 'سيد';
-  if (xp >= 500) return 'حارس';
-  return 'مبتدئ';
+export function getTitleFromXP(xp: number): UserTitle {
+  if (xp >= 80000) return "تاج الوقار";
+  if (xp >= 60000) return "صاحب القرآن";
+  if (xp >= 45000) return "جامع";
+  if (xp >= 35000) return "حافظ";
+  if (xp >= 28000) return "خادم القرآن";
+  if (xp >= 22000) return "ماهر";
+  if (xp >= 17000) return "راوي";
+  if (xp >= 12500) return "ضابط";
+  if (xp >= 9000) return "متقن";
+  if (xp >= 6500) return "متمكن";
+  if (xp >= 4500) return "ثابت";
+  if (xp >= 3000) return "قوي";
+  if (xp >= 2000) return "حارس";
+  if (xp >= 1300) return "ملازم";
+  if (xp >= 800) return "مرابط";
+  if (xp >= 450) return "مثابر";
+  if (xp >= 200) return "مجتهد";
+  if (xp >= 75) return "طالب";
+  if (xp >= 25) return "ساعي";
+  return "مبتدئ";
 }
 
 export function getXPProgressToNextLevel(xp: number): {
@@ -184,15 +225,21 @@ export function getXPProgressToNextLevel(xp: number): {
   required: number;
   percentage: number;
 } {
-  const levels = [0, 500, 2000, 5000, 99999];
-  for (let i = 0; i < levels.length - 1; i++) {
-    if (xp < levels[i + 1]) {
-      const current = xp - levels[i];
-      const required = levels[i + 1] - levels[i];
-      return { current, required, percentage: current / required };
+  const sortedReqs = Object.entries(TITLE_XP_REQUIREMENTS)
+    .sort((a, b) => a[1] - b[1])
+    .map((e) => e[1]);
+
+  for (let i = 0; i < sortedReqs.length - 1; i++) {
+    if (xp < sortedReqs[i + 1]) {
+      const lower = sortedReqs[i];
+      const upper = sortedReqs[i + 1];
+      const current = xp - lower;
+      const required = upper - lower;
+      return { current, required, percentage: Math.min(1, current / required) };
     }
   }
-  return { current: 0, required: 1, percentage: 1 };
+  // Max level
+  return { current: 100, required: 100, percentage: 1 };
 }
 
 // ─── Daily Completion ─────────────────────────────────────

@@ -54,6 +54,6 @@ const styles = StyleSheet.create({
     marginRight: Spacing.md,
   },
   intentionTextWrap: { flex: 1 },
-  intentionTitle: { fontFamily: Typography.heading, fontSize: 16, fontWeight: Typography.bold, textAlign: "left", marginBottom: 2 },
+  intentionTitle: { fontFamily: Typography.heading, fontSize: 16, textAlign: "left", marginBottom: 2 },
   intentionDesc: { fontFamily: Typography.body, fontSize: 12, textAlign: "left" },
 });

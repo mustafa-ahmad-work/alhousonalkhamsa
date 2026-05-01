@@ -24,10 +24,12 @@ export default function LegalScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar 
-        barStyle={Colors.background === "#07090F" ? "light-content" : "dark-content"} 
-        translucent 
-        backgroundColor="transparent" 
+      <StatusBar
+        barStyle={
+          Colors.background === "#07090F" ? "light-content" : "dark-content"
+        }
+        translucent
+        backgroundColor="transparent"
       />
       <View
         style={[
@@ -55,7 +57,7 @@ export default function LegalScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.infoCard}>
-          <Text style={styles.updateDate}>آخر تحديث: 7 أبريل 2026</Text>
+          <Text style={styles.updateDate}>آخر تحديث: ١ مايو ٢٠٢٦</Text>
           <Text style={styles.appName}>تطبيق: مفاتيح حفظ القرآن</Text>
           <Text style={styles.developerName}>
             المطور: مصطفى أحمد (Mustafa Ahmad)
@@ -63,63 +65,86 @@ export default function LegalScreen() {
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>١. مقدمة وهوية التطبيق</Text>
+          <Text style={styles.sectionTitle}>١. مقدمة وهدف السياسة</Text>
           <Text style={styles.paragraph}>
-            تطبيق &quot;مفاتيح حفظ القرآن&quot; هو تطبيق مجاني (Free App) مخصص لمساعدة المسلمين
-            على تنظيم حفظ ومراجعة القرآن الكريم. يُقدم هذا التطبيق كخدمة مجانية
-            تهدف لنفع المستخدمين دون مقابل مادي وبأعلى معايير الخصوصية.
-          </Text>
-        </View>
-
-        <View style={[styles.card, { marginTop: Spacing.xl }]}>
-          <Text style={styles.sectionTitle}>٢. جمع البيانات واستخدامها</Text>
-          <Text style={styles.paragraph}>
-            نحن نؤمن بالشفافية المطلقة مع مستخدمينا بشأن البيانات التقنية:
-          </Text>
-          <BulletPoint text="بيانات يقدمها المستخدم: لا نطلب منك أي بيانات شخصية (اسم، هاتف، أو حسابات) لاستخدام التطبيق. كل ما تدخله من خطط حفظ يُخزن محلياً فقط." />
-          <BulletPoint text="بيانات تُجمع تلقائياً: لتحسين أداء التطبيق، قد يتم جمع معلومات تقنية بسيطة عبر خدمات طرف ثالث (Google Play Services) مثل: نوع الجهاز، إصدار نظام التشغيل، ومعرّفات الأجهزة الفريدة (Device ID) لأغراض تقنية بحتة." />
-          <BulletPoint text="الأذونات الحساسة: لا يطلب التطبيق الوصول للكاميرا أو الصور أو جهات الاتصال. الأذونات المطلوبة هي (الإشعارات والاهتزاز) لتعزيز تجربة الاستخدام فقط." />
-        </View>
-
-        <View style={[styles.card, { marginTop: Spacing.xl }]}>
-          <Text style={styles.sectionTitle}>
-            ٣. خدمات الطرف الثالث (Third-Party Services)
-          </Text>
-          <Text style={styles.paragraph}>
-            يستخدم التطبيق خدمات تابعة لأطراف ثالثة لضمان استقرار العمل، ويمكنك
-            مراجعة سياساتهم عبر الروابط التالية:
-          </Text>
-          <BulletPoint text="Google Play Services: لتشغيل التطبيق على أندرويد." />
-          <BulletPoint text="Expo SDK: لتوفير ميزات النظام مثل الاهتزاز والإشعارات." />
-        </View>
-
-        <View style={[styles.card, { marginTop: Spacing.xl }]}>
-          <Text style={styles.sectionTitle}>
-            ٤. حماية بيانات الأطفال (COPPA)
-          </Text>
-          <Text style={styles.paragraph}>
-            تطبيق &quot;مفاتيح حفظ القرآن&quot; موجه لجميع الفئات العمرية بما في ذلك الأطفال
-            دون سن ١٣ عاماً. نحن نلتزم بقانون حماية خصوصية الأطفال عبر الإنترنت
-            (COPPA)؛ وبناءً عليه: لا نقوم بجمع أي معلومات تعريفية عن الأطفال،
-            ولا يحتوي التطبيق على إعلانات مستهدفة أو محتوى غير لائق.
+            تهدف هذه السياسة إلى توضيح كيفية تعامل تطبيق &quot;مفاتيح حفظ
+            القرآن&quot; مع بياناتك. نحن ندرك رحلتك مع القرآن الكريم، لذا صممنا
+            هذا التطبيق ليكون ملاذاً آمناً وخاصاً بالكامل، حيث لا تخرج بياناتك
+            عن حدود جهازك الشخصي أبداً.
           </Text>
         </View>
 
         <View style={[styles.card, { marginTop: Spacing.xl }]}>
           <Text style={styles.sectionTitle}>
-            ٥. حذف البيانات (Data Deletion)
+            ٢. ضمانة &quot;صفر بيانات&quot; (Zero-Data Policy)
           </Text>
           <Text style={styles.paragraph}>
-            بما أن جميع بياناتك مخزنة &quot;محلياً&quot; على جهازك:
+            نحن نلتزم بسياسة صارمة لعدم جمع البيانات. إليك ما لا نقوم بجمعه
+            نهائياً:
           </Text>
-          <BulletPoint text="يمكنك حذف كافة بياناتك فوراً عبر مسح ذاكرة التطبيق (Clear Data) من إعدادات جهازك." />
-          <BulletPoint text="عند حذف التطبيق من جهازك، يتم مسح كافة السجلات وعمليات الحفظ تلقائياً ولا تتبقى لنا أي نسخة منها." />
+          <BulletPoint text="الهوية الشخصية: لا نطلب الاسم، العمر، الجنس، أو أي وثائق تعريفية." />
+          <BulletPoint text="الاتصال: لا نطلب البريد الإلكتروني، رقم الهاتف، أو حسابات التواصل الاجتماعي." />
+          <BulletPoint text="الوصول للحسابات: لا يطلب التطبيق تسجيل الدخول عبر جوجل، فيسبوك، أو أي طرف ثالث." />
+          <BulletPoint text="البيانات الحساسة: لا نطلب الوصول لرسائلك، سجل المكالمات، أو كلمات المرور الخاصة بك." />
         </View>
 
         <View style={[styles.card, { marginTop: Spacing.xl }]}>
-          <Text style={styles.sectionTitle}>٦. شروط الخدمة والملكية</Text>
-          <BulletPoint text="حقوق الملكية: جميع أكواد وتصاميم التطبيق هي ملك للمطور. نصوص القرآن الكريم مستمدة من مصادر موثوقة (مجمع الملك فهد)." />
-          <BulletPoint text="التعديلات: قد نقوم بتحديث هذه السياسة دورياً لمواكبة متطلبات المتاجر الرسمية. استمرارك في استخدام التطبيق يعتبر موافقة على النسخة الأحدث." />
+          <Text style={styles.sectionTitle}>
+            ٣. أمن التخزين المحلي (On-Device Storage)
+          </Text>
+          <Text style={styles.paragraph}>
+            كل ما تقوم بإدخاله من سجلات حفظ، مراجعة، ودرجات قوة الحفظ يتم تخزينه
+            باستخدام تقنيات التخزين المحلي المؤمنة في نظام تشغيل جهازك.
+          </Text>
+          <BulletPoint text="التشفير: البيانات تُخزن في مساحة معزولة خاصة بالتطبيق (Sandbox) لا يمكن للتطبيقات الأخرى الوصول إليها." />
+          <BulletPoint text="عدم المزامنة السحابية: لا يملك المطور أي خوادم لاستقبال بياناتك، مما يعني أن بياناتك لا ترحل عبر الإنترنت إلى أي مكان." />
+          <BulletPoint text="النسخ الاحتياطي: إذا قمت بتفعيل النسخ الاحتياطي لنظام أندرويد (Google Backup)، فقد يتم تضمين بيانات التطبيق ضمن نسخة نظامك الخاصة بك وحدك تحت إشرافك." />
+        </View>
+
+        <View style={[styles.card, { marginTop: Spacing.xl }]}>
+          <Text style={styles.sectionTitle}>
+            ٤. الأذونات المطلوبة (App Permissions)
+          </Text>
+          <Text style={styles.paragraph}>
+            يطلب التطبيق حداً أدنى من الأذونات ليعمل بكفاءة:
+          </Text>
+          <BulletPoint text="الإشعارات (Notifications): لإرسال تنبيهات ورد الحفظ والمراجعة التي تضبطها بنفسك." />
+          <BulletPoint text="الاهتزاز (Vibration): لتقديم استجابة لمسية عند التفاعل مع أزرار التطبيق." />
+          <BulletPoint text="الإنترنت (Internet): يُستخدم فقط لتحميل الخطوط (Google Fonts) أو التأكد من وجود تحديثات للمتصفح الداخلي عند الضرورة التقنية." />
+        </View>
+
+        <View style={[styles.card, { marginTop: Spacing.xl }]}>
+          <Text style={styles.sectionTitle}>
+            ٥. الإفصاح عن الأطراف الثالثة التقنية
+          </Text>
+          <Text style={styles.paragraph}>
+            لتقديم خدمة مستقرة، يعتمد التطبيق على بنية تحتية تقنية عالمية:
+          </Text>
+          <BulletPoint text="Google Play Services: تُستخدم لتوزيع التطبيق والتأكد من سلامته التقنية على أجهزة أندرويد." />
+          <BulletPoint text="Expo SDK: هي البيئة البرمجية التي بُني عليها التطبيق لضمان عمله على مختلف إصدارات الهواتف." />
+          <Text style={styles.paragraph}>
+            هذه الجهات قد تجمع معلومات تقنية عامة (غير شخصية) مثل إصدار النظام
+            أو نوع الهاتف لتحسين استقرار النظام البرمجي.
+          </Text>
+        </View>
+
+        <View style={[styles.card, { marginTop: Spacing.xl }]}>
+          <Text style={styles.sectionTitle}>
+            ٦. التزامات قانونية (GDPR & COPPA)
+          </Text>
+          <BulletPoint text="حقوق المستخدم (GDPR): لك الحق الكامل في حذف كافة بياناتك بضغطة زر واحدة عبر مسح ذاكرة التطبيق." />
+          <BulletPoint text="حماية الأطفال (COPPA): التطبيق مصمم ليكون آمناً ١٠٠٪ للأطفال؛ لا إعلانات، لا تعقب، ولا محتوى غير لائق." />
+          <BulletPoint text="عدم البيع: نلتزم بعدم بيع أو تأجير أي معلومات تقنية قد تتوفر لدينا لأي جهة إعلانية أو تجارية." />
+        </View>
+
+        <View style={[styles.card, { marginTop: Spacing.xl }]}>
+          <Text style={styles.sectionTitle}>٧. الاحتفاظ بالبيانات وحذفها</Text>
+          <Text style={styles.paragraph}>
+            نحن لا نحتفظ ببياناتك لأننا لا نملكها أصلاً. بياناتك تبقى على جهازك
+            طالما أن التطبيق مثبّت.
+          </Text>
+          <BulletPoint text="عند رغبتك في حذف البيانات: انتقل إلى إعدادات الهاتف > التطبيقات > مفاتيح حفظ القرآن > مسح البيانات." />
+          <BulletPoint text="عند حذف التطبيق: يتم تدمير كافة سجلات الحفظ والمراجعة ولا يمكن استعادتها." />
         </View>
 
         <View
@@ -128,10 +153,10 @@ export default function LegalScreen() {
             { marginTop: Spacing.xl, marginBottom: Spacing["5xl"] },
           ]}
         >
-          <Text style={styles.sectionTitle}>٧. التواصل الرسمي</Text>
+          <Text style={styles.sectionTitle}>٨. التواصل والدعم القانوني</Text>
           <Text style={styles.paragraph}>
-            للأسئلة أو الاستفسارات القانونية، يرجى مراسلة المطور عبر البريد
-            الإلكتروني الرسمي:
+            إذا كان لديك أي تساؤل حول كيفية حماية خصوصيتك، فنحن نرحب بتواصلك
+            المباشر مع المطور:
           </Text>
           <TouchableOpacity style={styles.contactBtn}>
             <Text style={styles.contactBtnText}>
@@ -161,7 +186,6 @@ const getStyles = (Colors: any) =>
     headerTitle: {
       fontFamily: Typography.heading,
       fontSize: Typography.lg,
-      fontWeight: Typography.semibold,
       color: Colors.textPrimary,
     },
     backBtn: {
@@ -200,7 +224,6 @@ const getStyles = (Colors: any) =>
     appName: {
       fontFamily: Typography.heading,
       fontSize: 18,
-      fontWeight: "bold",
       color: Colors.textPrimary,
       marginTop: 4,
       textAlign: "left",
@@ -222,7 +245,6 @@ const getStyles = (Colors: any) =>
     sectionTitle: {
       fontFamily: Typography.heading,
       fontSize: Typography.base,
-      fontWeight: Typography.bold,
       color: Colors.primary,
       marginBottom: Spacing.md,
       textAlign: "left",
@@ -269,6 +291,5 @@ const getStyles = (Colors: any) =>
       color: Colors.primary,
       fontFamily: Typography.body,
       fontSize: Typography.sm,
-      fontWeight: Typography.medium,
     },
   });

@@ -404,7 +404,6 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: Typography.heading, fontSize: Typography.xl,
-    fontWeight: Typography.bold,
     marginBottom: Spacing.sm,
   },
   badge: {
@@ -416,7 +415,6 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontFamily: Typography.heading, fontSize: Typography.xs,
-    fontWeight: Typography.semibold,
   },
   timerContainer: {
     marginBottom: Spacing.xl,
@@ -441,7 +439,6 @@ const styles = StyleSheet.create({
   timeText: {
     fontFamily: 'System', 
     fontSize: Typography["5xl"],
-    fontWeight: '200',
     letterSpacing: -1,
   },
   remainingLabel: {
@@ -472,11 +469,9 @@ const styles = StyleSheet.create({
   },
   hifzLabel: {
     fontSize: 12,
-    fontWeight: '600',
   },
   hifzValueLarge: {
     fontSize: 22,
-    fontWeight: 'bold',
     minWidth: 50,
     textAlign: 'center',
   },
@@ -499,7 +494,6 @@ const styles = StyleSheet.create({
   },
   surahName: {
     fontSize: 16,
-    fontWeight: '900',
     marginBottom: Spacing.sm,
   },
   controls: {
@@ -518,7 +512,6 @@ const styles = StyleSheet.create({
   },
   btnText: {
     fontFamily: Typography.heading, fontSize: Typography.md,
-    fontWeight: Typography.bold,
     color: '#FFF',
   },
   resetBtn: {
@@ -555,7 +548,6 @@ const styles = StyleSheet.create({
   },
   setupTitle: {
     fontSize: 10,
-    fontWeight: 'bold',
     marginBottom: 8,
     textAlign: 'center',
     textTransform: 'uppercase',
@@ -578,7 +570,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 12,
     fontSize: 16,
-    fontWeight: '700',
     backgroundColor: 'rgba(255,255,255,0.5)',
   }
 });

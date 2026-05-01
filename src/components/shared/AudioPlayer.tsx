@@ -427,7 +427,6 @@ const getStyles = (Colors: any) =>
     infoBadgeText: {
       fontSize: 12,
       color: Colors.primary,
-      fontWeight: "bold",
     },
     progressCounter: {
       fontFamily: Typography.body,
@@ -501,6 +500,5 @@ const getStyles = (Colors: any) =>
     },
     retryBtnText: {
       color: "#FFF",
-      fontWeight: "bold",
     },
   });

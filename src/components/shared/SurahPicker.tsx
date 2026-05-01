@@ -219,7 +219,6 @@ const getStyles = (Colors: any) =>
     surahNumber: {
       fontFamily: Typography.heading, fontSize: Typography.sm,
       color: Colors.primary,
-      fontWeight: Typography.semibold,
       backgroundColor: Colors.primaryMuted,
       width: 28,
       height: 28,
@@ -230,7 +229,6 @@ const getStyles = (Colors: any) =>
     },
     surahName: {
       fontFamily: Typography.body, fontSize: Typography.base,
-      fontWeight: Typography.medium,
       color: Colors.textPrimary,
     },
     ayahInfo: {
@@ -265,7 +263,6 @@ const getStyles = (Colors: any) =>
       paddingVertical: Spacing.sm + 2,
       paddingHorizontal: Spacing.md,
       fontFamily: Typography.body, fontSize: Typography.base,
-      fontWeight: Typography.medium,
       color: Colors.textPrimary,
     },
     ayahDivider: {
@@ -295,7 +292,6 @@ const getStyles = (Colors: any) =>
     },
     modalTitle: {
       fontFamily: Typography.heading, fontSize: Typography.lg,
-      fontWeight: Typography.semibold,
       color: Colors.textPrimary,
     },
     searchBox: {
@@ -349,12 +345,10 @@ const getStyles = (Colors: any) =>
     },
     surahNumberText: {
       fontFamily: Typography.body, fontSize: Typography.sm,
-      fontWeight: Typography.medium,
       color: Colors.textSecondary,
     },
     surahItemName: {
       fontFamily: Typography.body, fontSize: Typography.base,
-      fontWeight: Typography.medium,
       color: Colors.textPrimary,
     },
     surahItemMeta: {

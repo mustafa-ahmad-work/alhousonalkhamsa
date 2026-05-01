@@ -68,11 +68,9 @@ const getStyles = (Colors: any) =>
     },
     optionText: {
       fontFamily: Typography.body, fontSize: Typography.base,
-      fontWeight: Typography.medium,
       color: Colors.textTertiary,
     },
     optionTextActive: {
       color: Colors.primary,
-      fontWeight: Typography.semibold,
     },
   });

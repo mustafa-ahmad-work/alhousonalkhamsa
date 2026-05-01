@@ -66,7 +66,6 @@ const getStyles = (Colors: any) =>
       fontFamily: Typography.body,
       fontSize: Typography.sm,
       color: Colors.primary,
-      fontWeight: "bold",
       textAlign: "left",
     },
     desc: {
@@ -86,7 +85,7 @@ const getStyles = (Colors: any) =>
       fontFamily: Typography.body,
       fontSize: 10,
       color: Colors.textPrimary,
-      // fontWeight: "500",
+      //
       lineHeight: 18,
       textAlign: "left",
     },

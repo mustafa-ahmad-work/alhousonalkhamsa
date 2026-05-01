@@ -71,7 +71,6 @@ const getStyles = (Colors: any) =>
     },
     count: {
       fontFamily: Typography.heading, fontSize: Typography.base,
-      fontWeight: Typography.semibold,
       color: Colors.gold,
       textAlign: "left",
     },
@@ -94,7 +93,6 @@ const getStyles = (Colors: any) =>
     },
     bestCount: {
       fontFamily: Typography.heading, fontSize: Typography.base,
-      fontWeight: Typography.semibold,
       color: Colors.goldLight,
       textAlign: "center",
     },

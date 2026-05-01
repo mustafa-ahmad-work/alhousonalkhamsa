@@ -146,7 +146,6 @@ const getStyles = (Colors: any) =>
     title: {
       fontFamily: Typography.heading,
       fontSize: Typography.lg,
-      fontWeight: Typography.bold,
       color: Colors.textPrimary,
       marginBottom: Spacing.lg,
       textAlign: "center",
@@ -162,7 +161,6 @@ const getStyles = (Colors: any) =>
       fontSize: 10,
       color: Colors.textTertiary,
       marginBottom: 8,
-      fontWeight: "bold",
     },
     list: { width: "100%" },
     item: {
@@ -180,9 +178,8 @@ const getStyles = (Colors: any) =>
       fontFamily: Typography.body,
       fontSize: 18,
       color: Colors.textSecondary,
-      fontWeight: "500",
     },
-    itemTextActive: { color: Colors.primary, fontWeight: "bold" },
+    itemTextActive: { color: Colors.primary},
     actions: {
       flexDirection: "row",
       justifyContent: "center",
@@ -204,12 +201,10 @@ const getStyles = (Colors: any) =>
       color: Colors.textSecondary,
       fontFamily: Typography.body,
       fontSize: Typography.sm,
-      fontWeight: Typography.medium,
     },
     confirmText: {
       color: "#FFF",
       fontFamily: Typography.body,
       fontSize: Typography.sm,
-      fontWeight: Typography.medium,
     },
   });

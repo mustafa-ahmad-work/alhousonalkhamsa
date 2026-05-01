@@ -510,7 +510,6 @@ const getStyles = (Colors: any) => {
     headerTitle: {
       fontFamily: Typography.heading,
       fontSize: 18,
-      fontWeight: "bold",
       color: Colors.textPrimary,
     } as TextStyle,
     content: { padding: Spacing.xl, paddingBottom: 100 } as ViewStyle,
@@ -531,13 +530,11 @@ const getStyles = (Colors: any) => {
     } as ViewStyle,
     surahBadgeText: {
       color: Colors.gold,
-      fontWeight: "bold",
       fontSize: 13,
     } as TextStyle,
     infoText: {
       fontSize: 12,
       color: Colors.textSecondary,
-      fontWeight: "bold",
     } as TextStyle,
     verseCard: {
       backgroundColor: Colors.surface,
@@ -550,7 +547,6 @@ const getStyles = (Colors: any) => {
     cardLabel: {
       fontSize: 13,
       color: Colors.primary,
-      fontWeight: "bold",
       marginBottom: Spacing.lg,
       opacity: 0.8,
     } as TextStyle,
@@ -602,7 +598,6 @@ const getStyles = (Colors: any) => {
     } as ViewStyle,
     showAnswerText: {
       color: "#FFF",
-      fontWeight: "bold",
       fontSize: 16,
     } as TextStyle,
     answerSection: { gap: Spacing.md } as ViewStyle,
@@ -614,7 +609,6 @@ const getStyles = (Colors: any) => {
     } as ViewStyle,
     answerTitle: {
       fontSize: 15,
-      fontWeight: "bold",
       color: Colors.textPrimary,
       textAlign: "right",
     } as TextStyle,
@@ -645,7 +639,7 @@ const getStyles = (Colors: any) => {
       borderWidth: 1,
       borderColor: Colors.border,
     } as ViewStyle,
-    nextBtnText: { fontWeight: "bold", color: Colors.textPrimary } as TextStyle,
+    nextBtnText: { color: Colors.textPrimary } as TextStyle,
     progressHeader: {
       flex: 1,
       alignItems: "center",
@@ -655,7 +649,6 @@ const getStyles = (Colors: any) => {
       fontSize: 12,
       color: Colors.textSecondary,
       marginBottom: 4,
-      fontWeight: "bold",
     } as TextStyle,
     progressBarBg: {
       width: "100%",
@@ -684,7 +677,6 @@ const getStyles = (Colors: any) => {
     } as ViewStyle,
     quizInfoValue: {
       fontSize: 18,
-      fontWeight: "bold",
       color: Colors.primary,
     } as TextStyle,
     quizInfoLabel: {
@@ -717,7 +709,6 @@ const getStyles = (Colors: any) => {
     scopeTextWrap: { flex: 1, alignItems: "flex-start" } as ViewStyle,
     scopeTitle: {
       fontSize: 16,
-      fontWeight: "bold",
       color: Colors.textPrimary,
       marginBottom: 2,
     } as TextStyle,
@@ -732,7 +723,6 @@ const getStyles = (Colors: any) => {
     } as ViewStyle,
     evaluationTitle: {
       fontSize: 15,
-      fontWeight: "bold",
       color: Colors.textPrimary,
       textAlign: "center",
       marginBottom: Spacing.lg,
@@ -748,7 +738,7 @@ const getStyles = (Colors: any) => {
       borderRadius: 12,
       borderWidth: 1.5,
     } as ViewStyle,
-    evalBtnText: { fontWeight: "bold", fontSize: 14 } as TextStyle,
+    evalBtnText: { fontSize: 14 } as TextStyle,
     resultCard: {
       alignItems: "center",
       padding: Spacing.xl,
@@ -767,13 +757,11 @@ const getStyles = (Colors: any) => {
     } as ViewStyle,
     resultScoreText: {
       fontSize: 32,
-      fontWeight: "bold",
       color: Colors.textPrimary,
     } as TextStyle,
     resultPctText: {
       fontSize: 18,
       color: Colors.primary,
-      fontWeight: "bold",
       marginBottom: Spacing.lg,
     } as TextStyle,
     resultFeedback: {
@@ -824,7 +812,6 @@ const getStyles = (Colors: any) => {
     } as ViewStyle,
     downloadBtnText: {
       color: "#FFF",
-      fontWeight: "bold",
       fontSize: 13,
     } as TextStyle,
     emptyContainer: {
@@ -844,7 +831,6 @@ const getStyles = (Colors: any) => {
     } as ViewStyle,
     emptyText: {
       fontSize: 22,
-      fontWeight: "bold",
       color: Colors.textPrimary,
     } as TextStyle,
     emptySub: {
@@ -864,7 +850,6 @@ const getStyles = (Colors: any) => {
     } as ViewStyle,
     primaryBtnText: {
       color: "#FFF",
-      fontWeight: "bold",
       fontSize: 16,
     } as TextStyle,
   };

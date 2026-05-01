@@ -62,6 +62,10 @@ type SelectionActions = {
   reviewPage: (pageNumber: number, passed: boolean) => void;
   /** Initialize page progress for a range */
   initPageProgress: (startPage: number, endPage: number) => void;
+  /** Unmark pages as memorized */
+  unmarkPagesMemorized: (pages: number[]) => void;
+  /** Revert a page review */
+  unreviewPage: (pageNumber: number) => void;
 
   // ─── Selectors ─────────────────────────────────────
   /** Get all selections for a specific module */
@@ -150,6 +154,24 @@ export const useSelectionStore = create<SelectionStore>((set, get) => ({
   },
 
   removeTaskSelection: (id) => {
+    const task = get().taskSelections.find((s) => s.id === id);
+    if (task && task.isCompleted) {
+      // Revert progress if it was completed
+      const pages: number[] = [];
+      task.ranges.forEach((r) => {
+        for (let p = r.start; p <= r.end; p++) pages.push(p);
+      });
+
+      if (task.module === "memorization") {
+        get().unmarkPagesMemorized(pages);
+      } else if (
+        task.module === "review_short" ||
+        task.module === "review_long"
+      ) {
+        pages.forEach((p) => get().unreviewPage(p));
+      }
+    }
+
     set((state) => {
       const updated = state.taskSelections.filter((s) => s.id !== id);
       persistSelections(updated);
@@ -187,6 +209,23 @@ export const useSelectionStore = create<SelectionStore>((set, get) => ({
   },
 
   clearModuleSelections: (module) => {
+    const completedTasks = get().taskSelections.filter(
+      (s) => s.module === module && s.isCompleted,
+    );
+
+    completedTasks.forEach((task) => {
+      const pages: number[] = [];
+      task.ranges.forEach((r) => {
+        for (let p = r.start; p <= r.end; p++) pages.push(p);
+      });
+
+      if (module === "memorization") {
+        get().unmarkPagesMemorized(pages);
+      } else if (module === "review_short" || module.includes("review")) {
+        pages.forEach((p) => get().unreviewPage(p));
+      }
+    });
+
     set((state) => {
       const updated = state.taskSelections.filter((s) => s.module !== module);
       persistSelections(updated);
@@ -282,9 +321,9 @@ export const useSelectionStore = create<SelectionStore>((set, get) => ({
             pageNumber: p,
             memorized: false,
             strength: 1 as MemorizationStrength,
-            lastReviewed: '',
+            lastReviewed: "",
             reviewCount: 0,
-            nextReviewDate: '',
+            nextReviewDate: "",
           });
         }
       }
@@ -294,6 +333,37 @@ export const useSelectionStore = create<SelectionStore>((set, get) => ({
         return { pageProgress: updated };
       }
       return state;
+    });
+  },
+
+  unmarkPagesMemorized: (pages) => {
+    set((state) => {
+      const updated = state.pageProgress.map((p) => {
+        if (!pages.includes(p.pageNumber)) return p;
+        return {
+          ...p,
+          memorized: false,
+          strength: 1 as MemorizationStrength,
+          nextReviewDate: "",
+        };
+      });
+      persistPageProgress(updated);
+      return { pageProgress: updated };
+    });
+  },
+
+  unreviewPage: (pageNumber) => {
+    set((state) => {
+      const updated = state.pageProgress.map((p) => {
+        if (p.pageNumber !== pageNumber) return p;
+        return {
+          ...p,
+          strength: Math.max(1, p.strength - 1) as MemorizationStrength,
+          reviewCount: Math.max(0, p.reviewCount - 1),
+        };
+      });
+      persistPageProgress(updated);
+      return { pageProgress: updated };
     });
   },
 

@@ -82,7 +82,6 @@ const getStyles = (Colors: any) =>
       paddingVertical: Spacing.md,
       paddingHorizontal: Spacing.md,
       fontFamily: Typography.heading, fontSize: Typography.lg,
-      fontWeight: Typography.semibold,
       color: Colors.textPrimary,
     },
     divider: {

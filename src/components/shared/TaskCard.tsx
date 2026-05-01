@@ -165,7 +165,6 @@ const styles = StyleSheet.create({
   completeBtnText: {
     fontFamily: Typography.heading,
     fontSize: 13,
-    fontWeight: Typography.semibold,
   },
   startBtn: {
     flex: 2,
@@ -180,6 +179,5 @@ const styles = StyleSheet.create({
   startBtnText: {
     fontFamily: Typography.body,
     fontSize: 13,
-    fontWeight: "bold",
   },
 });

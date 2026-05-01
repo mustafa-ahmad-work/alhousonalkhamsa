@@ -127,7 +127,6 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: Typography.heading, fontSize: Typography.xl,
-    fontWeight: Typography.bold,
     textAlign: "center",
     marginBottom: Spacing.md,
   },
@@ -146,7 +145,6 @@ const styles = StyleSheet.create({
   },
   changelogTitle: {
     fontFamily: Typography.heading, fontSize: 10,
-    fontWeight: "bold",
     marginBottom: 4,
     textTransform: "uppercase",
   },
@@ -167,7 +165,6 @@ const styles = StyleSheet.create({
   primaryBtnText: {
     color: "#FFFFFF",
     fontFamily: Typography.heading, fontSize: Typography.base,
-    fontWeight: Typography.bold,
   },
   secondaryBtn: {
     width: "100%",
@@ -178,6 +175,5 @@ const styles = StyleSheet.create({
   },
   secondaryBtnText: {
     fontFamily: Typography.body, fontSize: Typography.sm,
-    fontWeight: Typography.medium,
   },
 });

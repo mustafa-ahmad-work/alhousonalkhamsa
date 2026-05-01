@@ -157,7 +157,6 @@ const CelebrationOverlay = ({ onComplete }: { onComplete: () => void }) => {
               style={{
                 fontFamily: Typography.heading,
                 fontSize: 26,
-                fontWeight: "bold",
                 color: Colors.textPrimary,
                 textAlign: "center",
                 marginBottom: 8,
@@ -196,7 +195,6 @@ const CelebrationOverlay = ({ onComplete }: { onComplete: () => void }) => {
                   fontSize: 14,
                   lineHeight: 24,
                   textAlign: "center",
-                  fontWeight: "500",
                   fontStyle: "italic",
                 }}
               >
@@ -220,7 +218,6 @@ const CelebrationOverlay = ({ onComplete }: { onComplete: () => void }) => {
                   color: "#FFFFFF",
                   fontFamily: Typography.heading,
                   fontSize: 16,
-                  fontWeight: "bold",
                 }}
               >
                 الحمد لله، استمرار
@@ -289,7 +286,6 @@ const viewToggleStyle = StyleSheet.create({
   text: {
     fontFamily: Typography.body,
     fontSize: 12,
-    fontWeight: "600",
   },
 });
 
@@ -548,7 +544,6 @@ const getStyles = (Colors: any) =>
     loadingTitle: {
       fontFamily: Typography.heading,
       fontSize: 22,
-      fontWeight: "bold",
       color: Colors.textPrimary,
       marginBottom: Spacing.sm,
       letterSpacing: 0.5,
@@ -598,7 +593,6 @@ const getStyles = (Colors: any) =>
       fontFamily: Typography.heading,
       fontSize: 17,
       color: Colors.textSecondary,
-      fontWeight: "600",
     },
     emptySubText: {
       fontFamily: Typography.body,
@@ -617,7 +611,6 @@ const getStyles = (Colors: any) =>
     goSettingsBtnText: {
       fontFamily: Typography.heading,
       fontSize: 14,
-      fontWeight: "bold",
       color: "#FFF",
     },
     listContent: { paddingHorizontal: Spacing.lg, paddingBottom: 120 },

@@ -52,7 +52,6 @@ const RestDayCard = ({
               restStyles.dayName,
               {
                 color: isToday ? Colors.primary : Colors.textTertiary,
-                fontWeight: isToday ? "bold" : "500",
               },
             ]}
           >
@@ -67,7 +66,7 @@ const RestDayCard = ({
                 borderRadius: 4,
               }}
             >
-              <Text style={{ color: "#FFF", fontSize: 9, fontWeight: "bold" }}>
+              <Text style={{ color: "#FFF", fontSize: 9}}>
                 اليوم
               </Text>
             </View>
@@ -105,7 +104,6 @@ const restStyles = StyleSheet.create({
   dayName: {
     fontFamily: Typography.body,
     fontSize: 13,
-    fontWeight: "500",
   },
   restLabel: {
     fontFamily: Typography.body,
@@ -290,7 +288,6 @@ export const WeekGroupCard = React.memo(function WeekGroupCard({
                             : isActive
                               ? Colors.primary
                               : Colors.textMuted,
-                      fontWeight: isToday ? "800" : "600",
                     },
                   ]}
                 >
@@ -366,7 +363,6 @@ const getStyles = (Colors: any) =>
     weekBadgeText: {
       fontFamily: Typography.heading,
       fontSize: 13,
-      fontWeight: "bold",
     },
     currentBadge: {
       flexDirection: "row",
@@ -379,7 +375,6 @@ const getStyles = (Colors: any) =>
     currentBadgeText: {
       fontFamily: Typography.heading,
       fontSize: 10,
-      fontWeight: "bold",
       color: "#FFF",
     },
     weekProgressRow: {
@@ -401,7 +396,6 @@ const getStyles = (Colors: any) =>
     weekProgressText: {
       fontFamily: Typography.heading,
       fontSize: 11,
-      fontWeight: "600",
       minWidth: 28,
       textAlign: "right",
     },
@@ -422,7 +416,6 @@ const getStyles = (Colors: any) =>
     dowDotText: {
       fontFamily: Typography.heading,
       fontSize: 10,
-      fontWeight: "600",
     },
     daysContainer: {
       padding: Spacing.md,

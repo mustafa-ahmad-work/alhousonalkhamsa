@@ -387,7 +387,7 @@ const getStyles = (Colors: any) =>
     },
     splashTitle: {
       fontFamily: "Tajawal_700Bold",
-      fontSize: Typography["3xl"],
+      fontSize: Typography["2xl"],
       color: Colors.textPrimary,
       textAlign: "center",
       letterSpacing: 1,

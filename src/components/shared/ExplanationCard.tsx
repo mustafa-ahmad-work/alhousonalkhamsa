@@ -64,7 +64,6 @@ const getStyles = (Colors: any) =>
     title: {
       fontFamily: Typography.heading,
       fontSize: Typography.md,
-      fontWeight: Typography.bold,
       flex: 1,
       textAlign: "left",
     },

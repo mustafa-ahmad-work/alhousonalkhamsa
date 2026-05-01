@@ -113,6 +113,7 @@ export default function ModuleScreen() {
   };
 
   const handleRemove = (taskId: string) => {
+    const task = selections.find((s) => s.id === taskId);
     HusoonAlert.alert(
       "تأكيد",
       "هل تريد حذف هذا النطاق؟",
@@ -121,7 +122,25 @@ export default function ModuleScreen() {
         {
           text: "حذف",
           style: "destructive",
-          onPress: () => selectionStore.removeTaskSelection(taskId),
+          onPress: () => {
+            if (task && task.isCompleted) {
+              const pages: number[] = [];
+              task.ranges.forEach((r) => {
+                for (let p = r.start; p <= r.end; p++) pages.push(p);
+              });
+              if (task.module === "memorization") {
+                dispatch({
+                  type: "UNMARK_PAGES_MEMORIZED",
+                  payload: { pages },
+                });
+              } else if (task.module.includes("review")) {
+                pages.forEach((p) =>
+                  dispatch({ type: "UNREVIEW_PAGE", payload: { pageNumber: p } }),
+                );
+              }
+            }
+            selectionStore.removeTaskSelection(taskId);
+          },
         },
       ],
       "delete",
@@ -161,8 +180,28 @@ export default function ModuleScreen() {
         {
           text: "مسح الكل",
           style: "destructive",
-          onPress: () =>
-            selectionStore.clearModuleSelections(moduleInfo.id as ModuleId),
+          onPress: () => {
+            const completed = selections.filter(
+              (s) => s.isCompleted && s.module === moduleInfo.id,
+            );
+            completed.forEach((task) => {
+              const pages: number[] = [];
+              task.ranges.forEach((r) => {
+                for (let p = r.start; p <= r.end; p++) pages.push(p);
+              });
+              if (task.module === "memorization") {
+                dispatch({
+                  type: "UNMARK_PAGES_MEMORIZED",
+                  payload: { pages },
+                });
+              } else if (task.module.includes("review")) {
+                pages.forEach((p) =>
+                  dispatch({ type: "UNREVIEW_PAGE", payload: { pageNumber: p } }),
+                );
+              }
+            });
+            selectionStore.clearModuleSelections(moduleInfo.id as ModuleId);
+          },
         },
       ],
       "delete",
@@ -321,7 +360,7 @@ export default function ModuleScreen() {
                 ]}
                 onPress={() => setShowSelectionModal(true)}
               >
-                <Text style={{ color: "#FFF", fontWeight: "bold" }}>
+                <Text style={{ color: "#FFF"}}>
                   إضافة ورد جديد
                 </Text>
               </TouchableOpacity>
@@ -366,7 +405,6 @@ export default function ModuleScreen() {
                   style={{
                     color: Colors.red,
                     fontSize: 13,
-                    fontWeight: "bold",
                   }}
                 >
                   مسح السجل
@@ -533,7 +571,6 @@ const getStyles = (Colors: any) =>
     headerTitle: {
       fontFamily: Typography.heading,
       fontSize: 18,
-      fontWeight: "bold",
       color: Colors.textPrimary,
     },
     moduleBadge: {
@@ -547,7 +584,6 @@ const getStyles = (Colors: any) =>
     },
     moduleBadgeText: {
       fontSize: 10,
-      fontWeight: "bold",
       textTransform: "uppercase",
     },
     scroll: { padding: Spacing.xl, paddingBottom: 60 },
@@ -576,7 +612,6 @@ const getStyles = (Colors: any) =>
     planSugTitle: {
       fontFamily: Typography.heading,
       fontSize: 15,
-      fontWeight: "bold",
     },
     planSugBadge: {
       paddingHorizontal: 8,
@@ -586,7 +621,6 @@ const getStyles = (Colors: any) =>
     },
     planSugBadgeText: {
       fontSize: 10,
-      fontWeight: "bold",
     },
     planSugContent: {
       flexDirection: "row",
@@ -610,7 +644,6 @@ const getStyles = (Colors: any) =>
     planSugActionText: {
       color: "#FFF",
       fontSize: 12,
-      fontWeight: "bold",
     },
     section: {
       gap: Spacing.md,
@@ -624,7 +657,6 @@ const getStyles = (Colors: any) =>
     sectionTitle: {
       fontFamily: Typography.heading,
       fontSize: 17,
-      fontWeight: "900",
       color: Colors.textPrimary,
     },
     countBadge: {
@@ -638,7 +670,6 @@ const getStyles = (Colors: any) =>
     countBadgeText: {
       fontSize: 11,
       color: Colors.textSecondary,
-      fontWeight: "bold",
     },
     emptyBox: {
       alignItems: "center",
@@ -682,7 +713,6 @@ const getStyles = (Colors: any) =>
     },
     addBtnText: {
       fontSize: 13,
-      fontWeight: "bold",
     },
     backBtn: {
       marginTop: Spacing.md,
@@ -691,7 +721,7 @@ const getStyles = (Colors: any) =>
       backgroundColor: Colors.primaryMuted,
       borderRadius: BorderRadius.md,
     },
-    backBtnText: { color: Colors.primary, fontWeight: Typography.medium },
+    backBtnText: { color: Colors.primary},
     clearBtn: {
       flexDirection: "row",
       alignItems: "center",
@@ -745,7 +775,7 @@ const getStyles = (Colors: any) =>
       paddingVertical: 4,
       borderRadius: 8,
     },
-    statusText: { fontSize: 11, color: Colors.success, fontWeight: "bold" },
+    statusText: { fontSize: 11, color: Colors.success},
     deleteCircle: {
       width: 28,
       height: 28,
@@ -775,7 +805,6 @@ const getStyles = (Colors: any) =>
     },
     dateLabel: {
       fontSize: 14,
-      fontWeight: "bold",
       color: Colors.textPrimary,
       fontFamily: Typography.heading,
       backgroundColor: Colors.surfaceElevated,

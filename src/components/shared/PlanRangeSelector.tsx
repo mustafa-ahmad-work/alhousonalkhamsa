@@ -177,7 +177,7 @@ const getStyles = (Colors: any) =>
       fontSize: 12,
       color: Colors.textTertiary,
     },
-    activeTabText: { color: Colors.primary, fontWeight: "bold" },
+    activeTabText: { color: Colors.primary},
     rangeInputs: {
       flexDirection: "row",
       justifyContent: "space-between",
@@ -249,5 +249,5 @@ const getStyles = (Colors: any) =>
       fontSize: 11,
       color: Colors.textSecondary,
     },
-    activeDirText: { color: Colors.primary, fontWeight: "bold" },
+    activeDirText: { color: Colors.primary},
   });

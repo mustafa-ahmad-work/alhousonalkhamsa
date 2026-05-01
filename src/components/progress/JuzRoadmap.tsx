@@ -119,7 +119,7 @@ const getStyles = (Colors: any) =>
     },
     milestoneActive: { backgroundColor: "transparent" },
     milestoneEmpty: { opacity: 0.8 },
-    milestoneNum: { fontSize: 14, fontWeight: "bold" },
+    milestoneNum: { fontSize: 14},
     nodeCheck: {
       position: "absolute",
       bottom: -2,
@@ -133,7 +133,6 @@ const getStyles = (Colors: any) =>
     nodeContent: { flex: 1, marginLeft: Spacing.lg, paddingTop: 4 },
     nodeTitle: {
       fontSize: 15,
-      fontWeight: "bold",
       textAlign: "left",
       color: Colors.textPrimary,
     },

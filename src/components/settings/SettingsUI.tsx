@@ -49,12 +49,12 @@ export function SettingRow({ label, value, icon, onPress, showDivider, Colors }:
 
 const styles = StyleSheet.create({
   container: { marginTop: Spacing.xl },
-  title: { fontSize: 13, fontWeight: "bold", marginBottom: Spacing.sm, marginHorizontal: Spacing.xs },
+  title: { fontSize: 13, marginBottom: Spacing.sm, marginHorizontal: Spacing.xs },
   card: { borderRadius: 20, borderWidth: 1, padding: Spacing.sm, overflow: "hidden" },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: Spacing.lg, paddingHorizontal: Spacing.md },
   rowLeft: { flex: 1, alignItems: "flex-start" },
-  label: { fontSize: 14, fontWeight: "500", marginBottom: 2 },
+  label: { fontSize: 14, marginBottom: 2 },
   valueRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  value: { fontSize: 13, fontWeight: "bold" },
+  value: { fontSize: 13},
   divider: { height: 1, marginHorizontal: Spacing.md },
 });
