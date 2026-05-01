@@ -40,6 +40,7 @@ export default function DashboardScreen() {
   const [blockType, setBlockType] = useState<
     "disabled" | "force_update" | "optional_update" | null
   >(null);
+  const [hasDismissedUpdate, setHasDismissedUpdate] = useState(false);
 
   const checkVersion = useCallback(async () => {
     try {
@@ -48,16 +49,21 @@ export default function DashboardScreen() {
         setUpdateInfo(info);
         if (info.isAppDisabled) setBlockType("disabled");
         else if (info.isMandatory) setBlockType("force_update");
-        else if (info.hasUpdate) setBlockType("optional_update");
-        else setBlockType(null);
+        else if (info.hasUpdate && !hasDismissedUpdate) setBlockType("optional_update");
+        else if (!info.hasUpdate) setBlockType(null);
       }
     } catch (e) {
       console.warn("Failed to check version:", e);
     }
-  }, []);
+  }, [hasDismissedUpdate]);
 
+  // 1. Initial Check on Mount
   useEffect(() => {
     checkVersion();
+  }, []);
+
+  // 2. Continuous Check only for Critical Blocks
+  useEffect(() => {
     if (blockType === "disabled" || blockType === "force_update") {
       const interval = setInterval(checkVersion, 30000);
       return () => clearInterval(interval);
@@ -153,7 +159,11 @@ export default function DashboardScreen() {
           <VersionOverlay
             type={blockType}
             info={updateInfo}
-            onDismiss={() => setBlockType(null)}
+            onDismiss={() => {
+              if (updateInfo) UpdateService.dismissUpdate(updateInfo.latestVersion);
+              setHasDismissedUpdate(true);
+              setBlockType(null);
+            }}
             onRefresh={checkVersion}
           />
         )}

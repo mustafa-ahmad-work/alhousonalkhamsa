@@ -15,51 +15,91 @@ export interface UpdateInfo {
   minRequiredVersion?: string;
 }
 
-const CACHE_KEY = "@alhouson_update_cache";
+const CACHE_KEY = "@mafateeh_update_raw_cache";
+const DISMISSED_KEY = "@mafateeh_dismissed_version";
+const LAST_CHECK_KEY = "@mafateeh_last_check_time";
 
 /**
  * Service to check for new app versions and app status.
  */
 export const UpdateService = {
-  CURRENT_VERSION: Constants.expoConfig?.version || "1.0.0",
+  CURRENT_VERSION: Constants.expoConfig?.version || (Constants as any).manifest?.version || "1.0.0",
+  dismissedOptionalVersion: null as string | null,
+  isChecking: false,
+
+  async dismissUpdate(version: string) {
+    this.dismissedOptionalVersion = version;
+    try {
+      await AsyncStorage.setItem(DISMISSED_KEY, version);
+    } catch (e) {
+      // ignore
+    }
+  },
 
   /**
    * Main check function that handles remote fetching and local caching.
    */
   async checkForUpdate(): Promise<UpdateInfo | null> {
-    const freshUrl = `https://raw.githubusercontent.com/mustafa-ahmad-work/khumasiat-al-hifz/main/version.json?cb=${Date.now()}`;
-    
-    try {
-      // 1. Try to fetch from remote
-      const response = await fetch(freshUrl, {
-        headers: { 
-          "Cache-Control": "no-cache, no-store, must-revalidate",
-          "Pragma": "no-cache",
-          "Expires": "0"
-        },
-      });
+    if (this.isChecking) return null;
+    this.isChecking = true;
 
-      if (response.ok) {
-        const data = await response.json();
-        const info = this.processUpdateData(data);
-        
-        // Save to cache
-        await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(info));
-        return info;
+    try {
+      // Ensure dismissed version is loaded
+      if (!this.dismissedOptionalVersion) {
+        try {
+          this.dismissedOptionalVersion = await AsyncStorage.getItem(DISMISSED_KEY);
+        } catch (e) {}
       }
-    } catch (error) {
-      console.warn("Failed to fetch remote update, falling back to cache:", error);
-    }
 
-    // 2. Fallback to cache if offline or fetch failed
-    try {
-      const cached = await AsyncStorage.getItem(CACHE_KEY);
-      if (cached) return JSON.parse(cached);
-    } catch (e) {
-      // ignore
-    }
+      const freshUrl = `https://raw.githubusercontent.com/mustafa-ahmad-work/mafateeh-tathbeet-alquran/main/version.json?cb=${Date.now()}`;
+      
+      try {
+        // Check if we should skip fetch (e.g. checked in last 12 hours)
+        const lastCheck = await AsyncStorage.getItem(LAST_CHECK_KEY);
+        const now = Date.now();
+        const twentyFourHours = 24 * 60 * 60 * 1000;
 
-    return null;
+        if (lastCheck && now - parseInt(lastCheck) < twentyFourHours) {
+          const cached = await AsyncStorage.getItem(CACHE_KEY);
+          if (cached) {
+            const data = JSON.parse(cached);
+            const info = this.processUpdateData(data);
+            if (!info.isMandatory && !info.isAppDisabled) {
+              return info;
+            }
+          }
+        }
+
+        const response = await fetch(freshUrl, {
+          headers: { 
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0"
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(data));
+          await AsyncStorage.setItem(LAST_CHECK_KEY, Date.now().toString());
+          return this.processUpdateData(data);
+        }
+      } catch (error) {
+        console.warn("Failed to fetch remote update, falling back to cache:", error);
+      }
+
+      try {
+        const cached = await AsyncStorage.getItem(CACHE_KEY);
+        if (cached) {
+          const data = JSON.parse(cached);
+          return this.processUpdateData(data);
+        }
+      } catch (e) {}
+
+      return null;
+    } finally {
+      this.isChecking = false;
+    }
   },
 
   /**
@@ -70,8 +110,13 @@ export const UpdateService = {
     const minRequiredVersion = data.minRequiredVersion || "1.0.0";
     const isAppDisabled = !!data.isAppDisabled;
 
-    const hasUpdate = this.isVersionGreater(latestVersion, this.CURRENT_VERSION);
+    let hasUpdate = this.isVersionGreater(latestVersion, this.CURRENT_VERSION);
     const isMandatory = this.isVersionGreater(minRequiredVersion, this.CURRENT_VERSION);
+
+    // If the user dismissed this specific optional update in the current session, hide it
+    if (!isMandatory && hasUpdate && this.dismissedOptionalVersion === latestVersion) {
+      hasUpdate = false;
+    }
 
     return {
       hasUpdate,
@@ -80,7 +125,7 @@ export const UpdateService = {
       disabledMessage: data.disabledMessage || "التطبيق يخضع للصيانة، نعتذر عن الإزعاج.",
       latestVersion,
       changelog: data.changelog,
-      link: data.link || "https://github.com/mustafa-ahmad-work/khumasiat-al-hifz/releases",
+      link: data.link || "https://github.com/mustafa-ahmad-work/mafateeh-tathbeet-alquran/releases",
       minRequiredVersion,
     };
   },

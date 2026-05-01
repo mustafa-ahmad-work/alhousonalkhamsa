@@ -9,8 +9,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import { useTheme, Shadow, Spacing, Typography, BorderRadius } from "../../theme";
+import { KhumsAlert } from "../shared/CustomAlert";
 import { UpdateInfo } from "../../store/UpdateService";
 
 const { width } = Dimensions.get("window");
@@ -27,17 +27,26 @@ export default function VersionOverlay({ type, info, onDismiss, onRefresh }: Pro
   
   const isBlocking = type === 'disabled' || type === 'force_update';
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (info.link) {
-      Linking.openURL(info.link);
+      try {
+        const canOpen = await Linking.canOpenURL(info.link);
+        if (canOpen) {
+          await Linking.openURL(info.link);
+        } else {
+          KhumsAlert.alert("خطأ", "لا يمكن فتح رابط التحديث على جهازك.", [], "error");
+        }
+      } catch (err) {
+        console.error("Error opening update link:", err);
+        KhumsAlert.alert("خطأ", "حدث خطأ أثناء محاولة فتح الرابط.", [], "error");
+      }
     }
   };
 
   return (
     <Modal visible={true} transparent animationType="fade">
       <View style={styles.overlay}>
-        <Animated.View 
-          entering={FadeInDown.duration(400).springify()}
+        <View 
           style={[styles.content, { backgroundColor: Colors.surface, borderColor: Colors.borderLight }]}
         >
           <View style={[styles.iconContainer, { backgroundColor: `${type === 'disabled' ? Colors.red : Colors.primary}15` }]}>
@@ -94,7 +103,7 @@ export default function VersionOverlay({ type, info, onDismiss, onRefresh }: Pro
               </TouchableOpacity>
             )}
           </View>
-        </Animated.View>
+        </View>
       </View>
     </Modal>
   );
