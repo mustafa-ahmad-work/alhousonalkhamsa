@@ -1,5 +1,5 @@
 {
-  "latestVersion": "1.0.0",
+  "latestVersion": "1.6.0",
   "minRequiredVersion": "1.0.0",
   "isAppDisabled": false,
   "disabledMessage": "التطبيق يخضع للصيانة الدورية حالياً لتوفير تجربة أفضل. نعتذر عن الإزعاج ونعدكم بالعودة قريباً جداً.",
@@ -8,7 +8,7 @@
   "link": "https://github.com/mustafa-ahmad-work/khumasiat-al-hifz/releases/tag/v1.2.0",
   "history": [
     {
-      "version": "1.5.0",
+      "version": "1.6.0",
       "date": "2026-04-28",
       "notes": "الإصدار الأول للتطبيق"
     },
