@@ -23,7 +23,7 @@ export const DeveloperCard: React.FC<DeveloperCardProps> = ({ Colors }) => {
     >
       <View style={styles.info}>
         <Text style={[styles.name, { color: Colors.textPrimary }]}>
-          م/ مصطفى أحمد
+          مصطفى أحمد
         </Text>
         <Text style={[styles.desc, { color: Colors.textSecondary }]}>
           مطور برمجيات يهدف من خلال هذا العمل إلى تيسير ومساعدة المسلمين في حفظ

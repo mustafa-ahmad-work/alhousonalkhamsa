@@ -177,8 +177,7 @@ export default function SettingsScreen() {
               { marginBottom: Spacing.md, lineHeight: 20 },
             ]}
           >
-            اختر طبعة المصحف التي تحفظ منها. سيتم بناء الخطة بناءً على أرقام
-            صفحات هذه الطبعة تحديداً.
+            اختر طبعة المصحف التي تحفظ منها. حالياً نوفر (مصحف المدينة المنورة)، وقريباً سنوفر طبعات أخرى (الشمرلي، باكستاني) لتناسب طريقتك في الحفظ بدقة.
           </Text>
           <MushafEditionPicker
             currentEditionId={currentEditionId}
