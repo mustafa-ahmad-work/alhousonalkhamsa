@@ -1,26 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
   TouchableOpacity,
-} from 'react-native';
-import { HusoonAlert } from '../../components/shared/CustomAlert';
-import { useTheme, Typography, Spacing, BorderRadius } from '../../theme';
-import { RangeSelection, ModuleId } from '../../types';
-import { SurahMeta, TOTAL_PAGES } from '../../data/quranMeta';
-import { useSelectionStore } from '../../store/selectionStore';
+  View,
+} from "react-native";
+import { KhumsAlert } from "../../components/shared/CustomAlert";
+import { SurahMeta, TOTAL_PAGES } from "../../data/quranMeta";
+import { useSelectionStore } from "../../store/selectionStore";
+import { BorderRadius, Spacing, Typography, useTheme } from "../../theme";
+import { ModuleId, RangeSelection } from "../../types";
 
 // Components
-import { SelectionToggle } from '../../components/shared/SelectionToggle';
-import { SurahPicker } from '../../components/shared/SurahPicker';
-import { PageRangePicker } from '../../components/shared/PageRangePicker';
-import { RangeChip } from '../../components/shared/RangeChip';
-import { PrimaryButton } from '../../components/shared/PrimaryButton';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
+import { PageRangePicker } from "../../components/shared/PageRangePicker";
+import { PrimaryButton } from "../../components/shared/PrimaryButton";
+import { RangeChip } from "../../components/shared/RangeChip";
+import { SelectionToggle } from "../../components/shared/SelectionToggle";
+import { SurahPicker } from "../../components/shared/SurahPicker";
 
 type SelectionScreenProps = {
   moduleId: ModuleId;
@@ -43,32 +43,32 @@ export function SelectionScreen({
     getModuleSelections,
   } = useSelectionStore();
 
-  const [selectionType, setSelectionType] = useState<'surah' | 'page'>('page');
+  const [selectionType, setSelectionType] = useState<"surah" | "page">("page");
 
   // Surah State
   const [selectedSurah, setSelectedSurah] = useState<SurahMeta | null>(null);
-  const [startAyah, setStartAyah] = useState('');
-  const [endAyah, setEndAyah] = useState('');
+  const [startAyah, setStartAyah] = useState("");
+  const [endAyah, setEndAyah] = useState("");
 
   // Page State
-  const [startPage, setStartPage] = useState('');
-  const [endPage, setEndPage] = useState('');
+  const [startPage, setStartPage] = useState("");
+  const [endPage, setEndPage] = useState("");
 
   // Local drafted ranges before saving
   const [draftRanges, setDraftRanges] = useState<RangeSelection[]>([]);
 
   // ─── Add Range to Draft ────────────────────────────────────
   const handleAddRange = () => {
-    if (selectionType === 'surah') {
+    if (selectionType === "surah") {
       if (!selectedSurah) {
-        HusoonAlert.alert('خطأ', 'الرجاء اختيار السورة أولاً', [], 'error');
+        KhumsAlert.alert("خطأ", "الرجاء اختيار السورة أولاً", [], "error");
         return;
       }
       const sAyah = parseInt(startAyah) || 1;
       const eAyah = parseInt(endAyah) || selectedSurah.ayahCount;
 
       if (eAyah < sAyah || sAyah < 1 || eAyah > selectedSurah.ayahCount) {
-        HusoonAlert.alert('خطأ', 'نطاق الآيات غير صحيح', [], 'error');
+        KhumsAlert.alert("خطأ", "نطاق الآيات غير صحيح", [], "error");
         return;
       }
       const newRange = createSurahRange(selectedSurah.id, sAyah, eAyah);
@@ -76,14 +76,20 @@ export function SelectionScreen({
 
       // Reset
       setSelectedSurah(null);
-      setStartAyah('');
-      setEndAyah('');
+      setStartAyah("");
+      setEndAyah("");
     } else {
       const sPage = parseInt(startPage);
       const ePage = parseInt(endPage);
 
-      if (!sPage || !ePage || ePage < sPage || sPage < 1 || ePage > TOTAL_PAGES) {
-        HusoonAlert.alert('خطأ', 'نطاق الصفحات غير صحيح', [], 'error');
+      if (
+        !sPage ||
+        !ePage ||
+        ePage < sPage ||
+        sPage < 1 ||
+        ePage > TOTAL_PAGES
+      ) {
+        KhumsAlert.alert("خطأ", "نطاق الصفحات غير صحيح", [], "error");
         return;
       }
 
@@ -91,8 +97,8 @@ export function SelectionScreen({
       setDraftRanges((prev) => [...prev, newRange]);
 
       // Reset
-      setStartPage('');
-      setEndPage('');
+      setStartPage("");
+      setEndPage("");
     }
   };
 
@@ -103,7 +109,12 @@ export function SelectionScreen({
   // ─── Save Task Selection ──────────────────────────────────
   const handleSave = () => {
     if (draftRanges.length === 0) {
-      HusoonAlert.alert('تنبيه', 'أضف نطاقاً واحداً على الأقل للمتابعة', [], 'warning');
+      KhumsAlert.alert(
+        "تنبيه",
+        "أضف نطاقاً واحداً على الأقل للمتابعة",
+        [],
+        "warning",
+      );
       return;
     }
     addTaskSelection(moduleId, draftRanges);
@@ -113,7 +124,7 @@ export function SelectionScreen({
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView
         contentContainerStyle={styles.scroll}
@@ -128,14 +139,14 @@ export function SelectionScreen({
         <SelectionToggle value={selectionType} onChange={setSelectionType} />
 
         <View style={styles.pickerContainer}>
-          {selectionType === 'surah' ? (
+          {selectionType === "surah" ? (
             <SurahPicker
               selectedSurah={selectedSurah}
               startAyah={startAyah}
               endAyah={endAyah}
               onSurahChange={(s) => {
                 setSelectedSurah(s);
-                setStartAyah('1');
+                setStartAyah("1");
                 setEndAyah(s.ayahCount.toString());
               }}
               onStartAyahChange={setStartAyah}
@@ -208,24 +219,26 @@ const getStyles = (Colors: any) =>
       gap: Spacing.xl,
     },
     title: {
-      fontFamily: Typography.heading, fontSize: Typography.xl,
+      fontFamily: Typography.heading,
+      fontSize: Typography.xl,
       fontWeight: Typography.bold,
       color: Colors.textPrimary,
-      textAlign: 'center',
+      textAlign: "center",
     },
     subtitle: {
-      fontFamily: Typography.body, fontSize: Typography.sm,
+      fontFamily: Typography.body,
+      fontSize: Typography.sm,
       color: Colors.textSecondary,
-      textAlign: 'center',
+      textAlign: "center",
       marginTop: -Spacing.lg, // slightly pull up due to gap
     },
     pickerContainer: {
       gap: Spacing.lg,
     },
     addBtn: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
       gap: Spacing.sm,
       backgroundColor: Colors.primary,
       paddingVertical: Spacing.md,
@@ -237,9 +250,10 @@ const getStyles = (Colors: any) =>
       elevation: 4,
     },
     addBtnText: {
-      fontFamily: Typography.heading, fontSize: Typography.base,
+      fontFamily: Typography.heading,
+      fontSize: Typography.base,
       fontWeight: Typography.bold,
-      color: '#ffffff',
+      color: "#ffffff",
     },
     draftSection: {
       backgroundColor: Colors.glass,
@@ -250,28 +264,30 @@ const getStyles = (Colors: any) =>
       gap: Spacing.md,
     },
     draftHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
     },
     draftTitle: {
-      fontFamily: Typography.heading, fontSize: Typography.base,
+      fontFamily: Typography.heading,
+      fontSize: Typography.base,
       fontWeight: Typography.semibold,
       color: Colors.textPrimary,
     },
     draftCount: {
-      fontFamily: Typography.heading, fontSize: Typography.xs,
+      fontFamily: Typography.heading,
+      fontSize: Typography.xs,
       fontWeight: Typography.bold,
       color: Colors.primary,
       backgroundColor: Colors.primaryMuted,
       paddingHorizontal: Spacing.sm,
       paddingVertical: 2,
       borderRadius: BorderRadius.full,
-      overflow: 'hidden',
+      overflow: "hidden",
     },
     chipContainer: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
+      flexDirection: "row",
+      flexWrap: "wrap",
       gap: Spacing.sm,
     },
     footer: {
@@ -283,10 +299,11 @@ const getStyles = (Colors: any) =>
     },
     cancelBtn: {
       paddingVertical: Spacing.sm,
-      alignItems: 'center',
+      alignItems: "center",
     },
     cancelBtnText: {
-      fontFamily: Typography.body, fontSize: Typography.base,
+      fontFamily: Typography.body,
+      fontSize: Typography.base,
       fontWeight: Typography.medium,
       color: Colors.textTertiary,
     },

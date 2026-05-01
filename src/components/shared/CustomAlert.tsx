@@ -37,7 +37,7 @@ interface AlertConfig {
 
 let alertResolver: ((config: AlertConfig | null) => void) | null = null;
 
-export const HusoonAlert = {
+export const KhumsAlert = {
   alert: (
     title: string,
     message?: string,

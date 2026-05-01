@@ -1,13 +1,12 @@
-import { useState, useEffect } from 'react';
-import { HusoonAlert } from '../components/shared/CustomAlert';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
-import { useAppStore } from '../store/AppStore';
-import { useSelectionStore } from '../store/selectionStore';
-import { NotificationService } from '../store/NotificationService';
-import { getMushafEdition } from '../data/mushafEditions';
-import { SURAHS } from '../data/quranMeta';
-import { useThemeStore } from '../store/ThemeStore';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import { KhumsAlert } from "../components/shared/CustomAlert";
+import { getMushafEdition } from "../data/mushafEditions";
+import { useAppStore } from "../store/AppStore";
+import { NotificationService } from "../store/NotificationService";
+import { useSelectionStore } from "../store/selectionStore";
+import { useThemeStore } from "../store/ThemeStore";
 
 export type EditType =
   | "name"
@@ -37,11 +36,15 @@ export function useSettingsLogic() {
   const [editType, setEditType] = useState<EditType>("name");
   const [editValue, setEditValue] = useState("");
 
-
-
-  const [planMode, setPlanMode] = useState<"daily" | "weekly">((state.settings as any).planMode ?? "daily");
-  const [dailyPages, setDailyPages] = useState<number>(state.user?.dailyPages ?? 1);
-  const [activeDaysOfWeek, setActiveDaysOfWeek] = useState<number[]>((state.settings as any).activeDaysOfWeek ?? [0, 1, 2, 3, 4]);
+  const [planMode, setPlanMode] = useState<"daily" | "weekly">(
+    (state.settings as any).planMode ?? "daily",
+  );
+  const [dailyPages, setDailyPages] = useState<number>(
+    state.user?.dailyPages ?? 1,
+  );
+  const [activeDaysOfWeek, setActiveDaysOfWeek] = useState<number[]>(
+    (state.settings as any).activeDaysOfWeek ?? [0, 1, 2, 3, 4],
+  );
 
   const [timePickerVisible, setTimePickerVisible] = useState(false);
   const [selectedHour, setSelectedHour] = useState(8);
@@ -62,13 +65,20 @@ export function useSettingsLogic() {
     let value = "";
     if (type === "name") value = state.user?.name ?? "";
     else if (type === "goal") value = state.user?.goal ?? "";
-    else if (type === "dailyPages") value = (state.user?.dailyPages ?? 0).toString();
-    else if (type === "memorizationTimer") value = (state.settings.memorizationTimerMinutes ?? 15).toString();
-    else if (type === "reviewTimer") value = (state.settings.reviewTimerMinutes ?? 15).toString();
-    else if (type === "preparationTimer") value = (state.settings.preparationTimerMinutes || 15).toString();
-    else if (type === "recitationTimer") value = (state.settings.recitationTimerMinutes || 20).toString();
-    else if (type === "listeningTimer") value = (state.settings.listeningTimerMinutes || 15).toString();
-    else if (type.endsWith("Time")) value = (state.settings.notifications as any)[type] ?? "08:00";
+    else if (type === "dailyPages")
+      value = (state.user?.dailyPages ?? 0).toString();
+    else if (type === "memorizationTimer")
+      value = (state.settings.memorizationTimerMinutes ?? 15).toString();
+    else if (type === "reviewTimer")
+      value = (state.settings.reviewTimerMinutes ?? 15).toString();
+    else if (type === "preparationTimer")
+      value = (state.settings.preparationTimerMinutes || 15).toString();
+    else if (type === "recitationTimer")
+      value = (state.settings.recitationTimerMinutes || 20).toString();
+    else if (type === "listeningTimer")
+      value = (state.settings.listeningTimerMinutes || 15).toString();
+    else if (type.endsWith("Time"))
+      value = (state.settings.notifications as any)[type] ?? "08:00";
 
     if (type.endsWith("Time")) {
       const [h, m] = value.split(":").map(Number);
@@ -83,17 +93,35 @@ export function useSettingsLogic() {
 
   const saveEdit = () => {
     if (editType === "dailyPages") {
-      dispatch({ type: "UPDATE_USER", payload: { dailyPages: parseInt(editValue, 10) || 0 } });
+      dispatch({
+        type: "UPDATE_USER",
+        payload: { dailyPages: parseInt(editValue, 10) || 0 },
+      });
     } else if (editType === "memorizationTimer") {
-      dispatch({ type: "UPDATE_SETTINGS", payload: { memorizationTimerMinutes: parseInt(editValue, 10) || 15 } });
+      dispatch({
+        type: "UPDATE_SETTINGS",
+        payload: { memorizationTimerMinutes: parseInt(editValue, 10) || 15 },
+      });
     } else if (editType === "reviewTimer") {
-      dispatch({ type: "UPDATE_SETTINGS", payload: { reviewTimerMinutes: parseInt(editValue, 10) || 15 } });
+      dispatch({
+        type: "UPDATE_SETTINGS",
+        payload: { reviewTimerMinutes: parseInt(editValue, 10) || 15 },
+      });
     } else if (editType === "preparationTimer") {
-      dispatch({ type: "UPDATE_SETTINGS", payload: { preparationTimerMinutes: parseInt(editValue, 10) || 15 } });
+      dispatch({
+        type: "UPDATE_SETTINGS",
+        payload: { preparationTimerMinutes: parseInt(editValue, 10) || 15 },
+      });
     } else if (editType === "recitationTimer") {
-      dispatch({ type: "UPDATE_SETTINGS", payload: { recitationTimerMinutes: parseInt(editValue, 10) || 20 } });
+      dispatch({
+        type: "UPDATE_SETTINGS",
+        payload: { recitationTimerMinutes: parseInt(editValue, 10) || 20 },
+      });
     } else if (editType === "listeningTimer") {
-      dispatch({ type: "UPDATE_SETTINGS", payload: { listeningTimerMinutes: parseInt(editValue, 10) || 15 } });
+      dispatch({
+        type: "UPDATE_SETTINGS",
+        payload: { listeningTimerMinutes: parseInt(editValue, 10) || 15 },
+      });
     } else {
       dispatch({ type: "UPDATE_USER", payload: { [editType]: editValue } });
     }
@@ -104,13 +132,21 @@ export function useSettingsLogic() {
     const formattedTime = `${selectedHour.toString().padStart(2, "0")}:${selectedMinute.toString().padStart(2, "0")}`;
     dispatch({
       type: "UPDATE_SETTINGS",
-      payload: { notifications: { ...state.settings.notifications, [editType]: formattedTime } },
+      payload: {
+        notifications: {
+          ...state.settings.notifications,
+          [editType]: formattedTime,
+        },
+      },
     });
     setTimePickerVisible(false);
   };
 
   const applyPlanChanges = (overrideEditionId?: string) => {
-    const editionId = overrideEditionId ?? (state.settings as any).mushafEdition ?? "madani_604";
+    const editionId =
+      overrideEditionId ??
+      (state.settings as any).mushafEdition ??
+      "madani_604";
     const edition = getMushafEdition(editionId);
     const totalPages = edition.totalPages;
     let pages: number[] = [];
@@ -120,7 +156,7 @@ export function useSettingsLogic() {
     label = `القرآن الكريم كاملاً — ${edition.nameAr}`;
 
     if (pages.length === 0) {
-      HusoonAlert.alert("خطأ", "يرجى اختيار نطاق صحيح", [], "error");
+      KhumsAlert.alert("خطأ", "يرجى اختيار نطاق صحيح", [], "error");
       return;
     }
 
@@ -128,11 +164,12 @@ export function useSettingsLogic() {
       type: "REGENERATE_PLAN",
       payload: { pageNumbers: pages, label, direction: "forward" },
     });
-    HusoonAlert.alert("تم التحديث", `تم إنشاء خطة جديدة بنجاح`, [], "success");
+    KhumsAlert.alert("تم التحديث", `تم إنشاء خطة جديدة بنجاح`, [], "success");
   };
 
   const applyPlanModeSettings = () => {
-    const finalActiveDays = planMode === "daily" ? [0, 1, 2, 3, 4, 5, 6] : activeDaysOfWeek;
+    const finalActiveDays =
+      planMode === "daily" ? [0, 1, 2, 3, 4, 5, 6] : activeDaysOfWeek;
     dispatch({
       type: "UPDATE_SETTINGS",
       payload: { planMode, activeDaysOfWeek: finalActiveDays } as any,
@@ -142,7 +179,7 @@ export function useSettingsLogic() {
   };
 
   const handleReset = () => {
-    HusoonAlert.alert(
+    KhumsAlert.alert(
       "مسح البيانات بالكامل",
       "هل أنت متأكد من مسح جميع بيانات الحفظ والتقدم؟ هذا الإجراء لا يمكن التراجع عنه.",
       [
@@ -158,12 +195,17 @@ export function useSettingsLogic() {
               useSelectionStore.getState().reset();
               router.replace("/" as any);
             } catch (e) {
-              HusoonAlert.alert("خطأ", "فشل مسح البيانات، يرجى المحاولة مرة أخرى.", [], "error");
+              KhumsAlert.alert(
+                "خطأ",
+                "فشل مسح البيانات، يرجى المحاولة مرة أخرى.",
+                [],
+                "error",
+              );
             }
           },
         },
       ],
-      "delete"
+      "delete",
     );
   };
 
@@ -185,7 +227,8 @@ export function useSettingsLogic() {
     });
   };
 
-  const currentEditionId = (state.settings as any).mushafEdition ?? "madani_604";
+  const currentEditionId =
+    (state.settings as any).mushafEdition ?? "madani_604";
   const isMasterEnabled = state.settings.notifications.enabled;
 
   return {
@@ -220,6 +263,6 @@ export function useSettingsLogic() {
     handleToggleTheme,
     toggleNotifField,
     currentEditionId,
-    isMasterEnabled
+    isMasterEnabled,
   };
 }

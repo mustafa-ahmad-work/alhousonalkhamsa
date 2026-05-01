@@ -46,10 +46,8 @@ export const PresentationCard: React.FC<SubCardProps> = ({ Colors }) => {
   const zoomIn = () => setScale((prev) => Math.min(prev + 0.5, 4));
   const zoomOut = () => setScale((prev) => Math.max(prev - 0.5, 1));
 
-  // Sync scroll position when index changes (should really be handled by FlatList but let's stick to what works)
   React.useEffect(() => {
     if (selectedIndex !== null && scrollRef.current) {
-      // Small timeout to ensure modal is mounted
       setTimeout(() => {
         scrollRef.current?.scrollTo({
           x: selectedIndex * SCREEN_WIDTH,
@@ -62,15 +60,15 @@ export const PresentationCard: React.FC<SubCardProps> = ({ Colors }) => {
   return (
     <View style={styles.presentationWrap}>
       <View style={styles.header}>
-        <View style={[styles.iconBox, { backgroundColor: Colors.purpleMuted }]}>
-          <Ionicons name="images-outline" size={24} color={Colors.purple} />
+        <View style={[styles.iconBox, { backgroundColor: Colors.purple + '20' }]}>
+          <Ionicons name="images" size={20} color={Colors.purple} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={[styles.title, { color: Colors.textPrimary }]}>
             العرض التوضيحي للمنهجية
           </Text>
           <Text style={[styles.hint, { color: Colors.textTertiary }]}>
-            اضغط على الصورة للتكبير أو اسحب يميناً ويساراً لمشاهدة باقي العرض
+            اسحب لمشاهدة الخطوات العملية للحفظ
           </Text>
         </View>
       </View>
@@ -78,7 +76,7 @@ export const PresentationCard: React.FC<SubCardProps> = ({ Colors }) => {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        snapToInterval={SCREEN_WIDTH * 0.82 + Spacing.md}
+        snapToInterval={SCREEN_WIDTH * 0.85 + Spacing.md}
         decelerationRate="fast"
         contentContainerStyle={styles.horizontalScroll}
       >
@@ -87,15 +85,21 @@ export const PresentationCard: React.FC<SubCardProps> = ({ Colors }) => {
             key={index}
             activeOpacity={0.9}
             onPress={() => setSelectedIndex(index)}
-            style={styles.horizontalImageContainer}
+            style={[styles.horizontalImageContainer, { borderColor: Colors.border }]}
           >
-            <Image
-              source={img}
-              style={styles.presentationImage}
-              resizeMode="contain"
-            />
-            <View style={styles.zoomIcon}>
-              <Ionicons name="search-outline" size={20} color="#FFF" />
+            <View style={styles.imageInner}>
+              <Image
+                source={img}
+                style={styles.presentationImage}
+                resizeMode="cover"
+              />
+              <View style={[styles.imageOverlay, { backgroundColor: 'rgba(0,0,0,0.1)' }]} />
+              <View style={styles.zoomIcon}>
+                <Ionicons name="expand" size={18} color="#FFF" />
+              </View>
+              <View style={styles.indexBadge}>
+                <Text style={styles.indexText}>{index + 1}</Text>
+              </View>
             </View>
           </TouchableOpacity>
         ))}
@@ -105,31 +109,33 @@ export const PresentationCard: React.FC<SubCardProps> = ({ Colors }) => {
       <Modal
         visible={selectedIndex !== null}
         transparent={true}
-        animationType="fade"
+        animationType="slide"
         onRequestClose={handleClose}
       >
         <View style={styles.modalBg}>
           <View style={styles.modalHeader}>
-            <TouchableOpacity style={styles.modalActionBtn} onPress={zoomIn}>
-              <Ionicons name="add" size={24} color="#FFF" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.modalActionBtn} onPress={zoomOut}>
-              <Ionicons name="remove" size={24} color="#FFF" />
-            </TouchableOpacity>
+            <View style={styles.modalControls}>
+              <TouchableOpacity style={styles.modalActionBtn} onPress={zoomIn}>
+                <Ionicons name="add" size={24} color="#FFF" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalActionBtn} onPress={zoomOut}>
+                <Ionicons name="remove" size={24} color="#FFF" />
+              </TouchableOpacity>
+            </View>
 
             {selectedIndex !== null && (
               <View style={styles.pageIndicator}>
                 <Text style={styles.pageText}>
-                  {selectedIndex + 1} / {PRESENTATION_IMAGES.length}
+                  {selectedIndex + 1} من {PRESENTATION_IMAGES.length}
                 </Text>
               </View>
             )}
 
             <TouchableOpacity
-              style={[styles.modalActionBtn, { marginLeft: "auto" }]}
+              style={styles.closeBtn}
               onPress={handleClose}
             >
-              <Ionicons name="close" size={24} color="#FFF" />
+              <Ionicons name="close" size={28} color="#FFF" />
             </TouchableOpacity>
           </View>
 
@@ -143,9 +149,9 @@ export const PresentationCard: React.FC<SubCardProps> = ({ Colors }) => {
                 e.nativeEvent.contentOffset.x / SCREEN_WIDTH,
               );
               setSelectedIndex(newIndex);
-              setScale(1); // Reset scale when swiping
+              setScale(1);
             }}
-            scrollEnabled={scale === 1} // Only swipe when not zoomed
+            scrollEnabled={scale === 1}
           >
             {PRESENTATION_IMAGES.map((img, index) => (
               <View
@@ -189,14 +195,6 @@ export const PresentationCard: React.FC<SubCardProps> = ({ Colors }) => {
               </View>
             ))}
           </ScrollView>
-
-          {scale > 1 && (
-            <View style={styles.zoomIndicator}>
-              <Text style={styles.zoomText}>
-                نسبة التكبير: {Math.round(scale * 100)}%
-              </Text>
-            </View>
-          )}
         </View>
       </Modal>
     </View>
@@ -209,37 +207,72 @@ export const TimeManagementCard: React.FC<SubCardProps> = ({ Colors }) => {
       style={[
         styles.card,
         {
-          backgroundColor: Colors.surface,
+          backgroundColor: Colors.surfaceElevated,
           borderColor: Colors.border,
-          marginTop: Spacing.lg,
+          marginTop: Spacing.xl,
         },
       ]}
     >
-      <View style={styles.header}>
-        <View style={[styles.iconBox, { backgroundColor: Colors.blueMuted }]}>
-          <Ionicons name="time" size={24} color={Colors.blue} />
+      <View style={styles.cardHeader}>
+        <View style={[styles.iconBox, { backgroundColor: Colors.primary + '20' }]}>
+          <Ionicons name="timer-outline" size={22} color={Colors.primary} />
         </View>
-        <Text style={[styles.title, { color: Colors.textPrimary }]}>
-          إدارة وقت الحفظ
-        </Text>
+        <View>
+          <Text style={[styles.title, { color: Colors.textPrimary }]}>
+            توزيع الوقت المقترح
+          </Text>
+          <Text style={[styles.hint, { color: Colors.textTertiary }]}>
+            بناءً على متوسط إنجاز الطالب المجتهد
+          </Text>
+        </View>
       </View>
-      <View style={styles.timeGrid}>
-        <View style={styles.timeItem}>
-          <Text style={[styles.timeValue, { color: Colors.primary }]}>45د</Text>
-          <Text style={[styles.timeLabel, { color: Colors.textTertiary }]}>
-            حفظ جديد
-          </Text>
+
+      <View style={styles.timeContainer}>
+        {/* Total Time Header */}
+        <View style={[styles.totalTimeBox, { backgroundColor: Colors.primary + '10' }]}>
+          <Text style={[styles.totalLabel, { color: Colors.textSecondary }]}>الجدول الزمني المثالي (90 دقيقة)</Text>
+          <Text style={[styles.totalValue, { color: Colors.primary }]}>ساعة ونصف يومياً</Text>
         </View>
-        <View style={styles.timeItem}>
-          <Text style={[styles.timeValue, { color: Colors.gold }]}>30د</Text>
-          <Text style={[styles.timeLabel, { color: Colors.textTertiary }]}>
-            مراجعة
-          </Text>
+
+        {/* Detailed Breakdown */}
+        <View style={styles.breakdownGrid}>
+          <View style={[styles.timeSlot, { backgroundColor: Colors.surface }]}>
+            <Ionicons name="book-outline" size={18} color={Colors.fortressRecitation || Colors.blue} />
+            <Text style={[styles.slotLabel, { color: Colors.textSecondary }]}>الختمة</Text>
+            <Text style={[styles.slotValue, { color: Colors.textPrimary }]}>25 د</Text>
+          </View>
+          
+          <View style={[styles.timeSlot, { backgroundColor: Colors.surface }]}>
+            <Ionicons name="timer-outline" size={18} color={Colors.fortressPreparation || Colors.gold} />
+            <Text style={[styles.slotLabel, { color: Colors.textSecondary }]}>التحضير</Text>
+            <Text style={[styles.slotValue, { color: Colors.textPrimary }]}>25 د</Text>
+          </View>
+
+          <View style={[styles.timeSlot, { backgroundColor: Colors.surface }]}>
+            <Ionicons name="create-outline" size={18} color={Colors.fortressMemorization || Colors.purple} />
+            <Text style={[styles.slotLabel, { color: Colors.textSecondary }]}>الحفظ</Text>
+            <Text style={[styles.slotValue, { color: Colors.textPrimary }]}>15 د</Text>
+          </View>
+
+          <View style={[styles.timeSlot, { backgroundColor: Colors.surface }]}>
+            <Ionicons name="sync-outline" size={18} color={Colors.fortressReview || Colors.success} />
+            <Text style={[styles.slotLabel, { color: Colors.textSecondary }]}>المراجعة</Text>
+            <Text style={[styles.slotValue, { color: Colors.textPrimary }]}>25 د</Text>
+          </View>
         </View>
-        <View style={styles.timeItem}>
-          <Text style={[styles.timeValue, { color: Colors.purple }]}>15د</Text>
-          <Text style={[styles.timeLabel, { color: Colors.textTertiary }]}>
-            تحضير
+
+        {/* Visual Timeline Bar */}
+        <View style={[styles.progressBar, { backgroundColor: Colors.border + '30' }]}>
+          <View style={[styles.progressSegment, { width: '28%', backgroundColor: Colors.fortressRecitation || Colors.blue }]} />
+          <View style={[styles.progressSegment, { width: '28%', backgroundColor: Colors.fortressPreparation || Colors.gold }]} />
+          <View style={[styles.progressSegment, { width: '16%', backgroundColor: Colors.fortressMemorization || Colors.purple }]} />
+          <View style={[styles.progressSegment, { width: '28%', backgroundColor: Colors.fortressReview || Colors.success }]} />
+        </View>
+        
+        <View style={styles.footerNote}>
+          <Ionicons name="information-circle-outline" size={14} color={Colors.textTertiary} />
+          <Text style={[styles.footerText, { color: Colors.textTertiary }]}>
+            يمكنك دمج ختمة الاستماع والتحضير الليلي أثناء الأنشطة اليومية لتقليل الوقت الفعلي.
           </Text>
         </View>
       </View>
@@ -252,133 +285,207 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   horizontalScroll: {
-    paddingRight: 40,
+    paddingHorizontal: Spacing.xl,
+    paddingBottom: Spacing.md,
   },
   horizontalImageContainer: {
-    width: SCREEN_WIDTH * 0.82,
-    aspectRatio: 16 / 9,
+    width: SCREEN_WIDTH * 0.85,
+    aspectRatio: 16 / 9.5,
     marginRight: Spacing.md,
-    borderRadius: BorderRadius.md,
-    overflow: "hidden",
-    backgroundColor: "rgba(0,0,0,0.05)",
+    borderRadius: BorderRadius.xl,
+    backgroundColor: 'rgba(0,0,0,0.02)',
+    borderWidth: 1,
+    overflow: 'hidden',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
   },
-  imageContainer: {
-    width: "100%",
-    aspectRatio: 16 / 9,
-    overflow: "hidden",
-    marginBottom: 0,
+  imageInner: {
+    flex: 1,
   },
   presentationImage: {
     width: "100%",
     height: "100%",
   },
+  imageOverlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
   zoomIcon: {
     position: "absolute",
-    bottom: 8,
-    right: 8,
-    backgroundColor: "rgba(0,0,0,0.4)",
-    padding: 6,
-    borderRadius: 20,
+    top: 12,
+    right: 12,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  indexBadge: {
+    position: "absolute",
+    bottom: 12,
+    left: 12,
+    backgroundColor: "rgba(255,255,255,0.9)",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.sm,
+  },
+  indexText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#000',
   },
   modalBg: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.98)",
+    backgroundColor: "#000",
   },
   modalHeader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
     flexDirection: "row",
+    alignItems: 'center',
+    justifyContent: "space-between",
     paddingTop: 50,
     paddingHorizontal: 20,
-    zIndex: 10,
-    gap: 15,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    paddingBottom: 15,
+    zIndex: 100,
+    paddingBottom: 20,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  modalControls: {
+    flexDirection: 'row',
+    gap: 12,
   },
   pageIndicator: {
-    backgroundColor: "rgba(255,255,255,0.1)",
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.15)",
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
   },
   pageText: {
     color: "#FFF",
     fontFamily: Typography.heading,
-    fontSize: 14,
+    fontSize: 13,
   },
   modalActionBtn: {
-    width: 44,
-    height: 44,
-    backgroundColor: "rgba(255,255,255,0.15)",
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
   },
-  zoomIndicator: {
-    position: "absolute",
-    bottom: 40,
-    alignSelf: "center",
-    backgroundColor: "rgba(0,0,0,0.7)",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  zoomText: {
-    color: "#FFF",
-    fontFamily: Typography.body,
-    fontSize: 12,
+  closeBtn: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
   },
   card: {
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.lg,
+    padding: Spacing.xl,
+    borderRadius: BorderRadius.xl,
     borderWidth: 1,
     marginBottom: Spacing.md,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: Spacing.lg,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: Spacing.sm,
+    paddingHorizontal: Spacing.xl,
+    marginBottom: Spacing.md,
   },
   iconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: BorderRadius.md,
+    width: 42,
+    height: 42,
+    borderRadius: BorderRadius.lg,
     alignItems: "center",
     justifyContent: "center",
     marginRight: Spacing.md,
   },
   title: {
     fontFamily: Typography.heading,
-    fontSize: Typography.md,
+    fontSize: 16,
+    marginBottom: 2,
   },
   hint: {
     fontFamily: Typography.body,
-    fontSize: 10,
-    marginTop: 2,
+    fontSize: 11,
   },
-  description: {
+  timeContainer: {
+    gap: Spacing.md,
+  },
+  totalTimeBox: {
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+  },
+  totalLabel: {
+    fontSize: 12,
     fontFamily: Typography.body,
-    fontSize: Typography.sm,
-    lineHeight: 20,
+    marginBottom: 4,
   },
-  timeGrid: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: Spacing.md,
-    paddingTop: Spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.05)",
-  },
-  timeItem: {
-    alignItems: "center",
-    flex: 1,
-  },
-  timeValue: {
+  totalValue: {
+    fontSize: 22,
     fontFamily: Typography.heading,
-    fontSize: Typography.lg,
   },
-  timeLabel: {
+  breakdownGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.md,
+  },
+  timeSlot: {
+    flex: 1,
+    minWidth: '45%',
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.03)',
+    alignItems: 'center',
+    gap: 4,
+  },
+  slotLabel: {
+    fontSize: 10,
     fontFamily: Typography.body,
-    fontSize: Typography.xs,
-    marginTop: 2,
+  },
+  slotValue: {
+    fontSize: 14,
+    fontFamily: Typography.heading,
+  },
+  progressBar: {
+    height: 8,
+    borderRadius: 4,
+    flexDirection: 'row',
+    overflow: 'hidden',
+    marginTop: Spacing.sm,
+  },
+  progressSegment: {
+    height: '100%',
+  },
+  footerNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: Spacing.sm,
+    paddingHorizontal: 4,
+  },
+  footerText: {
+    fontSize: 10,
+    fontFamily: Typography.body,
+    flex: 1,
+    lineHeight: 14,
   },
 });

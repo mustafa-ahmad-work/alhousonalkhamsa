@@ -12,7 +12,7 @@ import {
   View,
 } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import { HusoonAlert } from "../components/shared/CustomAlert";
+import { KhumsAlert } from "../components/shared/CustomAlert";
 
 import { useModuleLogic } from "../hooks/useModuleLogic";
 import { useAppStore } from "../store/AppStore";
@@ -58,7 +58,7 @@ export default function ModuleScreen() {
         selectionStore.createPageRange(r.start, r.end),
       ),
     );
-    HusoonAlert.alert(
+    KhumsAlert.alert(
       "تم الإضافة",
       "تمت إضافة ورد الخطة إلى الأوراد الحالية",
       [],
@@ -104,7 +104,7 @@ export default function ModuleScreen() {
       type: "TOGGLE_FORTRESS",
       payload: { fortressId: moduleInfo.fortressId },
     });
-    HusoonAlert.alert(
+    KhumsAlert.alert(
       "إنجاز عظيم!",
       `أتممت ورد ${moduleInfo.nameAr}`,
       [],
@@ -114,7 +114,7 @@ export default function ModuleScreen() {
 
   const handleRemove = (taskId: string) => {
     const task = selections.find((s) => s.id === taskId);
-    HusoonAlert.alert(
+    KhumsAlert.alert(
       "تأكيد",
       "هل تريد حذف هذا النطاق؟",
       [
@@ -135,7 +135,10 @@ export default function ModuleScreen() {
                 });
               } else if (task.module.includes("review")) {
                 pages.forEach((p) =>
-                  dispatch({ type: "UNREVIEW_PAGE", payload: { pageNumber: p } }),
+                  dispatch({
+                    type: "UNREVIEW_PAGE",
+                    payload: { pageNumber: p },
+                  }),
                 );
               }
             }
@@ -172,7 +175,7 @@ export default function ModuleScreen() {
 
   const handleClearAll = () => {
     if (!moduleInfo) return;
-    HusoonAlert.alert(
+    KhumsAlert.alert(
       "مسح السجل",
       "هل أنت متأكد من حذف سجل الإنجاز بالكامل لهذا القسم؟ لا يمكن التراجع عن هذه الخطوة.",
       [
@@ -196,7 +199,10 @@ export default function ModuleScreen() {
                 });
               } else if (task.module.includes("review")) {
                 pages.forEach((p) =>
-                  dispatch({ type: "UNREVIEW_PAGE", payload: { pageNumber: p } }),
+                  dispatch({
+                    type: "UNREVIEW_PAGE",
+                    payload: { pageNumber: p },
+                  }),
                 );
               }
             });
@@ -275,6 +281,23 @@ export default function ModuleScreen() {
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
+        {/* Methodology Description Card */}
+        <Animated.View entering={FadeInDown} style={styles.methodologyCard}>
+          <View style={styles.methodologyHeader}>
+            <Ionicons
+              name="information-circle"
+              size={18}
+              color={moduleInfo.color}
+            />
+            <Text
+              style={[styles.methodologyTitle, { color: moduleInfo.color }]}
+            >
+              منهجية العمل
+            </Text>
+          </View>
+          <Text style={styles.methodologyDesc}>{moduleInfo.description}</Text>
+        </Animated.View>
+
         {todayPlanItem && (
           <Animated.View entering={FadeInDown} style={styles.planSuggestion}>
             <View style={styles.planSugHeader}>
@@ -360,9 +383,7 @@ export default function ModuleScreen() {
                 ]}
                 onPress={() => setShowSelectionModal(true)}
               >
-                <Text style={{ color: "#FFF"}}>
-                  إضافة ورد جديد
-                </Text>
+                <Text style={{ color: "#FFF" }}>إضافة ورد جديد</Text>
               </TouchableOpacity>
             </Animated.View>
           ) : (
@@ -721,7 +742,7 @@ const getStyles = (Colors: any) =>
       backgroundColor: Colors.primaryMuted,
       borderRadius: BorderRadius.md,
     },
-    backBtnText: { color: Colors.primary},
+    backBtnText: { color: Colors.primary },
     clearBtn: {
       flexDirection: "row",
       alignItems: "center",
@@ -775,7 +796,7 @@ const getStyles = (Colors: any) =>
       paddingVertical: 4,
       borderRadius: 8,
     },
-    statusText: { fontSize: 11, color: Colors.success},
+    statusText: { fontSize: 11, color: Colors.success },
     deleteCircle: {
       width: 28,
       height: 28,
@@ -812,5 +833,30 @@ const getStyles = (Colors: any) =>
       paddingVertical: 4,
       borderRadius: 8,
       overflow: "hidden",
+    },
+    methodologyCard: {
+      backgroundColor: Colors.surface,
+      borderRadius: BorderRadius.xl,
+      padding: Spacing.lg,
+      marginBottom: Spacing.xl,
+      borderWidth: 1,
+      borderColor: Colors.border,
+    },
+    methodologyHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      marginBottom: 8,
+    },
+    methodologyTitle: {
+      fontFamily: Typography.heading,
+      fontSize: 14,
+    },
+    methodologyDesc: {
+      fontFamily: Typography.body,
+      fontSize: 12,
+      color: Colors.textSecondary,
+      lineHeight: 20,
+      textAlign: "left",
     },
   });

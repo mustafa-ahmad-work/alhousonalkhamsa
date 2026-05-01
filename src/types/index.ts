@@ -235,49 +235,49 @@ export type NotificationSettings = {
 
 export const FORTRESSES: Fortress[] = [
   {
-    id: 'recitation',
-    nameAr: 'التلاوة',
-    nameEn: 'Recitation',
+    id: 'recitation', // Used as Key 1: Khatma
+    nameAr: 'الختمة المستمرة',
+    nameEn: 'Continuous Khatma',
     icon: 'book-outline',
-    description: 'تلاوة جزأين يومياً',
+    description: 'تلاوة جزأين واستماع لحزب يومياً',
     color: '#10B981',
-    xpReward: 20,
+    xpReward: 35,
   },
   {
-    id: 'listening',
-    nameAr: 'الاستماع',
-    nameEn: 'Listening',
-    icon: 'headset-outline',
-    description: 'الاستماع لنصف جزء',
-    color: '#6366F1',
-    xpReward: 15,
-  },
-  {
-    id: 'preparation',
-    nameAr: 'التهيؤ',
+    id: 'preparation', // Key 2: Prep
+    nameAr: 'التحضير',
     nameEn: 'Preparation',
-    icon: 'moon-outline',
-    description: 'التحضير قبل النوم',
+    icon: 'timer-outline',
+    description: 'أسبوعي، ليلي، وقبلي',
     color: '#F59E0B',
-    xpReward: 15,
+    xpReward: 30,
   },
   {
-    id: 'memorization',
-    nameAr: 'الحفظ',
-    nameEn: 'Memorization',
+    id: 'memorization', // Key 3: New Mem
+    nameAr: 'الحفظ الجديد',
+    nameEn: 'New Memorization',
     icon: 'shield-checkmark-outline',
-    description: 'حفظ الصفحات الجديدة',
+    description: 'تكرار الصفحة لمدة ١٥ دقيقة',
     color: '#EF4444',
     xpReward: 50,
   },
   {
-    id: 'review',
-    nameAr: 'المراجعة',
-    nameEn: 'Review',
-    icon: 'sync-outline',
-    description: 'مراجعة قصيرة وطويلة',
+    id: 'review', // Key 4: Near Review
+    nameAr: 'المراجعة القريبة',
+    nameEn: 'Near Review',
+    icon: 'refresh-outline',
+    description: 'مراجعة آخر جزء تم حفظه',
     color: '#8B5CF6',
     xpReward: 30,
+  },
+  {
+    id: 'review_long' as any, // Key 5: Far Review
+    nameAr: 'المراجعة البعيدة',
+    nameEn: 'Far Review',
+    icon: 'layers-outline',
+    description: 'مراجعة المحفوظ القديم دورياً',
+    color: '#6366F1',
+    xpReward: 40,
   },
 ];
 
@@ -289,7 +289,7 @@ export const MODULES: ModuleInfo[] = [
     nameEn: 'Pre-Memorization',
     icon: 'sunny-outline',
     color: '#F59E0B',
-    description: 'قراءة المقرر قبل الحفظ بـ ١٥ دقيقة لتنشيط الذهن',
+    description: 'قراءة صفحة الحفظ لمدة ١٥ دقيقة لتصفية الذهن قبل البدء الفعلي',
     fortressId: 'preparation',
   },
   {
@@ -298,7 +298,7 @@ export const MODULES: ModuleInfo[] = [
     nameEn: 'Night Preparation',
     icon: 'moon-outline',
     color: '#8B5CF6',
-    description: '١٥ دقيقة قراءة و١٥ دقيقة استماع لصفحة الغد قبل النوم',
+    description: 'قبل النوم مباشرة؛ قراءة صفحة الغد (١٥ دقيقة) وسماعها (١٥ دقيقة)',
     fortressId: 'preparation',
   },
   {
@@ -307,7 +307,7 @@ export const MODULES: ModuleInfo[] = [
     nameEn: 'Weekly Preparation',
     icon: 'calendar-outline',
     color: '#6366F1',
-    description: 'قراءة صفحات الأسبوع القادم يومياً طوال الأسبوع الحالي',
+    description: 'قراءة وسماع ورد الأسبوع القادم (٥-٦ صفحات) يومياً طوال الأسبوع الحالي',
     fortressId: 'preparation',
   },
   {
@@ -316,26 +316,26 @@ export const MODULES: ModuleInfo[] = [
     nameEn: 'New Memorization',
     icon: 'shield-checkmark-outline',
     color: '#EF4444',
-    description: 'تكرار الصفحة لمدة ١٥ دقيقة على الأقل لنقلها للذاكرة البعيدة',
+    description: 'تكرار الصفحة لمدة لا تقل عن ١٥ دقيقة لنقل الآيات للذاكرة بعيدة المدى',
     fortressId: 'memorization',
   },
   {
     id: 'review_short',
     nameAr: 'المراجعة القريبة',
-    nameEn: 'Short-term Review',
+    nameEn: 'Near Review',
     icon: 'refresh-outline',
     color: '#10B981',
-    description: 'مراجعة آخر جزء تم حفظه يومياً قبل البدء في الجديد',
+    description: 'مراجعة آخر جزء (٢٠ صفحة) تم حفظه كاملاً لضمان ربطه ومنع تفلته',
     fortressId: 'review',
   },
   {
     id: 'review_long',
     nameAr: 'المراجعة البعيدة',
-    nameEn: 'Long-term Review',
-    icon: 'sync-outline',
+    nameEn: 'Far Review',
+    icon: 'layers-outline',
     color: '#8B5CF6',
-    description: 'مراجعة الأجزاء القديمة بمعدل جزئين يومياً للمتقدمين',
-    fortressId: 'review',
+    description: 'مراجعة كل ما سبق من أجزاء قديمة بقدر ثابت يومياً لضمان الرسوخ الأبدي',
+    fortressId: 'review_long' as any,
   },
   {
     id: 'recitation',
@@ -343,7 +343,7 @@ export const MODULES: ModuleInfo[] = [
     nameEn: 'Khatma Recitation',
     icon: 'book-outline',
     color: '#10B981',
-    description: 'قراءة جزئين يومياً (٤٠ صفحة) لضبط الحفظ بصرياً',
+    description: 'قراءة جزأين يومياً (٤٠ صفحة) بطريقة الحدر السريعة لضمان ختم المصحف كل أسبوعين',
     fortressId: 'recitation',
   },
   {
@@ -352,8 +352,8 @@ export const MODULES: ModuleInfo[] = [
     nameEn: 'Khatma Listening',
     icon: 'headset-outline',
     color: '#6366F1',
-    description: 'الاستماع لحزب واحد يومياً لضبط مخارج الحروف',
-    fortressId: 'listening',
+    description: 'الاستماع لحزب واحد يومياً (١٠ صفحات) بصوت الحصري لضبط التجويد والمخارج',
+    fortressId: 'recitation',
   },
 ];
 

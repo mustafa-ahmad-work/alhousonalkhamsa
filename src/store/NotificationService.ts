@@ -23,28 +23,28 @@
  * 5. Logging: every step is logged under '[NS]' for easy debugging.
  */
 
-import { Platform, Linking } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from 'expo-constants';
-import { NotificationSettings } from '../types';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
+import { Linking, Platform } from "react-native";
+import { NotificationSettings } from "../types";
 
 // ─── Storage key for change-detection hash ──────────────────────────────────
-const NOTIF_HASH_KEY = 'husoon_notif_settings_hash_v2';
+const NOTIF_HASH_KEY = "husoon_notif_settings_hash_v2";
 
 // ─── Android notification channel id ────────────────────────────────────────
-const CHANNEL_ID = 'husoon_reminders';
+const CHANNEL_ID = "husoon_reminders";
 
 // ─── One stable identifier per reminder type ───────────────────────────────
 // These are the canonical IDs used for cancel-by-id and reschedule.
 // Keep them stable across app versions; changing them orphans old notifications.
 const REMINDER_IDS = {
-  recitation:  'husoon_recitation',
-  listening:   'husoon_listening',
-  weeklyPrep:  'husoon_weekly_prep',
-  nightlyPrep: 'husoon_nightly_prep',
-  dailyPrep:   'husoon_daily_prep',
-  memorization:'husoon_memorization',
-  review:      'husoon_review',
+  recitation: "husoon_recitation",
+  listening: "husoon_listening",
+  weeklyPrep: "husoon_weekly_prep",
+  nightlyPrep: "husoon_nightly_prep",
+  dailyPrep: "husoon_daily_prep",
+  memorization: "husoon_memorization",
+  review: "husoon_review",
 } as const;
 
 type ReminderId = (typeof REMINDER_IDS)[keyof typeof REMINDER_IDS];
@@ -55,24 +55,28 @@ const ALL_REMINDER_IDS: ReminderId[] = Object.values(REMINDER_IDS);
 let _Notifications: any = null;
 
 function getNotifications(): any | null {
-  if (Platform.OS === 'web') return null;
+  if (Platform.OS === "web") return null;
   if (_Notifications) return _Notifications;
 
   // Silence Expo Go's Android push-token warning (local-only app)
-  const isGo = Constants.appOwnership === 'expo';
+  const isGo = Constants.appOwnership === "expo";
   if (isGo && !(console as any).__nsFilterInstalled) {
     const origError = console.error;
     console.error = (...args: any[]) => {
-      if (typeof args[0] === 'string' && args[0].includes('Android Push notifications')) return;
+      if (
+        typeof args[0] === "string" &&
+        args[0].includes("Android Push notifications")
+      )
+        return;
       origError.apply(console, args);
     };
     (console as any).__nsFilterInstalled = true;
   }
 
   try {
-    _Notifications = require('expo-notifications');
+    _Notifications = require("expo-notifications");
   } catch {
-    console.warn('[NS] expo-notifications not available');
+    console.warn("[NS] expo-notifications not available");
     return null;
   }
 
@@ -82,9 +86,9 @@ function getNotifications(): any | null {
   _Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowBanner: true,
-      shouldShowList:   true,
-      shouldPlaySound:  true,
-      shouldSetBadge:   false,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
     }),
   });
 
@@ -102,15 +106,19 @@ function hashString(str: string): string {
 
 // ─── Validate HH:MM time string ──────────────────────────────────────────────
 function parseTime(time: string): { hour: number; minute: number } | null {
-  const parts = time.split(':');
+  const parts = time.split(":");
   if (parts.length !== 2) return null;
-  const hour   = parseInt(parts[0], 10);
+  const hour = parseInt(parts[0], 10);
   const minute = parseInt(parts[1], 10);
   if (
-    isNaN(hour) || isNaN(minute) ||
-    hour < 0 || hour > 23 ||
-    minute < 0 || minute > 59
-  ) return null;
+    isNaN(hour) ||
+    isNaN(minute) ||
+    hour < 0 ||
+    hour > 23 ||
+    minute < 0 ||
+    minute > 59
+  )
+    return null;
   return { hour, minute };
 }
 
@@ -118,12 +126,11 @@ function parseTime(time: string): { hour: number; minute: number } | null {
 // Public service
 // ─────────────────────────────────────────────────────────────────────────────
 export const NotificationService = {
-
   // ── Permissions ─────────────────────────────────────────────────────────
 
   /** Request permissions and set up the Android channel. Returns true if granted. */
   async registerForPushNotificationsAsync(): Promise<void> {
-    if (Platform.OS === 'web') return;
+    if (Platform.OS === "web") return;
     const notifs = getNotifications();
     if (!notifs) return;
 
@@ -131,53 +138,53 @@ export const NotificationService = {
       const { status: existing } = await notifs.getPermissionsAsync();
       let finalStatus = existing;
 
-      if (existing !== 'granted') {
+      if (existing !== "granted") {
         const { status } = await notifs.requestPermissionsAsync();
         finalStatus = status;
       }
 
-      if (finalStatus !== 'granted') {
-        console.log('[NS] Notification permission not granted');
+      if (finalStatus !== "granted") {
+        console.log("[NS] Notification permission not granted");
         return;
       }
 
       await NotificationService._ensureAndroidChannel(notifs);
-      console.log('[NS] Permissions granted and channel ready');
+      console.log("[NS] Permissions granted and channel ready");
     } catch (e) {
-      console.warn('[NS] Permission setup error:', e);
+      console.warn("[NS] Permission setup error:", e);
     }
   },
 
   async getPermissionStatus(): Promise<string> {
-    if (Platform.OS === 'web') return 'granted';
+    if (Platform.OS === "web") return "granted";
     const notifs = getNotifications();
-    if (!notifs) return 'denied';
+    if (!notifs) return "denied";
     try {
       const { status } = await notifs.getPermissionsAsync();
       return status;
     } catch {
-      return 'denied';
+      return "denied";
     }
   },
 
   async requestPermissions(): Promise<string> {
-    if (Platform.OS === 'web') return 'granted';
+    if (Platform.OS === "web") return "granted";
     const notifs = getNotifications();
-    if (!notifs) return 'denied';
+    if (!notifs) return "denied";
     try {
       const { status } = await notifs.requestPermissionsAsync();
-      if (status === 'granted') {
+      if (status === "granted") {
         await NotificationService._ensureAndroidChannel(notifs);
       }
       return status;
     } catch {
-      return 'denied';
+      return "denied";
     }
   },
 
   async openNotificationSettings(): Promise<void> {
-    if (Platform.OS === 'web') return;
-    if (Platform.OS === 'ios') Linking.openURL('app-settings:');
+    if (Platform.OS === "web") return;
+    if (Platform.OS === "ios") Linking.openURL("app-settings:");
     else Linking.openSettings();
   },
 
@@ -185,20 +192,20 @@ export const NotificationService = {
 
   /** Idempotent — safe to call multiple times. */
   async _ensureAndroidChannel(notifs: any): Promise<void> {
-    if (Platform.OS !== 'android') return;
+    if (Platform.OS !== "android") return;
     try {
       await notifs.setNotificationChannelAsync(CHANNEL_ID, {
-        name: 'تنبيهات الحفظ',
-        description: 'تنبيهات يومية لمحطات حفظ القرآن',
+        name: "تنبيهات الحفظ",
+        description: "تنبيهات يومية لمحطات حفظ القرآن",
         importance: notifs.AndroidImportance.HIGH,
         vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#10B981',
-        sound: 'default',
+        lightColor: "#10B981",
+        sound: "default",
         enableVibrate: true,
         showBadge: false,
       });
     } catch (e) {
-      console.warn('[NS] Failed to create Android channel:', e);
+      console.warn("[NS] Failed to create Android channel:", e);
     }
   },
 
@@ -211,11 +218,11 @@ export const NotificationService = {
 
     await Promise.all(
       ALL_REMINDER_IDS.map((id) =>
-        notifs.cancelScheduledNotificationAsync(id).catch(() => {})
-      )
+        notifs.cancelScheduledNotificationAsync(id).catch(() => {}),
+      ),
     );
     await AsyncStorage.removeItem(NOTIF_HASH_KEY).catch(() => {});
-    console.log('[NS] All reminders cancelled');
+    console.log("[NS] All reminders cancelled");
   },
 
   /** Cancel a single reminder by its reminder key. */
@@ -257,8 +264,10 @@ export const NotificationService = {
    * occurs — it NEVER fires a catch-up notification immediately when the time
    * has already passed today. No suppression mechanism is necessary.
    */
-  async scheduleFortressReminders(settings: NotificationSettings): Promise<void> {
-    if (Platform.OS === 'web') return;
+  async scheduleFortressReminders(
+    settings: NotificationSettings,
+  ): Promise<void> {
+    if (Platform.OS === "web") return;
 
     const notifs = getNotifications();
     if (!notifs) return;
@@ -268,7 +277,7 @@ export const NotificationService = {
     try {
       const savedHash = await AsyncStorage.getItem(NOTIF_HASH_KEY);
       if (savedHash === newHash) {
-        console.log('[NS] Settings unchanged — skipping reschedule');
+        console.log("[NS] Settings unchanged — skipping reschedule");
         return;
       }
     } catch {
@@ -277,8 +286,8 @@ export const NotificationService = {
 
     // ── 2. Permission check ───────────────────────────────────────────────
     const { status } = await notifs.getPermissionsAsync();
-    if (status !== 'granted') {
-      console.log('[NS] No permission — skipping schedule');
+    if (status !== "granted") {
+      console.log("[NS] No permission — skipping schedule");
       return;
     }
 
@@ -289,11 +298,11 @@ export const NotificationService = {
     if (!settings.enabled) {
       await Promise.all(
         ALL_REMINDER_IDS.map((id) =>
-          notifs.cancelScheduledNotificationAsync(id).catch(() => {})
-        )
+          notifs.cancelScheduledNotificationAsync(id).catch(() => {}),
+        ),
       );
       await AsyncStorage.setItem(NOTIF_HASH_KEY, newHash).catch(() => {});
-      console.log('[NS] Master switch OFF — all reminders cancelled');
+      console.log("[NS] Master switch OFF — all reminders cancelled");
       return;
     }
 
@@ -307,50 +316,50 @@ export const NotificationService = {
     }> = [
       {
         id: REMINDER_IDS.recitation,
-        title: 'ورد التلاوة 📖',
-        body: 'حان وقت ورد التلاوة.. جزئين يومياً بنظام الحَدر يحقق التثبيت البصري لمصحفك.',
+        title: "ورد التلاوة",
+        body: "حان وقت ورد التلاوة.. جزئين يومياً بنظام الحَدر يحقق التثبيت البصري لمصحفك.",
         enabled: settings.recitationEnabled,
         time: settings.recitationTime,
       },
       {
         id: REMINDER_IDS.listening,
-        title: 'ورد الاستماع 🎧',
-        body: 'أنصت للقرآن لضبط المخارج.. حزب واحد يومياً بصوت متقن يعزز جودة حفظك.',
+        title: "ورد الاستماع",
+        body: "أنصت للقرآن لضبط المخارج.. حزب واحد يومياً بصوت متقن يعزز جودة حفظك.",
         enabled: settings.listeningEnabled,
         time: settings.listeningTime,
       },
       {
         id: REMINDER_IDS.weeklyPrep,
-        title: 'التحضير الأسبوعي 📅',
-        body: 'استعد للأسبوع القادم.. قراءة صفحات الأسبوع القادم يومياً تيسّر عليك حفظها لاحقاً.',
+        title: "التحضير الأسبوعي",
+        body: "استعد للأسبوع القادم.. قراءة صفحات الأسبوع القادم يومياً تيسّر عليك حفظها لاحقاً.",
         enabled: settings.weeklyPrepEnabled,
         time: settings.weeklyPrepTime,
       },
       {
         id: REMINDER_IDS.nightlyPrep,
-        title: 'التحضير الليلي 🌙',
-        body: 'آخر عهدك اليوم.. ٣٠ دقيقة قراءةً واستماعاً لصفحة الغد تمنحك صورة مستقرة للحفظ.',
+        title: "التحضير الليلي",
+        body: "آخر عهدك اليوم.. ٣٠ دقيقة قراءةً واستماعاً لصفحة الغد تمنحك صورة مستقرة للحفظ.",
         enabled: settings.nightlyPrepEnabled,
         time: settings.nightlyPrepTime,
       },
       {
         id: REMINDER_IDS.dailyPrep,
-        title: 'التحضير القبلي ☀️',
-        body: 'التهيؤ الذهني.. ١٥ دقيقة من تركيزك الآن هي جسرك للحفظ المتمكن والمستديم.',
+        title: "التحضير القبلي",
+        body: "التهيؤ الذهني.. ١٥ دقيقة من تركيزك الآن هي جسرك للحفظ المتمكن والمستديم.",
         enabled: settings.dailyPrepEnabled,
         time: settings.dailyPrepTime,
       },
       {
         id: REMINDER_IDS.memorization,
-        title: 'الحفظ الجديد 🛡️',
-        body: 'موعد الحفظ الجديد.. كرر الصفحة ١٥ دقيقة على الأقل لنقلها إلى الذاكرة البعيدة.',
+        title: "الحفظ الجديد",
+        body: "موعد الحفظ الجديد.. كرر الصفحة ١٥ دقيقة على الأقل لنقلها إلى الذاكرة البعيدة.",
         enabled: settings.memorizationEnabled,
         time: settings.memorizationTime,
       },
       {
         id: REMINDER_IDS.review,
-        title: 'المراجعة اليومية 🔄',
-        body: 'ثبّت ما حفظت.. المراجعة اليومية هي المرحلة المنيعة ضد التفلّت والنسيان.',
+        title: "المراجعة اليومية",
+        body: "ثبّت ما حفظت.. المراجعة اليومية هي المرحلة المنيعة ضد التفلّت والنسيان.",
         enabled: settings.reviewEnabled,
         time: settings.reviewTime,
       },
@@ -365,7 +374,9 @@ export const NotificationService = {
     const results = await Promise.allSettled(
       reminders.map(async (reminder) => {
         // Always cancel the old schedule for this identifier first
-        await notifs.cancelScheduledNotificationAsync(reminder.id).catch(() => {});
+        await notifs
+          .cancelScheduledNotificationAsync(reminder.id)
+          .catch(() => {});
 
         if (!reminder.enabled) {
           console.log(`[NS] ⊘ ${reminder.id} — disabled, cancelled`);
@@ -374,7 +385,9 @@ export const NotificationService = {
 
         const parsed = parseTime(reminder.time);
         if (!parsed) {
-          console.warn(`[NS] ✗ ${reminder.id} — invalid time "${reminder.time}"`);
+          console.warn(
+            `[NS] ✗ ${reminder.id} — invalid time "${reminder.time}"`,
+          );
           return;
         }
 
@@ -397,26 +410,26 @@ export const NotificationService = {
         await notifs.scheduleNotificationAsync({
           identifier: reminder.id,
           content: {
-            title:     reminder.title,
-            body:      reminder.body,
-            data:      { reminderId: reminder.id },
-            sound:     'default',
-            priority:  notifs.AndroidNotificationPriority?.HIGH ?? 'high',
+            title: reminder.title,
+            body: reminder.body,
+            data: { reminderId: reminder.id },
+            sound: "default",
+            priority: notifs.AndroidNotificationPriority?.HIGH ?? "high",
             // Android channel
-            ...(Platform.OS === 'android' ? { channelId: CHANNEL_ID } : {}),
+            ...(Platform.OS === "android" ? { channelId: CHANNEL_ID } : {}),
           },
           trigger,
         });
 
         console.log(
-          `[NS] ✓ ${reminder.id} scheduled daily at ${reminder.time}`
+          `[NS] ✓ ${reminder.id} scheduled daily at ${reminder.time}`,
         );
-      })
+      }),
     );
 
     // Log failures without crashing
     results.forEach((result, i) => {
-      if (result.status === 'rejected') {
+      if (result.status === "rejected") {
         console.warn(
           `[NS] ✗ Failed to schedule ${reminders[i].id}:`,
           result.reason,
@@ -426,13 +439,13 @@ export const NotificationService = {
 
     // ── 7. Persist the new hash ───────────────────────────────────────────
     await AsyncStorage.setItem(NOTIF_HASH_KEY, newHash).catch(() => {});
-    console.log('[NS] Scheduling complete — hash saved');
+    console.log("[NS] Scheduling complete — hash saved");
   },
 
   // ── Debug helper (dev builds only) ──────────────────────────────────────
   /** Returns all currently scheduled notifications. Useful during development. */
   async getScheduledNotifications(): Promise<any[]> {
-    if (Platform.OS === 'web') return [];
+    if (Platform.OS === "web") return [];
     const notifs = getNotifications();
     if (!notifs) return [];
     try {

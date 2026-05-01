@@ -100,9 +100,22 @@ export default function DashboardScreen() {
   const dailySelections = taskSelections.filter(
     (s: TaskSelection) => new Date(s.createdAt).toDateString() === todayStr,
   );
-  const completedHousons = dailySelections.filter(
-    (s: TaskSelection) => s.isCompleted,
-  ).length;
+  
+  // Count how many of the 5 "Keys" (Fortresses) have at least one completed module today
+  const completedKeys = useMemo(() => {
+    const completedModuleIds = new Set(
+      dailySelections.filter(s => s.isCompleted).map(s => s.module)
+    );
+    const completedFortressIds = new Set<string>();
+    
+    MODULES.forEach(m => {
+      if (completedModuleIds.has(m.id)) {
+        completedFortressIds.add(m.fortressId);
+      }
+    });
+    
+    return completedFortressIds.size;
+  }, [dailySelections]);
 
   const memorizedCount = memorizedPages.length;
   const targetPagesCount = plan?.targetPages.length || 604;
@@ -215,9 +228,9 @@ export default function DashboardScreen() {
         </TouchableOpacity>
 
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>منهج الحفظ</Text>
+          <Text style={styles.sectionTitle}>المفاتيح الخمسة</Text>
           <View style={styles.pillBadge}>
-            <Text style={styles.pillText}>{completedHousons}/5 أتممت</Text>
+            <Text style={styles.pillText}>{completedKeys}/5 أنجزت</Text>
           </View>
         </View>
 
@@ -231,16 +244,16 @@ export default function DashboardScreen() {
           ))}
         </View>
 
-        {completedHousons >= 5 && (
+        {completedKeys >= 5 && (
           <View style={styles.completionMessage}>
             <View style={styles.completionIcon}>
               <Ionicons name="checkmark-done" size={24} color="#FFF" />
             </View>
             <Text style={styles.completionTitle}>
-              هنيئاً لك إكمال ورد اليوم!
+              هنيئاً لك إتمام المفاتيح الخمسة!
             </Text>
             <Text style={styles.completionDesc}>
-              لقد أتممت جميع مراحل مفاتيح حفظ القرآن لهذا اليوم.
+              لقد أتممت جميع مراحل منهجية "المفاتيح الخمسة" لهذا اليوم، ثبت الله حفظك ونفع بك.
             </Text>
           </View>
         )}

@@ -59,6 +59,21 @@ export const DeveloperCard: React.FC<DeveloperCardProps> = ({ Colors }) => {
             <Ionicons name="paper-plane" size={18} color={Colors.primary} />
           </TouchableOpacity>
         </View>
+        <View
+          style={[
+            styles.thanksContainer,
+            { borderTopColor: Colors.border + "50" },
+          ]}
+        >
+          <Ionicons name="heart" size={14} color={Colors.red || "#FF4B4B"} />
+          <Text style={[styles.thanksText, { color: Colors.textSecondary }]}>
+            شكر خاص لكل من ساعد في التطوير والتجربة ، وخصيصاً{" "}
+            <Text style={{ color: Colors.textPrimary, fontWeight: "bold" }}>
+              المهندس محمد حسني
+            </Text>
+            .
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -98,5 +113,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.05)",
+  },
+  thanksContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: Spacing.md,
+    paddingTop: Spacing.md,
+    borderTopWidth: 1,
+  },
+  thanksText: {
+    flex: 1,
+    fontFamily: Typography.body,
+    fontSize: 10,
+    lineHeight: 14,
   },
 });

@@ -72,10 +72,10 @@ export default function AppExplanationScreen() {
         />
         <View style={styles.stabilityGuide}>
           <Text style={styles.subParagraph}>
-            هذا التطبيق هو <Text style={styles.bold}>نظام هندسي متكامل</Text> لختم القرآن الكريم كاملاً حفظاً وإتقاناً. يعتمد النظام على "منهجية المفاتيح الخمسة" التي تحول الآيات إلى جزء من ذاكرتك الدائمة عبر تكرار ذكي مبني على أسس علمية ونفسية دقيقة.
+            هذا التطبيق هو <Text style={styles.bold}>نظام هندسي متكامل</Text> يهدف إلى جعل حفظ القرآن الكريم ثابتاً في الذاكرة <Text style={styles.bold}>كالفاتحة تماماً</Text>. يعتمد النظام على "منهجية المفاتيح الخمسة" التي تنقل الحفظ من الذاكرة مؤقتة إلى الذاكرة بعيدة المدى.
           </Text>
           <Text style={styles.subParagraph}>
-            يهدف التطبيق إلى معالجة أكبر عائق يواجه الحفاظ: <Text style={styles.bold}>النسيان وتشتت المراجعة</Text>، من خلال جدولة آلية دقيقة تضمن لك عدم ترك أي صفحة دون تمكين.
+            يتطلب هذا البرنامج همة عالية والتزاماً تاماً بالوقت المحدد لكل مفتاح، حيث يستغرق يومياً ما بين <Text style={styles.bold}>ساعة إلى ساعة ونصف</Text> تقريباً للحصول على أفضل النتائج في الإتقان والتمكين.
           </Text>
         </View>
 
@@ -84,55 +84,64 @@ export default function AppExplanationScreen() {
           color={Colors.primary}
         />
         <ExplanationCard
-          title="المفتاح 1: الختمة (بناء الألفة البصرية والسمعية)"
+          title="المفتاح 1: الختمة المستمرة (الاتصال الدائم)"
           icon="book-outline"
           color={Colors.fortressRecitation}
           content={
             <View>
               <Text style={styles.subParagraph}>
-                • <Text style={styles.bold}>ختمة التلاوة:</Text> قراءة جزئين يومياً بنظام "الحدر" السريع لتسهيل انسياب الآيات في العقل وربط السور ببعضها.
+                • <Text style={styles.bold}>ختمة التلاوة:</Text> قراءة جزأين يومياً (40 صفحة) بطريقة "الحدر" السريعة، بحيث لا يتجاوز الجزء 20 دقيقة، لضمان ختم المصحف كل أسبوعين.
               </Text>
               <Text style={styles.subParagraph}>
-                • <Text style={styles.bold}>ختمة الاستماع:</Text> الاستماع اليومي بصوت الشيخ الحصري لضبط مخارج الحروف وترسيخ النغمة الصحيحة في الوجدان.
+                • <Text style={styles.bold}>ختمة الاستماع:</Text> الاستماع لحزب واحد يومياً (نصف جزء)، ويفضل بصوت الشيخ محمود خليل الحصري لضبط التجويد والمخارج.
               </Text>
             </View>
           }
         />
         <ExplanationCard
-          title="المفتاح 2: التحضير (تهيئة الذاكرة الثلاثية)"
+          title="المفتاح 2: التحضير (تهيئة العقل الباطن)"
           icon="timer-outline"
           color={Colors.fortressPreparation}
           content={
             <View>
               <Text style={styles.subParagraph}>
-                • <Text style={styles.bold}>التحضير الأسبوعي:</Text> نظرة استباقية لورد الأسبوع القادم.
+                • <Text style={styles.bold}>التحضير الأسبوعي:</Text> قراءة وسماع ورد الأسبوع القادم (5-6 صفحات) يومياً طوال الأسبوع الحالي.
               </Text>
               <Text style={styles.subParagraph}>
-                • <Text style={styles.bold}>التحضير الليلي:</Text> قراءة صفحة الغد قبل النوم مباشرة لمعالجتها أثناء النوم.
+                • <Text style={styles.bold}>التحضير الليلي:</Text> قبل النوم مباشرة؛ قراءة صفحة الغد (15 دقيقة) وسماعها (15 دقيقة) لاستغلال نشاط العقل أثناء النوم.
               </Text>
               <Text style={styles.subParagraph}>
-                • <Text style={styles.bold}>التحضير القبلي:</Text> تنشيط الذاكرة القريبة قبل البدء بالحفظ مباشرة.
+                • <Text style={styles.bold}>التحضير القبلي:</Text> قراءة صفحة الحفظ لمدة 15 دقيقة لتصفية الذهن قبل البدء الفعلي.
               </Text>
             </View>
           }
         />
         <ExplanationCard
-          title="المفتاح 3: الحفظ الجديد (الإيداع في الذاكرة)"
+          title="المفتاح 3: الحفظ الجديد (الذاكرة البعيدة)"
           icon="create-outline"
           color={Colors.fortressMemorization}
-          content="مرحلة التركيز القصوى لحفظ الصفحات المقررة. التطبيق يحدد لك عدد الصفحات الكاملة يومياً بناءً على طاقتك، ويوفر لك عدادات تكرار لضمان 'جودة الإيداع'."
+          content="يتم الحفظ بتكرار الصفحة لمدة لا تقل عن 15 دقيقة، حتى لو شعرت بحفظها سريعاً؛ فهذا التكرار هو ما ينقل الآيات للذاكرة بعيدة المدى لسنوات."
         />
         <ExplanationCard
-          title="المفتاح 4: مراجعة القريب (صمام الأمان)"
+          title="المفتاح 4: مراجعة القريب (الربط والتمكين)"
           icon="sync-outline"
           color={Colors.fortressReview}
-          content="مراجعة آخر 20 صفحة تم حفظها يومياً. هذا القسم يحمي حفظك الجديد من التآكل السريع وينقله للذاكرة المتوسطة."
+          content="تبدأ بعد إتمام أول 20 صفحة (جزء). تراجع يومياً الجزء الأخير الذي حفظته كاملاً لضمان ربطه ببعضه ومنع تفلته."
         />
         <ExplanationCard
-          title="المفتاح 5: مراجعة البعيد (مرحلة الرسوخ)"
+          title="المفتاح 5: مراجعة البعيد (الرسوخ الأبدي)"
           icon="layers-outline"
           color={Colors.blue}
-          content="مراجعة الأجزاء القديمة المسردة للوصول لمرحلة السرد كالفاتحة عبر جدولة آلية تمر بك على كامل محفوظك."
+          content={
+            <View>
+              <Text style={styles.subParagraph}>
+                تشمل مراجعة كل ما سبق "مراجعة القريب" من أجزاء قديمة بقدر ثابت يومياً (مثلاً جزأين).
+              </Text>
+              <Text style={styles.subParagraph}>
+                <Text style={styles.bold}>مثال:</Text> إذا كنت في الجزء 10، يكون الجزء 9 "قريب" والأجزاء من 1 إلى 8 "بعيد".
+              </Text>
+            </View>
+          }
         />
 
         <SectionHeader title="جولة داخل التطبيق (للمبتدئين)" color={Colors.gold} />
