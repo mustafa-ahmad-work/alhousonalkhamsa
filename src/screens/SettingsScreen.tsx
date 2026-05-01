@@ -13,8 +13,8 @@ import {
   View,
 } from "react-native";
 import { NotificationService } from "../store/NotificationService";
-import { BorderRadius, Shadow, Spacing, Typography, useTheme } from "../theme";
 import { useThemeStore } from "../store/ThemeStore";
+import { BorderRadius, Shadow, Spacing, Typography, useTheme } from "../theme";
 
 // ── Extracted Components ─────────────────────────────────────────────────────
 import { EditModal } from "../components/settings/EditModal";
@@ -22,7 +22,6 @@ import { MushafEditionPicker } from "../components/settings/MushafEditionPicker"
 import { NotificationRow } from "../components/settings/NotificationRow";
 import { PlanModeSelector } from "../components/settings/PlanModeSelector";
 import { TimePickerModal } from "../components/settings/TimePickerModal";
-
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -660,7 +659,6 @@ export default function SettingsScreen() {
         onConfirm={saveSelectedTime}
         onCancel={() => setTimePickerVisible(false)}
       />
-
     </View>
   );
 }
@@ -785,7 +783,6 @@ const getStyles = (Colors: any) =>
       color: "#FFF",
       fontFamily: Typography.heading,
       fontSize: 15,
-      fontWeight: "bold",
     },
     templateBtn: {
       backgroundColor: Colors.surface,
@@ -799,7 +796,6 @@ const getStyles = (Colors: any) =>
       fontFamily: Typography.body,
       fontSize: 12,
       color: Colors.textSecondary,
-      fontWeight: "500",
     },
     permRow: {
       flexDirection: "row",
@@ -822,7 +818,6 @@ const getStyles = (Colors: any) =>
       fontFamily: Typography.body,
       fontSize: 12,
       color: Colors.primary,
-      fontWeight: "bold",
     },
     actionRow: {
       flexDirection: "row",

@@ -120,7 +120,6 @@ const getStyles = (Colors: any) =>
     userName: {
       fontFamily: Typography.heading,
       fontSize: 24,
-      fontWeight: "bold",
       color: Colors.textPrimary,
       marginTop: 2,
     },
@@ -134,7 +133,7 @@ const getStyles = (Colors: any) =>
       gap: 6,
       marginBottom: 4,
     },
-    xpBadgeText: { fontSize: 12, fontWeight: "bold", color: Colors.gold },
+    xpBadgeText: { fontSize: 12, color: Colors.gold },
     quoteCard: {
       flexDirection: "row",
       alignItems: "flex-start",

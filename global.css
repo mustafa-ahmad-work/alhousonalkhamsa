@@ -1,3 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  * {
+    font-family: Tajawal_500Medium !important;
+  }
+  Text {
+    font-family: Tajawal_500Medium;
+  }
+  text {
+    font-family: Tajawal_500Medium;
+  }
+}
+
+.font-bold {
+  font-family: Tajawal_700Bold;
+}
+
+.font-medium {
+  font-family: Tajawal_500Medium;
+}
+
+.font-quran {
+  font-family: Amiri_400Regular;
+}

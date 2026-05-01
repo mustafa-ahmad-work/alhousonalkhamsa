@@ -67,178 +67,150 @@ export default function AppExplanationScreen() {
         <PresentationCard Colors={Colors} />
 
         <SectionHeader
-          title="منهجية المفاتيح الخمسة بالتفصيل"
+          title="فلسفة التطبيق: إتقان كالفاتحة"
+          color={Colors.gold}
+        />
+        <View style={styles.stabilityGuide}>
+          <Text style={styles.subParagraph}>
+            هذا التطبيق هو <Text style={styles.bold}>نظام هندسي متكامل</Text> لختم القرآن الكريم كاملاً حفظاً وإتقاناً. يعتمد النظام على "منهجية المفاتيح الخمسة" التي تحول الآيات إلى جزء من ذاكرتك الدائمة عبر تكرار ذكي مبني على أسس علمية ونفسية دقيقة.
+          </Text>
+          <Text style={styles.subParagraph}>
+            يهدف التطبيق إلى معالجة أكبر عائق يواجه الحفاظ: <Text style={styles.bold}>النسيان وتشتت المراجعة</Text>، من خلال جدولة آلية دقيقة تضمن لك عدم ترك أي صفحة دون تمكين.
+          </Text>
+        </View>
+
+        <SectionHeader
+          title="الركن الركين: منهجية المفاتيح الخمسة"
           color={Colors.primary}
         />
         <ExplanationCard
-          title="المفتاح الأول: الختمة (التلاوة والاستماع)"
+          title="المفتاح 1: الختمة (بناء الألفة البصرية والسمعية)"
           icon="book-outline"
           color={Colors.fortressRecitation}
           content={
             <View>
               <Text style={styles.subParagraph}>
-                • <Text style={styles.bold}>ختمة التلاوة:</Text> قراءة جزئين
-                يومياً بنظام &quot;الحدر&quot; السريع؛ الهدف منها تعويد العين على رسم
-                المصحف وتسهيل انسياب الآيات في العقل وربطها ببعضها.
+                • <Text style={styles.bold}>ختمة التلاوة:</Text> قراءة جزئين يومياً بنظام "الحدر" السريع لتسهيل انسياب الآيات في العقل وربط السور ببعضها.
               </Text>
               <Text style={styles.subParagraph}>
-                • <Text style={styles.bold}>ختمة الاستماع:</Text> الاستماع لورد
-                الاستماع اليومي (حزب واحد) بصوت الشيخ الحصري لضبط الأحكام
-                والارتقاء بجودة التجويد قبل البدء في الحفظ.
+                • <Text style={styles.bold}>ختمة الاستماع:</Text> الاستماع اليومي بصوت الشيخ الحصري لضبط مخارج الحروف وترسيخ النغمة الصحيحة في الوجدان.
               </Text>
             </View>
           }
         />
         <ExplanationCard
-          title="المفتاح الثاني: التحضير (3 مستويات للتمكين)"
+          title="المفتاح 2: التحضير (تهيئة الذاكرة الثلاثية)"
           icon="timer-outline"
           color={Colors.fortressPreparation}
           content={
             <View>
               <Text style={styles.subParagraph}>
-                • <Text style={styles.bold}>التحضير الأسبوعي:</Text> قراءة صفحات
-                ورد الحفظ للأسبوع القادم بالكامل مرة واحدة في يوم الراحة لتكوين
-                صورة ذهنية شاملة.
+                • <Text style={styles.bold}>التحضير الأسبوعي:</Text> نظرة استباقية لورد الأسبوع القادم.
               </Text>
               <Text style={styles.subParagraph}>
-                • <Text style={styles.bold}>التحضير الليلي:</Text> قراءة الصفحة
-                المقررة غداً قبل النوم مباشرة؛ العقل الباطن سيقوم
-                بتثبيتها ومعالجتها أثناء نومك!
+                • <Text style={styles.bold}>التحضير الليلي:</Text> قراءة صفحة الغد قبل النوم مباشرة لمعالجتها أثناء النوم.
               </Text>
               <Text style={styles.subParagraph}>
-                • <Text style={styles.bold}>التحضير القبلي:</Text> قراءة نفس
-                الصفحة قبل بدء الحفظ الفعلي لتهيئة الذاكرة القريبة وجعل
-                الحفظ يجري بيسر.
+                • <Text style={styles.bold}>التحضير القبلي:</Text> تنشيط الذاكرة القريبة قبل البدء بالحفظ مباشرة.
               </Text>
             </View>
           }
         />
         <ExplanationCard
-          title="المفتاح الثالث: الحفظ الجديد (الإيداع الذكي)"
+          title="المفتاح 3: الحفظ الجديد (الإيداع في الذاكرة)"
           icon="create-outline"
           color={Colors.fortressMemorization}
-          content="مرحلة التركيز الذهني الكامل؛ كرر كل آية 10 مرات ثم اربطها بما قبلها. لا تنتقل لصفحة جديدة إلا إذا أصبحت قادراً على سرد الصفحة الحالية غيباً دون خطأ واحد وبسرعة."
+          content="مرحلة التركيز القصوى لحفظ الصفحات المقررة. التطبيق يحدد لك عدد الصفحات الكاملة يومياً بناءً على طاقتك، ويوفر لك عدادات تكرار لضمان 'جودة الإيداع'."
         />
         <ExplanationCard
-          title="المفتاح الرابع: مراجعة القريب (التمكين والربط)"
+          title="المفتاح 4: مراجعة القريب (صمام الأمان)"
           icon="sync-outline"
           color={Colors.fortressReview}
-          content="مراجعة آخر 20 صفحة (أو آخر جزء) تم حفظها بشكل يومي. هذا المفتاح هو صمام الأمان الذي يحول الحفظ من الذاكرة المؤقتة إلى الدائمة ويمنع النسيان السريع."
+          content="مراجعة آخر 20 صفحة تم حفظها يومياً. هذا القسم يحمي حفظك الجديد من التآكل السريع وينقله للذاكرة المتوسطة."
         />
         <ExplanationCard
-          title="المفتاح الخامس: مراجعة البعيد (التثبيت الأبدي)"
+          title="المفتاح 5: مراجعة البعيد (مرحلة الرسوخ)"
           icon="layers-outline"
           color={Colors.blue}
-          content="مراجعة الأجزاء القديمة المسردة بمعدل جزئين يومياً. الهدف هو الوصول لمرحلة 'السرد الغيبي'؛ حيث تقرأ أجزاءك القديمة بانسيابية تامة كأنك تقرأ الفاتحة."
+          content="مراجعة الأجزاء القديمة المسردة للوصول لمرحلة السرد كالفاتحة عبر جدولة آلية تمر بك على كامل محفوظك."
         />
 
-        <SectionHeader title="الروتين اليومي المقترح" color={Colors.gold} />
+        <SectionHeader title="جولة داخل التطبيق (للمبتدئين)" color={Colors.gold} />
         <ExplanationCard
-          title="الفجر: وقت البركة"
-          icon="sunny-outline"
-          color={Colors.gold}
-          content="أفضل وقت للحفظ الجديد والتحضير القبلي؛ حيث يكون الذهن في أقصى درجات اليقظة والصفاء والهدوء النفسي."
+          title="1. الشاشة الرئيسية (المفاتيح الملونة)"
+          icon="home-outline"
+          color={Colors.primary}
+          content="لوحة تحكمك اليومية؛ كل 'مفتاح' ملون يمثل ركناً من المنهجية. المربعات تظهر حالة وردك، وبالضغط عليها تبدأ المهمة فوراً."
         />
         <ExplanationCard
-          title="بعد العصر أو العشاء: التمكين"
-          icon="moon-outline"
-          color={Colors.purple}
-          content="وقت مثالي لمراجعة القريب والبعيد؛ السكينة في هذا الوقت تساعد على استرجاع المحفوظ بهدوء وتثبيته في الذاكرة البعيدة."
-        />
-        <ExplanationCard
-          title="قبل النوم: البذر"
-          icon="bed-outline"
-          color={Colors.blue}
-          content="خصص 15-20 دقيقة للتحضير الليلي لصفحة الغد. اترك عقلك يثبتها لك ويقوم بالمهمة الصعبة أثناء راحتك ونومك."
-        />
-
-        <SectionHeader
-          title="كيفية تحقيق أقصى استفادة"
-          color={Colors.secondary}
-        />
-        <ExplanationCard
-          title="1. التزم بعدّادات التكرار والتايمر"
+          title="2. شاشة التنفيذ (المؤقت والعداد)"
           icon="stopwatch-outline"
-          color={Colors.secondary}
-          content="التطبيق يوفر عدادات دقيقة؛ لا تكتفِ بالحفظ الظاهري، بل كرر حتى تنهي الورد المطلوب لضمان 'جودة التكرار' وليس الكم فقط."
-        />
-        <ExplanationCard
-          title="2. عداد التكرارات التفاعلي"
-          icon="add-circle-outline"
-          color={Colors.primary}
-          content="داخل شاشة المؤقت (Timer)، ستجد عداداً يدوياً للتكرارات. استخدمه لضبط عدد مرات قراءة الآية الواحدة أو الصفحة؛ حيث يساعدك هذا العدّ الذهني على زيادة التركيز وضمان عدم شرود الذهن أثناء التكرار."
-        />
-        <ExplanationCard
-          title="3. التقييم الذاتي الصادق"
-          icon="checkmark-done-circle-outline"
           color={Colors.success}
-          content="بعد تسميع كل ورد، كن صادقاً في تقييم حفظك. إذا كان حفظك مهتزاً، التطبيق سيقترح عليك مراجعة هذه الصفحة قريباً لتقويتها."
+          content="تتضمن مؤقتاً للوقت وعداداً يدوياً للتكرارات لضمان الالتزام بنصاب التكرار المطلوب لكل آية وصفحة."
         />
         <ExplanationCard
-          title="3. ميزان الرسوخ (IQ)"
-          icon="bar-chart-outline"
-          color={Colors.primary}
-          content="راقب لون السور في شاشتك الرئيسية؛ الألوان تمثل 'قوة الرسوخ'. السور التي يميل لونها للأحمر تحتاج لتدخل فوري منك لمراجعتها."
+          title="3. شاشة الخطة (الجدولة الذكية)"
+          icon="calendar-outline"
+          color={Colors.blue}
+          content="هنا تختار طاقتك اليومية (عدد الصفحات) وتحدد أيام العمل في الأسبوع. النظام يقوم تلقائياً بجدولة المصحف كاملاً بناءً على هذه الاختيارات."
+        />
+        <ExplanationCard
+          title="4. شاشة الإحصائيات (ميزان الرسوخ)"
+          icon="stats-chart-outline"
+          color={Colors.purple}
+          content="تحلل جودة حفظك وتعرض 'ميزان الرسوخ'. السور الخضراء تعني أنها متينة، والحمراء تنبهك لضرورة المراجعة العاجلة."
         />
 
-        <SectionHeader title="أبرز مميزات التطبيق الذكية" color={Colors.gold} />
-        {[
-          {
-            title: "خوارزمية المراجعة المتباعدة",
-            icon: "infinite-outline",
-            color: Colors.primary,
-            content:
-              "يقوم التطبيق بذكاء بتحديد أي الصفحات تحتاج لمراجعة اليوم بناءً على تاريخ آخر مراجعة وقوة حفظك، ليضمن عدم نسيانك.",
-          },
-          {
-            title: "الخطة المرنة والمتكاملة",
-            icon: "calendar-outline",
-            color: Colors.success,
-            content:
-              "سواء كنت تحفظ صفحة أو جزئين، يتكيف النظام تلقائياً مع وتيرتك، مع إمكانية تخصيص أيام للراحة والمراجعة فقط.",
-          },
-          {
-            title: "وضعية الختم المبارك",
-            icon: "trophy-outline",
-            color: Colors.gold,
-            content:
-              "احتفالات وتنبيهات محفزة عند إتمام الأجزاء والأحزاب، مما يزيد من دافعيتك نحو الإتمام والإتقان.",
-          },
-          {
-            title: "المزامنة السحابية وآمن البيانات",
-            icon: "cloud-upload-outline",
-            color: Colors.blue,
-            content:
-              "جميع بيانات تقدمك ومستواك في الرسوخ محفوظة دائماً؛ يمكنك استرجاعها حتى لو قمت بتغيير هاتفك أو مسح التطبيق.",
-          },
-          {
-            title: "مشغل الصوت (منهج الحصري)",
-            icon: "musical-note",
-            color: Colors.purple,
-            content:
-              "دعم مدمج للاستماع لورد الاستماع اليومي لضمان ضبط المخارج والأحكام وفق منهجية علمية رصينة.",
-          },
-          {
-            title: "دعم المصاحف المتعددة",
-            icon: "book-outline",
-            color: Colors.fortressRecitation,
-            content:
-              "دعم كامل لمصحف المدينة القديم والجديد، الشمرلي، والباكستاني لضمان راحتك البصرية أثناء المتابعة.",
-          },
-        ].map((feat, idx) => (
-          <ExplanationCard
-            key={idx}
-            title={feat.title}
-            icon={feat.icon}
-            color={feat.color}
-            content={feat.content}
-          />
-        ))}
+        <SectionHeader title="أدوات الإتقان (مميزات فريدة)" color={Colors.success} />
+        <ExplanationCard
+          title="المشغل الصوتي المدمج"
+          icon="play-circle-outline"
+          color={Colors.fortressListening}
+          content="لا حاجة لمغادرة التطبيق؛ يمكنك الاستماع لورد 'ختمة الاستماع' مباشرة من داخل التطبيق بصوت الشيخ الحصري، مع إمكانية التنقل بين الصفحات والآيات بسهولة."
+        />
+        <ExplanationCard
+          title="قارئ القرآن التفاعلي"
+          icon="book-outline"
+          color={Colors.primary}
+          content="يوفر التطبيق مصحفاً رقمياً تفاعلياً لكل ورد (تلاوة أو حفظ)، حيث يمكنك القراءة مباشرة من الشاشة ومتابعة تقدمك صفحة بصفحة."
+        />
+        <ExplanationCard
+          title="نظام الاختبارات (Quiz)"
+          icon="extension-puzzle-outline"
+          color={Colors.gold}
+          content="اختبر قوة رسوخك من خلال نظام اختبارات ذكي يطرح عليك أسئلة من محفوظك، ويحدد لك مواضع الضعف التي تحتاج لمزيد من المراجعة."
+        />
+        <ExplanationCard
+          title="سجل الإنجاز (Achievement History)"
+          icon="time-outline"
+          color={Colors.blue}
+          content="يوثق التطبيق كل ورد أتممته بالوقت والتاريخ، مما يعطيك دفعة معنوية لرؤية تراكم إنجازاتك يوماً بعد يوم."
+        />
+
+        <SectionHeader title="أسرار الإعدادات (الإعدادات المتقدمة)" color={Colors.primary} />
+        <ExplanationCard
+          title="مرونة الخطة (يومي / أسبوعي)"
+          icon="options-outline"
+          color={Colors.primary}
+          content="يمكنك الاختيار بين 'الخطة اليومية' التي توزع الورد بالتساوي، أو 'الخطة الأسبوعية' التي تتيح لك حرية أكبر في التنفيذ خلال الأسبوع. كما يمكنك تحديد أيام محددة فقط للحفظ (مثلاً 5 أيام حفظ ويومان مراجعة)."
+        />
+        <ExplanationCard
+          title="طبعة المصحف واستراتيجيات المراجعة"
+          icon="layers-outline"
+          color={Colors.gold}
+          content="اختر طبعة المصحف التي تفضلها (المدينة، الشمرلي، إلخ) وطبق استراتيجيات مراجعة متقدمة مثل 'التكرار المتباعد SSR' لضمان أعلى مستويات الرسوخ."
+        />
+        <ExplanationCard
+          title="قوالب التنبيهات الذكية"
+          icon="notifications-outline"
+          color={Colors.success}
+          content="استخدم القوالب الجاهزة (البكور، القياسي، المتأخر) لضبط مواعيد كل المفاتيح بضغطة واحدة، وفعل الاهتزاز اللمسي (Haptics) لزيادة التركيز أثناء العد."
+        />
 
         <SectionHeader title="ميزان الرسوخ (مستويات الحفظ)" color={Colors.primary} />
         <View style={styles.stabilityGuide}>
           <Text style={styles.subParagraph}>
-            ينقسم حفظك في التطبيق إلى 5 مستويات ذكية تتأثر بأدائك في الاختبارات والمراجعات الدورية:
+            ينقسم حفظك في التطبيق إلى 5 مستويات ذكية تتأثر بأدائك في المراجعات الدورية:
           </Text>
           <View style={styles.levelRow}>
             <View style={[styles.levelDot, { backgroundColor: Colors.red }]} />

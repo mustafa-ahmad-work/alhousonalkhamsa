@@ -1,7 +1,7 @@
-import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Typography, Spacing, BorderRadius } from "../../theme";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { BorderRadius, Spacing, Typography } from "../../theme";
 
 interface ExplanationHeroProps {
   Colors: any;
@@ -9,9 +9,16 @@ interface ExplanationHeroProps {
 
 export const ExplanationHero: React.FC<ExplanationHeroProps> = ({ Colors }) => {
   return (
-    <View style={[styles.container, { backgroundColor: Colors.surfaceElevated }]}>
+    <View
+      style={[styles.container, { backgroundColor: Colors.surfaceElevated }]}
+    >
       <View style={styles.content}>
-        <View style={[styles.iconContainer, { backgroundColor: Colors.primaryMuted }]}>
+        <View
+          style={[
+            styles.iconContainer,
+            { backgroundColor: Colors.primaryMuted },
+          ]}
+        >
           <Ionicons name="book" size={40} color={Colors.primary} />
         </View>
         <Text style={[styles.title, { color: Colors.textPrimary }]}>
@@ -21,15 +28,29 @@ export const ExplanationHero: React.FC<ExplanationHeroProps> = ({ Colors }) => {
           نظام ذكي مبني على منهجية المفاتيح الخمسة لضمان رسوخ حفظك وعدم تفلته
         </Text>
       </View>
-      
+
       <View style={styles.badgeContainer}>
-        <View style={[styles.badge, { backgroundColor: Colors.goldMuted, borderColor: Colors.gold }]}>
+        <View
+          style={[
+            styles.badge,
+            { backgroundColor: Colors.goldMuted, borderColor: Colors.gold },
+          ]}
+        >
           <Ionicons name="star" size={14} color={Colors.gold} />
-          <Text style={[styles.badgeText, { color: Colors.gold }]}>المنهجية العلمية</Text>
+          <Text style={[styles.badgeText, { color: Colors.gold }]}>
+            المنهجية العلمية
+          </Text>
         </View>
-        <View style={[styles.badge, { backgroundColor: Colors.blueMuted, borderColor: Colors.blue }]}>
+        <View
+          style={[
+            styles.badge,
+            { backgroundColor: Colors.blueMuted, borderColor: Colors.blue },
+          ]}
+        >
           <Ionicons name="flash" size={14} color={Colors.blue} />
-          <Text style={[styles.badgeText, { color: Colors.blue }]}>تقنية المراجعة المتباعدة</Text>
+          <Text style={[styles.badgeText, { color: Colors.blue }]}>
+            تقنية المراجعة المتباعدة
+          </Text>
         </View>
       </View>
     </View>
@@ -59,7 +80,6 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: Typography.heading,
     fontSize: Typography.xl,
-    fontWeight: "bold",
     textAlign: "center",
     marginBottom: Spacing.xs,
   },
@@ -87,7 +107,6 @@ const styles = StyleSheet.create({
   badgeText: {
     fontFamily: Typography.body,
     fontSize: Typography.xs,
-    fontWeight: "600",
     marginLeft: 4,
   },
 });

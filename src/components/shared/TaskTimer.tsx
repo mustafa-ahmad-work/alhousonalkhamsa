@@ -1,10 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, Vibration, View } from 'react-native';
+import { Svg, Circle } from 'react-native-svg';
+import quranData from '../../data/quran_pages.json';
+import { getMushafEdition } from '../../data/mushafEditions';
 import { getSurahById, SURAHS } from '../../data/quranMeta';
+import { useAppStore } from '../../store/AppStore';
 import { BorderRadius, Shadow, Spacing, Typography, useTheme } from '../../theme';
 import { TaskSelection } from '../../types';
-import { formatTime } from '../../utils/helpers';
+import { formatTime, toArabicNumerals } from '../../utils/helpers';
 
 type TaskTimerProps = {
   initialSeconds: number;
@@ -42,23 +46,29 @@ export function TaskTimer({
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
+  const { state } = useAppStore();
+  const { settings } = state;
+
   // Initialize from task if available
   useEffect(() => {
     if (task && task.ranges.length > 0) {
+      const editionId = settings.mushafEdition || 'madani_604';
+      const edition = getMushafEdition(editionId as any);
+
       const firstRange = task.ranges[0];
       if (firstRange.type === 'surah' && firstRange.surahId) {
         setCurrentAyah({ surahId: firstRange.surahId, ayah: firstRange.startAyah || 1 });
       }
       
-      // Calculate min/max pages from all ranges
+      // Calculate min/max pages from all ranges using the current edition
       const allPages: number[] = [];
       task.ranges.forEach(r => {
         if (r.type === 'page') {
           for (let p = r.start; p <= r.end; p++) allPages.push(p);
         } else if (r.type === 'surah' && r.surahId) {
-          const surah = getSurahById(r.surahId);
-          if (surah) {
-            for (let p = surah.startPage; p <= surah.endPage; p++) allPages.push(p);
+          const range = edition.surahPages[r.surahId];
+          if (range) {
+            for (let p = range[0]; p <= range[1]; p++) allPages.push(p);
           }
         }
       });
@@ -68,9 +78,13 @@ export function TaskTimer({
         const maxP = Math.max(...allPages);
         setPageRange({ min: minP, max: maxP });
         setCurrentPage(minP);
+      } else {
+        // Fallback to standard range if no pages calculated
+        setPageRange({ min: 1, max: edition.totalPages });
+        setCurrentPage(1);
       }
     }
-  }, [task]);
+  }, [task, settings.mushafEdition]);
 
   useEffect(() => {
     let interval: any = null;
@@ -100,37 +114,75 @@ export function TaskTimer({
     }
   }, [isActive]);
 
+  // Track ayahs for the current page
+  useEffect(() => {
+    if (currentPage) {
+      const pageVerses = (quranData as any)[currentPage.toString()];
+      if (pageVerses && pageVerses.length > 0) {
+        const firstVerse = pageVerses[0];
+        const [sId, aNum] = firstVerse.verse_key.split(':').map(Number);
+        
+        // Only reset if the current ayah is not on this page
+        const isCurrentAyahOnPage = pageVerses.some((v: any) => v.verse_key === `${currentAyah?.surahId}:${currentAyah?.ayah}`);
+        
+        if (!isCurrentAyahOnPage) {
+          setCurrentAyah({ surahId: sId, ayah: aNum });
+        }
+      }
+    }
+  }, [currentPage]);
+
   const toggle = () => setIsActive(!isActive);
   const reset = () => {
     setSeconds(initialSeconds);
     setIsActive(false);
     setIsFinished(false);
     setCurrentRep(0);
+    if (pageRange.min) setCurrentPage(pageRange.min);
   };
 
   const percentage = initialSeconds > 0 ? seconds / initialSeconds : 0;
-
-  // Circular progress clipping logic
-  const getRotation = (p: number) => `${p * 180 - 180}deg`;
-  const rightHalfPct = percentage <= 0.5 ? percentage * 2 : 1;
-  const leftHalfPct = percentage > 0.5 ? (percentage - 0.5) * 2 : 0;
+  
+  // SVG Progress calculation
+  const size = 260;
+  const radius = (size - STROKE_WIDTH) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference * (1 - percentage);
 
   const handleNextAyah = () => {
+    if (!currentPage) return;
+    const pageVerses = (quranData as any)[currentPage.toString()];
+    if (!pageVerses) return;
+
     setCurrentAyah(prev => {
       if (!prev) return { surahId: 1, ayah: 1 };
-      const surah = getSurahById(prev.surahId);
-      if (surah && prev.ayah < surah.ayahCount) {
-        return { ...prev, ayah: prev.ayah + 1 };
+      
+      const currentIndex = pageVerses.findIndex((v: any) => v.verse_key === `${prev.surahId}:${prev.ayah}`);
+      if (currentIndex !== -1 && currentIndex < pageVerses.length - 1) {
+        const nextVerse = pageVerses[currentIndex + 1];
+        const [sId, aNum] = nextVerse.verse_key.split(':').map(Number);
+        return { surahId: sId, ayah: aNum };
       }
-      return prev;
+      return prev; // Stay at last ayah of page
     });
     setCurrentRep(0);
   };
 
   const handlePrevAyah = () => {
+    if (!currentPage) return;
+    const pageVerses = (quranData as any)[currentPage.toString()];
+    if (!pageVerses) return;
+
     setCurrentAyah(prev => {
-      if (!prev || prev.ayah <= 1) return prev;
-      return { ...prev, ayah: prev.ayah - 1 };
+      if (!prev) return prev;
+      
+      const currentIndex = pageVerses.findIndex((v: any) => v.verse_key === `${prev.surahId}:${prev.ayah}`);
+      if (currentIndex > 0) {
+        const prevVerse = pageVerses[currentIndex - 1];
+        const [sId, aNum] = prevVerse.verse_key.split(':').map(Number);
+        return { surahId: sId, ayah: aNum };
+      }
+      return prev; // Stay at first ayah of page
     });
     setCurrentRep(0);
   };
@@ -158,98 +210,42 @@ export function TaskTimer({
              </Text>
           </View>
         </View>
-
-        {/* Initial Setup Section - Only visible before start */}
-        {showSetup && !isActive && !isFinished && (
-          <View style={styles.setupCard}>
-            <Text style={[styles.setupTitle, { color: Colors.textSecondary }]}>إعداد البداية</Text>
-            <View style={styles.setupRow}>
-              <View style={styles.setupItem}>
-                <Text style={styles.setupLabel}>رقم الآية</Text>
-                <TextInput
-                  style={[styles.setupInput, { color: Colors.textPrimary, borderColor: Colors.border }]}
-                  keyboardType="numeric"
-                  placeholder="رقم.."
-                  placeholderTextColor={Colors.textTertiary}
-                  value={currentAyah ? currentAyah.ayah.toString() : ""}
-                  onChangeText={(val) => {
-                    const num = parseInt(val);
-                    if (!isNaN(num)) {
-                      setCurrentAyah(prev => ({ surahId: prev?.surahId || 1, ayah: num }));
-                    } else if (val === "") {
-                      setCurrentAyah(prev => prev ? { ...prev, ayah: 0 } : null);
-                    }
-                  }}
-                />
-              </View>
-              <View style={styles.setupItem}>
-                <Text style={styles.setupLabel}>رقم الصفحة</Text>
-                <TextInput
-                  style={[styles.setupInput, { color: Colors.textPrimary, borderColor: Colors.border }]}
-                  keyboardType="numeric"
-                  placeholder="رقم.."
-                  placeholderTextColor={Colors.textTertiary}
-                  value={currentPage ? currentPage.toString() : ""}
-                  onChangeText={(val) => {
-                    const num = parseInt(val);
-                    if (!isNaN(num)) {
-                      setCurrentPage(num);
-                    } else if (val === "") {
-                      setCurrentPage(null);
-                    }
-                  }}
-                />
-              </View>
-            </View>
-          </View>
-        )}
         
         <Animated.View style={[
           styles.timerContainer, 
           { transform: [{ scale: pulseAnim }] }
         ]}>
           <View style={styles.circularContainer}>
-            {/* Background Track Ring */}
-            <View style={[styles.trackRing, { borderColor: Colors.borderLight }]} />
-
-            {/* Right Half */}
-            <View style={styles.halfContainer}>
-              <View style={[styles.halfInner, { overflow: 'hidden' }]}>
-                <View style={[
-                  styles.progressHalf, 
-                  { 
-                    borderColor: 'transparent', 
-                    borderRightColor: Colors.primary, 
-                    borderTopColor: Colors.primary,
-                    transform: [{ rotate: '-45deg' }, { rotate: getRotation(rightHalfPct) }]
-                  }
-                ]} />
-              </View>
-            </View>
-
-            {/* Left Half */}
-            <View style={[styles.halfContainer, { flexDirection: 'row' }]}>
-              <View style={[styles.halfInner, { overflow: 'hidden' }]}>
-                <View style={[
-                  styles.progressHalf, 
-                  { 
-                    borderColor: 'transparent', 
-                    borderLeftColor: leftHalfPct > 0 ? Colors.primary : 'transparent', 
-                    borderBottomColor: leftHalfPct > 0 ? Colors.primary : 'transparent',
-                    transform: [{ rotate: '-45deg' }, { rotate: getRotation(leftHalfPct) }],
-                    left: 0,
-                    right: undefined
-                  }
-                ]} />
-              </View>
-            </View>
+            <Svg width={size} height={size} style={{ transform: [{ rotate: '-90deg' }] }}>
+              <Circle
+                cx={size / 2}
+                cy={size / 2}
+                r={radius}
+                stroke={Colors.borderLight}
+                strokeWidth={STROKE_WIDTH}
+                fill="transparent"
+              />
+              <Circle
+                cx={size / 2}
+                cy={size / 2}
+                r={radius}
+                stroke={isFinished ? Colors.success : Colors.primary}
+                strokeWidth={STROKE_WIDTH}
+                fill="transparent"
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeDashoffset}
+                strokeLinecap="round"
+              />
+            </Svg>
 
             {/* Center Content */}
-            <View style={[styles.timerCircle, { backgroundColor: Colors.surface }]}>
+            <View style={[styles.timerCircle, { backgroundColor: Colors.surface, position: 'absolute' }]}>
               <Text style={[styles.timeText, { color: isFinished ? Colors.success : Colors.textPrimary }]}>
                 {formatTime(seconds)}
               </Text>
-              <Text style={[styles.remainingLabel, { color: Colors.textTertiary }]}>المتبقي</Text>
+              <Text style={[styles.remainingLabel, { color: Colors.textTertiary }]}>
+                {isFinished ? 'تم بنجاح' : 'متبقي'}
+              </Text>
             </View>
           </View>
         </Animated.View>
@@ -292,17 +288,25 @@ export function TaskTimer({
              <View style={styles.stackedItem}>
                 <Text style={[styles.hifzLabel, { color: Colors.textTertiary }]}>رقم الآية</Text>
                 <View style={styles.counterRow}>
-                  <TouchableOpacity onPress={handlePrevAyah} style={styles.largeMiniBtn}>
+                  <TouchableOpacity 
+                    onPress={handlePrevAyah} 
+                    style={[styles.largeMiniBtn, (!currentAyah || ((quranData as any)[currentPage?.toString() || ""]?.[0]?.verse_key === `${currentAyah.surahId}:${currentAyah.ayah}`)) && { opacity: 0.3 }]}
+                    disabled={!currentAyah || ((quranData as any)[currentPage?.toString() || ""]?.[0]?.verse_key === `${currentAyah.surahId}:${currentAyah.ayah}`)}
+                  >
                     <Ionicons name="remove-circle-outline" size={24} color={Colors.textPrimary} />
                   </TouchableOpacity>
                   <Text style={[styles.hifzValueLarge, { color: Colors.textPrimary }]}>
-                    {currentAyah ? currentAyah.ayah : '-'}
+                    {currentAyah ? toArabicNumerals(currentAyah.ayah) : '-'}
                   </Text>
-                  <TouchableOpacity onPress={handleNextAyah} style={styles.largeMiniBtn}>
+                  <TouchableOpacity 
+                    onPress={handleNextAyah} 
+                    style={[styles.largeMiniBtn, (!currentAyah || ((quranData as any)[currentPage?.toString() || ""]?.slice(-1)[0]?.verse_key === `${currentAyah.surahId}:${currentAyah.ayah}`)) && { opacity: 0.3 }]}
+                    disabled={!currentAyah || ((quranData as any)[currentPage?.toString() || ""]?.slice(-1)[0]?.verse_key === `${currentAyah.surahId}:${currentAyah.ayah}`)}
+                  >
                     <Ionicons name="add-circle-outline" size={24} color={Colors.textPrimary} />
                   </TouchableOpacity>
                 </View>
-             </View>
+              </View>
 
              {showRepetition && (
                <>
@@ -424,31 +428,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-  },
-  trackRing: {
-    position: 'absolute',
-    width: 260,
-    height: 260,
-    borderRadius: 130,
-    borderWidth: STROKE_WIDTH,
-  },
-  halfContainer: {
-    position: 'absolute',
-    width: 260,
-    height: 260,
-    flexDirection: 'row-reverse',
-  },
-  halfInner: {
-    width: 130,
-    height: 260,
-  },
-  progressHalf: {
-    width: 260,
-    height: 260,
-    borderRadius: 130,
-    borderWidth: STROKE_WIDTH,
-    position: 'absolute',
-    right: 0,
   },
   timerCircle: {
     width: 260 - STROKE_WIDTH * 2,

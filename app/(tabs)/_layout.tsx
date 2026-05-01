@@ -102,10 +102,7 @@ function TabItem({
             <Ionicons name={iconName as any} size={24} color="#FFFFFF" />
             <Text
               numberOfLines={1}
-              style={[
-                styles.tabText,
-                { color: "#FFFFFF", fontWeight: "900", marginTop: 2 },
-              ]}
+              style={[styles.tabText, { color: "#FFFFFF", marginTop: 2 }]}
             >
               {title}
             </Text>
@@ -219,6 +216,7 @@ const getStyles = (Colors: any) =>
       flex: 1,
       height: "100%",
       alignItems: "center",
+      fontFamily: Typography.body,
       justifyContent: "center",
       overflow: "visible",
     },
@@ -261,11 +259,10 @@ const getStyles = (Colors: any) =>
       fontSize: 9,
       color: Colors.textSecondary,
       textAlign: "center",
-      fontWeight: "500",
     },
 
     tabTextActive: {
       color: "#FFFFFF",
-      fontWeight: "900",
+      fontFamily: Typography.body,
     },
   });

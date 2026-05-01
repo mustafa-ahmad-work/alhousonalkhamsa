@@ -11,15 +11,25 @@ interface VirtueCardProps {
   Colors: any;
 }
 
-export function VirtueCard({ title, desc, icon, color, Colors }: VirtueCardProps) {
+export function VirtueCard({
+  title,
+  desc,
+  icon,
+  color,
+  Colors,
+}: VirtueCardProps) {
   return (
     <View style={styles.flatRow}>
       <View style={[styles.iconCircle, { backgroundColor: `${color}15` }]}>
         <Ionicons name={icon as any} size={24} color={color} />
       </View>
       <View style={styles.flatContent}>
-        <Text style={[styles.flatTitle, { color: Colors.textPrimary }]}>{title}</Text>
-        <Text style={[styles.flatDesc, { color: Colors.textSecondary }]}>{desc}</Text>
+        <Text style={[styles.flatTitle, { color: Colors.textPrimary }]}>
+          {title}
+        </Text>
+        <Text style={[styles.flatDesc, { color: Colors.textSecondary }]}>
+          {desc}
+        </Text>
       </View>
     </View>
   );
@@ -31,7 +41,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     paddingVertical: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
+    borderBottomColor: "rgba(0,0,0,0.05)",
   },
   iconCircle: {
     width: 50,
@@ -48,7 +58,6 @@ const styles = StyleSheet.create({
   flatTitle: {
     fontFamily: Typography.heading,
     fontSize: 16,
-    fontWeight: Typography.bold,
     marginBottom: 4,
     textAlign: "left",
     width: "100%",

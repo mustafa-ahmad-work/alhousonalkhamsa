@@ -22,6 +22,12 @@ module.exports = {
           dark: "#fef3c7",
         },
       },
+      fontFamily: {
+        sans: ["Tajawal_500Medium"],
+        medium: ["Tajawal_500Medium"],
+        bold: ["Tajawal_700Bold"],
+        quran: ["Amiri_400Regular"],
+      },
     },
   },
   plugins: [],

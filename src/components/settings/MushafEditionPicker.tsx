@@ -28,18 +28,18 @@ export function MushafEditionPicker({
           </View>
           <Text style={styles.desc}>{edition.description}</Text>
           <View style={styles.metaRow}>
-            <Ionicons name="checkmark-circle" size={12} color={Colors.primary} />
+            <Ionicons
+              name="checkmark-circle"
+              size={12}
+              color={Colors.primary}
+            />
             <Text style={styles.source}>المصدر: {edition.source}</Text>
           </View>
           <Text style={styles.meta}>
             رواية: {edition.riwaya} • {edition.totalPages} صفحة
           </Text>
         </View>
-        <Ionicons
-          name="radio-button-on"
-          size={20}
-          color={Colors.primary}
-        />
+        <Ionicons name="radio-button-on" size={20} color={Colors.primary} />
       </View>
     </View>
   );
@@ -86,7 +86,8 @@ const getStyles = (Colors: any) =>
       fontFamily: Typography.body,
       fontSize: 10,
       color: Colors.textPrimary,
-      fontWeight: "500",
+      // fontWeight: "500",
+      lineHeight: 18,
       textAlign: "left",
     },
     meta: {

@@ -1,15 +1,15 @@
-import React, { useRef } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import React, { useRef } from "react";
 import {
+  Animated,
+  StyleSheet,
+  Text,
   TouchableOpacity,
   View,
-  Text,
-  StyleSheet,
-  Animated,
   ViewStyle,
-} from 'react-native';
-import { Fortress } from '../../types';
-import { useTheme, Typography, Spacing, BorderRadius, Shadow } from '../../theme';
-import { Ionicons } from '@expo/vector-icons';
+} from "react-native";
+import { BorderRadius, Spacing, Typography, useTheme } from "../../theme";
+import { Fortress } from "../../types";
 
 interface FortressCardProps {
   fortress: Fortress;
@@ -89,21 +89,30 @@ export function FortressCard({
         {/* Right: Check & XP */}
         <View style={styles.right}>
           <View style={styles.xpRow}>
-            <Text style={[styles.xp, { color: completed ? color : Colors.textTertiary }]}>+{fortress.xpReward}</Text>
-            <Ionicons name="star" size={10} color={completed ? color : Colors.textTertiary} />
+            <Text
+              style={[
+                styles.xp,
+                { color: completed ? color : Colors.textTertiary },
+              ]}
+            >
+              +{fortress.xpReward}
+            </Text>
+            <Ionicons
+              name="star"
+              size={10}
+              color={completed ? color : Colors.textTertiary}
+            />
           </View>
           <View
             style={[
               styles.checkBox,
               {
-                backgroundColor: completed ? color : 'transparent',
+                backgroundColor: completed ? color : "transparent",
                 borderColor: completed ? color : Colors.border,
               },
             ]}
           >
-            {completed && (
-              <Ionicons name="checkmark" size={14} color="#fff" />
-            )}
+            {completed && <Ionicons name="checkmark" size={14} color="#fff" />}
           </View>
         </View>
       </TouchableOpacity>
@@ -111,67 +120,69 @@ export function FortressCard({
   );
 }
 
-const getStyles = (Colors: any) => StyleSheet.create({
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    paddingHorizontal: Spacing.base,
-    paddingVertical: 14,
-    marginBottom: Spacing.sm,
-  },
-  left: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    gap: Spacing.md,
-  },
-  iconContainer: {
-    width: 42,
-    height: 42,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  info: {
-    flex: 1,
-    gap: 2,
-  },
-  name: {
-    fontFamily: Typography.body, fontSize: Typography.base,
-    fontWeight: Typography.medium,
-    color: Colors.textPrimary,
-    textAlign: 'left',
-    writingDirection: 'rtl',
-  },
-  description: {
-    fontFamily: Typography.body, fontSize: Typography.xs,
-    color: Colors.textTertiary,
-    textAlign: 'left',
-    writingDirection: 'rtl',
-  },
-  right: {
-    alignItems: 'center',
-    gap: 6,
-  },
-  xpRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-  },
-  xp: {
-    fontFamily: Typography.heading, fontSize: Typography.xs,
-    fontWeight: Typography.semibold,
-  },
-  checkBox: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const getStyles = (Colors: any) =>
+  StyleSheet.create({
+    card: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      borderRadius: BorderRadius.lg,
+      borderWidth: 1,
+      paddingHorizontal: Spacing.base,
+      paddingVertical: 14,
+      marginBottom: Spacing.sm,
+    },
+    left: {
+      flexDirection: "row",
+      alignItems: "center",
+      flex: 1,
+      gap: Spacing.md,
+    },
+    iconContainer: {
+      width: 42,
+      height: 42,
+      borderRadius: BorderRadius.md,
+      borderWidth: 1,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    info: {
+      flex: 1,
+      gap: 2,
+    },
+    name: {
+      fontFamily: Typography.body,
+      fontSize: Typography.base,
+      color: Colors.textPrimary,
+      textAlign: "left",
+      writingDirection: "rtl",
+    },
+    description: {
+      fontFamily: Typography.body,
+      fontSize: Typography.xs,
+      color: Colors.textTertiary,
+      textAlign: "left",
+      writingDirection: "rtl",
+    },
+    right: {
+      alignItems: "center",
+      gap: 6,
+    },
+    xpRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 3,
+    },
+    xp: {
+      fontFamily: Typography.heading,
+      fontSize: Typography.xs,
+    },
+    checkBox: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      borderWidth: 1.5,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  });

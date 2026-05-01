@@ -364,11 +364,9 @@ export function InteractiveQuran({
                                 ]}
                               >
                                 {isHidden ? " ┄┄┄ " : ` ${v.text_uthmani} `}
-                                <View style={styles.ayahCircle}>
-                                  <Text style={styles.ayahNumberText}>
-                                    {toArabicNumerals(parseInt(ayahNum))}
-                                  </Text>
-                                </View>
+                                <Text style={styles.ayahNumberText}>
+                                  {" "}({toArabicNumerals(parseInt(ayahNum))}){" "}
+                                </Text>
                               </Text>
                             );
                           })}
@@ -642,31 +640,20 @@ const getStyles = (Colors: any) =>
     },
     quranText: {
       fontFamily: Typography.quran,
-      fontSize: 24,
+      fontSize: 20,
       color: Colors.textPrimary,
-      lineHeight: 52,
+      lineHeight: 65,
       textAlign: "center",
     },
     quranTextHidden: {
       color: Colors.borderLight,
       backgroundColor: Colors.surfaceElevated,
     },
-    ayahCircle: {
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: Colors.gold,
-      justifyContent: "center",
-      alignItems: "center",
-      marginHorizontal: 4,
-      transform: [{ translateY: 4 }],
-    },
     ayahNumberText: {
       fontFamily: Typography.body,
-      fontSize: 10,
+      fontSize: 20,
       fontWeight: "bold",
-      color: Colors.gold,
+      color: Colors.primary,
     },
     physicalModeContainer: {
       flex: 1,

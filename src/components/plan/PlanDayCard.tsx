@@ -167,7 +167,7 @@ export const PlanDayCard = React.memo(function PlanDayCard({
                 <Text
                   style={[
                     styles.dowLabel,
-                    isToday && { color: Colors.primary, fontWeight: "bold" },
+                    isToday && { color: Colors.primary },
                   ]}
                 >
                   {dowLabel}
@@ -177,7 +177,7 @@ export const PlanDayCard = React.memo(function PlanDayCard({
                   style={[
                     styles.dayNumText,
                     item.isCurrent && { color: Colors.primary },
-                    isToday && { fontWeight: "900" },
+                    isToday && {},
                   ]}
                 >
                   {toArabicNumerals(item.dayIndex)}
@@ -391,13 +391,11 @@ const getStyles = (Colors: any) =>
     dayNumText: {
       fontFamily: Typography.heading,
       fontSize: 13,
-      fontWeight: "bold",
       color: Colors.textSecondary,
     },
     dowLabel: {
       fontFamily: Typography.heading,
       fontSize: 10,
-      fontWeight: "bold",
       color: Colors.textSecondary,
       textAlign: "center",
     },
@@ -412,7 +410,6 @@ const getStyles = (Colors: any) =>
     surahName: {
       fontFamily: Typography.heading,
       fontSize: 15,
-      fontWeight: "bold",
       color: Colors.textPrimary,
       flexShrink: 1,
     },
@@ -421,7 +418,6 @@ const getStyles = (Colors: any) =>
       fontFamily: Typography.heading,
       fontSize: 9,
       color: "#FFF",
-      fontWeight: "bold",
     },
     pageRangeRow: {
       flexDirection: "row",
@@ -455,7 +451,6 @@ const getStyles = (Colors: any) =>
     surahChipText: {
       fontFamily: Typography.heading,
       fontSize: 11,
-      fontWeight: "600",
     },
     tasksSection: { marginTop: Spacing.sm },
     tasksDivider: {
@@ -466,7 +461,6 @@ const getStyles = (Colors: any) =>
     tasksTitle: {
       fontFamily: Typography.heading,
       fontSize: 11,
-      fontWeight: "bold",
       color: Colors.textTertiary,
       marginBottom: Spacing.md,
       textAlign: "left",
@@ -514,7 +508,6 @@ const getStyles = (Colors: any) =>
       color: "#FFF",
       fontFamily: Typography.heading,
       fontSize: 15,
-      fontWeight: "bold",
     },
     progressBarBg: {
       height: 4,

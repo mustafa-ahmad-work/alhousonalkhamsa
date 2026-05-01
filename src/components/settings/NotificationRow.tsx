@@ -46,7 +46,9 @@ export function NotificationRow({
             }
             size={20}
             color={
-              isEnabled && isMasterEnabled ? Colors.primary : Colors.textTertiary
+              isEnabled && isMasterEnabled
+                ? Colors.primary
+                : Colors.textTertiary
             }
           />
           <Text style={[styles.label, { marginLeft: 12 }]}>{label}</Text>
@@ -99,7 +101,6 @@ const getStyles = (Colors: any) =>
     timeText: {
       fontFamily: Typography.heading,
       fontSize: 13,
-      fontWeight: "bold",
       color: Colors.primary,
     },
     divider: {

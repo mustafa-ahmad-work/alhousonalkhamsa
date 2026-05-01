@@ -237,7 +237,6 @@ const getStyles = (Colors: any) =>
     headerTitle: {
       fontFamily: Typography.heading,
       fontSize: 28,
-      fontWeight: "bold",
       color: Colors.textPrimary,
       marginBottom: Spacing.xs,
     },
@@ -259,7 +258,6 @@ const getStyles = (Colors: any) =>
     headerChipText: {
       fontFamily: Typography.heading,
       fontSize: 11,
-      fontWeight: "600",
     },
     statsGrid: {
       flexDirection: "row",
@@ -276,7 +274,6 @@ const getStyles = (Colors: any) =>
     statValue: {
       fontFamily: Typography.heading,
       fontSize: 22,
-      fontWeight: "bold",
     },
     statLabel: {
       fontFamily: Typography.body,
@@ -294,12 +291,10 @@ const getStyles = (Colors: any) =>
       fontFamily: Typography.body,
       fontSize: 13,
       color: Colors.textSecondary,
-      fontWeight: "500",
     },
     progressPercent: {
       fontFamily: Typography.heading,
       fontSize: 14,
-      fontWeight: "bold",
     },
     progressBarBg: {
       height: 4,
@@ -324,7 +319,6 @@ const getStyles = (Colors: any) =>
     weekSummaryText: {
       fontFamily: Typography.heading,
       fontSize: 12,
-      fontWeight: "600",
     },
     weekSummaryMeta: {
       fontFamily: Typography.body,

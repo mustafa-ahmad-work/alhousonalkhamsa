@@ -16,20 +16,57 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import "../global.css";
-import VersionOverlay from "../src/components/shared/VersionOverlay";
 import { CustomAlertProvider } from "../src/components/shared/CustomAlert";
+import VersionOverlay from "../src/components/shared/VersionOverlay";
 import { AppProvider } from "../src/store/AppStore";
 import { UpdateInfo, UpdateService } from "../src/store/UpdateService";
 import { Spacing, Typography, useTheme } from "../src/theme";
+import "../src/theme/fontFix";
 
 // Force RTL for Arabic
 I18nManager.allowRTL(true);
 I18nManager.forceRTL(true);
 
 const { width, height } = Dimensions.get("window");
+
+// Global Font Fix: This is the ONLY way to affect StyleSheet elements globally in React Native.
+// CSS files only affect Tailwind/NativeWind components.
+const setGlobalFont = () => {
+  const customStyle = { fontFamily: Typography.body, textAlign: "right" };
+
+  // Patch Text components
+  if ((Text as any).defaultProps == null) (Text as any).defaultProps = {};
+  (Text as any).defaultProps.style = customStyle;
+
+  // Patch TextInput components
+  if ((TextInput as any).defaultProps == null)
+    (TextInput as any).defaultProps = {};
+  (TextInput as any).defaultProps.style = customStyle;
+
+  // Ensure that even if a component has its own style, it merges with our font
+  // @ts-ignore
+  const oldRender = Text.render;
+  if (oldRender) {
+    // @ts-ignore
+    Text.render = function (...args) {
+      const origin = oldRender.call(this, ...args);
+      // Only inject font if not already set to something specific (like Quran font)
+      const currentFont = StyleSheet.flatten(origin.props.style)?.fontFamily;
+      if (!currentFont || currentFont === "System") {
+        return React.cloneElement(origin, {
+          style: [customStyle, origin.props.style],
+        });
+      }
+      return origin;
+    };
+  }
+};
+
+setGlobalFont();
 
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
@@ -77,7 +114,11 @@ export default function RootLayout() {
           alignItems: "center",
         }}
       >
-        <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+        <StatusBar
+          barStyle="light-content"
+          translucent
+          backgroundColor="transparent"
+        />
       </View>
     );
   }
@@ -347,7 +388,6 @@ const getStyles = (Colors: any) =>
     splashTitle: {
       fontFamily: "Tajawal_700Bold",
       fontSize: Typography["3xl"],
-      fontWeight: Typography.extrabold,
       color: Colors.textPrimary,
       textAlign: "center",
       letterSpacing: 1,
@@ -382,7 +422,6 @@ const getStyles = (Colors: any) =>
       fontFamily: "Tajawal_700Bold",
       fontSize: 16,
       color: Colors.primary,
-      fontWeight: "600",
       marginBottom: 8,
     },
     logoImageSplash: {

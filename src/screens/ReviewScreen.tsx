@@ -87,10 +87,12 @@ export default function ReviewScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar 
-        barStyle={Colors.background === "#07090F" ? "light-content" : "dark-content"} 
-        translucent 
-        backgroundColor="transparent" 
+      <StatusBar
+        barStyle={
+          Colors.background === "#07090F" ? "light-content" : "dark-content"
+        }
+        translucent
+        backgroundColor="transparent"
       />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -213,7 +215,6 @@ const getStyles = (Colors: any) =>
     heroTitle: {
       fontFamily: Typography.heading,
       fontSize: 26,
-      fontWeight: Typography.bold,
       color: Colors.textPrimary,
       textAlign: "center",
       marginBottom: Spacing.sm,
@@ -234,7 +235,6 @@ const getStyles = (Colors: any) =>
     sectionTitle: {
       fontFamily: Typography.heading,
       fontSize: 18,
-      fontWeight: Typography.bold,
       color: Colors.primary,
       textAlign: "left",
     },
@@ -263,7 +263,6 @@ const getStyles = (Colors: any) =>
     parentTitle: {
       fontFamily: Typography.heading,
       fontSize: 17,
-      fontWeight: Typography.bold,
       marginBottom: 4,
       textAlign: "left",
     },
@@ -299,7 +298,6 @@ const getStyles = (Colors: any) =>
     miniTitle: {
       fontFamily: Typography.heading,
       fontSize: 15,
-      fontWeight: Typography.bold,
       color: Colors.textPrimary,
       marginBottom: 6,
       textAlign: "left",
@@ -337,6 +335,5 @@ const getStyles = (Colors: any) =>
       color: Colors.primary,
       marginTop: 8,
       textAlign: "left",
-      fontWeight: "bold",
     },
   });

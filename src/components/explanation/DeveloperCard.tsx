@@ -1,7 +1,13 @@
-import React from "react";
-import { View, Text, StyleSheet, Linking, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Typography, Spacing, BorderRadius } from "../../theme";
+import React from "react";
+import {
+  Linking,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { BorderRadius, Spacing, Typography } from "../../theme";
 
 interface DeveloperCardProps {
   Colors: any;
@@ -9,24 +15,48 @@ interface DeveloperCardProps {
 
 export const DeveloperCard: React.FC<DeveloperCardProps> = ({ Colors }) => {
   return (
-    <View style={[styles.container, { backgroundColor: Colors.surfaceElevated, borderColor: Colors.border }]}>
-      <View style={[styles.avatar, { backgroundColor: Colors.primarySubtle }]}>
-        <Image 
-          source={require("../../../assets/images/moustafa.jpg")} 
-          style={styles.avatarImage} 
-        />
-      </View>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: Colors.surfaceElevated, borderColor: Colors.border },
+      ]}
+    >
       <View style={styles.info}>
-        <Text style={[styles.name, { color: Colors.textPrimary }]}>م/ مصطفى أحمد</Text>
+        <Text style={[styles.name, { color: Colors.textPrimary }]}>
+          م/ مصطفى أحمد
+        </Text>
         <Text style={[styles.desc, { color: Colors.textSecondary }]}>
-          مطور برمجيات يهدف من خلال هذا العمل إلى تيسير ومساعدة المسلمين في حفظ كتاب الله تعالى وإتقانه باستخدام أحدث الوسائل التقنية.
+          مطور برمجيات يهدف من خلال هذا العمل إلى تيسير ومساعدة المسلمين في حفظ
+          كتاب الله تعالى وإتقانه باستخدام أحدث الوسائل التقنية.
         </Text>
         <View style={styles.socials}>
-          <TouchableOpacity style={[styles.socialBtn, { backgroundColor: Colors.glass }]}>
-            <Ionicons name="logo-linkedin" size={18} color={Colors.textSecondary} />
+          <TouchableOpacity
+            style={[styles.socialBtn, { backgroundColor: Colors.glass }]}
+            onPress={() =>
+              Linking.openURL("https://www.facebook.com/Mostafa7Ahmad")
+            }
+          >
+            <Ionicons name="logo-facebook" size={18} color={Colors.primary} />
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.socialBtn, { backgroundColor: Colors.glass }]}>
-            <Ionicons name="mail" size={18} color={Colors.textSecondary} />
+          <TouchableOpacity
+            style={[styles.socialBtn, { backgroundColor: Colors.glass }]}
+            onPress={() => Linking.openURL("https://wa.me/+201120354592")}
+          >
+            <Ionicons name="logo-whatsapp" size={18} color={Colors.primary} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.socialBtn, { backgroundColor: Colors.glass }]}
+            onPress={() =>
+              Linking.openURL("https://www.linkedin.com/in/mustafa-ahmad-work")
+            }
+          >
+            <Ionicons name="logo-linkedin" size={18} color={Colors.primary} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.socialBtn, { backgroundColor: Colors.glass }]}
+            onPress={() => Linking.openURL("https://t.me/+nTRukDn0mAc2Zjc8")}
+          >
+            <Ionicons name="paper-plane" size={18} color={Colors.primary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -39,24 +69,8 @@ const styles = StyleSheet.create({
     padding: Spacing.xl,
     borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    flexDirection: "row",
-    alignItems: "center",
     marginTop: Spacing.xl,
     marginBottom: Spacing["2xl"],
-  },
-  avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: Spacing.lg,
-    overflow: "hidden",
-  },
-  avatarImage: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
   },
   info: {
     flex: 1,
@@ -64,7 +78,6 @@ const styles = StyleSheet.create({
   name: {
     fontFamily: Typography.heading,
     fontSize: Typography.base,
-    fontWeight: "bold",
     marginBottom: 4,
   },
   desc: {

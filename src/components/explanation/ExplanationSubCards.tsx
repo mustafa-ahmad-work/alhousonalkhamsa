@@ -304,7 +304,6 @@ const styles = StyleSheet.create({
     color: "#FFF",
     fontFamily: Typography.heading,
     fontSize: 14,
-    fontWeight: "bold",
   },
   modalActionBtn: {
     width: 44,
@@ -350,7 +349,6 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: Typography.heading,
     fontSize: Typography.md,
-    fontWeight: "bold",
   },
   hint: {
     fontFamily: Typography.body,
@@ -377,7 +375,6 @@ const styles = StyleSheet.create({
   timeValue: {
     fontFamily: Typography.heading,
     fontSize: Typography.lg,
-    fontWeight: "bold",
   },
   timeLabel: {
     fontFamily: Typography.body,

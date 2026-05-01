@@ -1,11 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { BorderRadius, Spacing, Typography, useTheme } from "../../theme";
 
 // ─── Arabic Day Names ─────────────────────────────────────────────────────────
@@ -48,9 +43,7 @@ export function PlanModeSelector({
         activeDaysOfWeek.filter((d) => d !== dow).sort((a, b) => a - b),
       );
     } else {
-      onActiveDaysChange(
-        [...activeDaysOfWeek, dow].sort((a, b) => a - b),
-      );
+      onActiveDaysChange([...activeDaysOfWeek, dow].sort((a, b) => a - b));
     }
   };
 
@@ -125,7 +118,9 @@ export function PlanModeSelector({
       {planMode === "weekly" && (
         <View style={styles.weeklySection}>
           {/* Pages Per Day */}
-          <Text style={styles.sectionLabel}>عدد الصفحات اليومية (في أيام الحفظ)</Text>
+          <Text style={styles.sectionLabel}>
+            عدد الصفحات اليومية (في أيام الحفظ)
+          </Text>
           <View style={styles.stepperRow}>
             <TouchableOpacity
               style={styles.stepperBtn}
@@ -144,9 +139,7 @@ export function PlanModeSelector({
 
             <TouchableOpacity
               style={styles.stepperBtn}
-              onPress={() =>
-                onDailyPagesChange(Math.min(20, dailyPages + 1))
-              }
+              onPress={() => onDailyPagesChange(Math.min(20, dailyPages + 1))}
               activeOpacity={0.7}
             >
               <Ionicons name="add" size={18} color={Colors.primary} />
@@ -190,9 +183,21 @@ export function PlanModeSelector({
           </View>
 
           {/* Summary */}
-          <View style={[styles.summaryBox, { borderColor: `${Colors.primary}25`, backgroundColor: `${Colors.primary}08` }]}>
+          <View
+            style={[
+              styles.summaryBox,
+              {
+                borderColor: `${Colors.primary}25`,
+                backgroundColor: `${Colors.primary}08`,
+              },
+            ]}
+          >
             <View style={styles.summaryRow}>
-              <Ionicons name="calendar-number-outline" size={14} color={Colors.primary} />
+              <Ionicons
+                name="calendar-number-outline"
+                size={14}
+                color={Colors.primary}
+              />
               <Text style={[styles.summaryText, { color: Colors.primary }]}>
                 {activeDaysOfWeek.length} أيام حفظ في الأسبوع
               </Text>
@@ -204,8 +209,14 @@ export function PlanModeSelector({
               </Text>
             </View>
             <View style={styles.summaryRow}>
-              <Ionicons name="bed-outline" size={14} color={Colors.textSecondary} />
-              <Text style={[styles.summaryText, { color: Colors.textSecondary }]}>
+              <Ionicons
+                name="bed-outline"
+                size={14}
+                color={Colors.textSecondary}
+              />
+              <Text
+                style={[styles.summaryText, { color: Colors.textSecondary }]}
+              >
                 {7 - activeDaysOfWeek.length} أيام راحة في الأسبوع
               </Text>
             </View>
@@ -240,7 +251,6 @@ const getStyles = (Colors: any) =>
       fontFamily: Typography.body,
       fontSize: 13,
       color: Colors.textSecondary,
-      fontWeight: "500",
     },
     modeDesc: {
       fontFamily: Typography.body,
@@ -255,7 +265,6 @@ const getStyles = (Colors: any) =>
     sectionLabel: {
       fontFamily: Typography.heading,
       fontSize: 13,
-      fontWeight: "600",
       color: Colors.textSecondary,
       marginBottom: Spacing.sm,
     },
@@ -282,7 +291,6 @@ const getStyles = (Colors: any) =>
     stepperNum: {
       fontFamily: Typography.heading,
       fontSize: 28,
-      fontWeight: "bold",
     },
     stepperUnit: {
       fontFamily: Typography.body,
@@ -317,7 +325,6 @@ const getStyles = (Colors: any) =>
       fontFamily: Typography.body,
       fontSize: 12,
       color: Colors.textSecondary,
-      fontWeight: "500",
     },
     summaryBox: {
       borderRadius: BorderRadius.md,
@@ -333,6 +340,5 @@ const getStyles = (Colors: any) =>
     summaryText: {
       fontFamily: Typography.body,
       fontSize: 12,
-      fontWeight: "500",
     },
   });

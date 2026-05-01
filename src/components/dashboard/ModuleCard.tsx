@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 import { useSelectionStore } from "../../store/selectionStore";
-import { BorderRadius, Shadow, Spacing, Typography, useTheme } from "../../theme";
+import { Shadow, Spacing, Typography, useTheme } from "../../theme";
 import { ModuleInfo } from "../../types";
 
 const { width } = Dimensions.get("window");
@@ -24,16 +24,20 @@ export function ModuleCard({ moduleInfo, onPress }: ModuleCardProps) {
 
   const taskSelections = useSelectionStore((state) => state.taskSelections);
   const todayStr = new Date().toDateString();
-  
+
   const dailyModuleSelections = taskSelections.filter(
-    (s) => s.module === moduleInfo.id && new Date(s.createdAt).toDateString() === todayStr
+    (s) =>
+      s.module === moduleInfo.id &&
+      new Date(s.createdAt).toDateString() === todayStr,
   );
-  
-  const completedCount = dailyModuleSelections.filter((s) => s.isCompleted).length;
+
+  const completedCount = dailyModuleSelections.filter(
+    (s) => s.isCompleted,
+  ).length;
   const totalSelections = dailyModuleSelections.length;
   const hasSelections = totalSelections > 0;
   const completionPct = hasSelections ? completedCount / totalSelections : 0;
-  
+
   const stats = {
     totalSelections,
     completedCount,
@@ -58,15 +62,20 @@ export function ModuleCard({ moduleInfo, onPress }: ModuleCardProps) {
             color={moduleInfo.color}
           />
         </View>
-        
+
         {/* Progress Indicator Badge */}
         <View style={styles.progressBadge}>
           {completionPct === 1 ? (
-             <View style={styles.doneBadge}>
-               <Ionicons name="checkmark-done" size={14} color="#FFF" />
-             </View>
+            <View style={styles.doneBadge}>
+              <Ionicons name="checkmark-done" size={14} color="#FFF" />
+            </View>
           ) : completionPct > 0 ? (
-            <View style={[styles.pctPill, { backgroundColor: `${moduleInfo.color}15` }]}>
+            <View
+              style={[
+                styles.pctPill,
+                { backgroundColor: `${moduleInfo.color}15` },
+              ]}
+            >
               <Text style={[styles.pctText, { color: moduleInfo.color }]}>
                 {Math.round(completionPct * 100)}%
               </Text>
@@ -76,18 +85,16 @@ export function ModuleCard({ moduleInfo, onPress }: ModuleCardProps) {
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.title}>
-          {moduleInfo.nameAr}
-        </Text>
-        <Text style={styles.subtitle}>
-           {moduleInfo.description}
-        </Text>
+        <Text style={styles.title}>{moduleInfo.nameAr}</Text>
+        <Text style={styles.subtitle}>{moduleInfo.description}</Text>
       </View>
 
       <View style={styles.footer}>
         <View style={styles.statsTextWrap}>
-            <Text style={styles.statsValue}>{stats.completedCount}/{stats.totalSelections}</Text>
-            <Text style={styles.statsLabel}>مكتمل</Text>
+          <Text style={styles.statsValue}>
+            {stats.completedCount}/{stats.totalSelections}
+          </Text>
+          <Text style={styles.statsLabel}>مكتمل</Text>
         </View>
         <Ionicons name="chevron-back" size={12} color={Colors.textTertiary} />
       </View>
@@ -122,31 +129,29 @@ const getStyles = (Colors: any) =>
       borderColor: Colors.border,
     },
     progressBadge: {
-        alignItems: 'flex-end',
+      alignItems: "flex-end",
     },
     doneBadge: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        backgroundColor: Colors.success,
-        alignItems: 'center',
-        justifyContent: 'center',
-        ...Shadow.sm,
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      backgroundColor: Colors.success,
+      alignItems: "center",
+      justifyContent: "center",
+      ...Shadow.sm,
     },
     pctPill: {
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-        borderRadius: 8,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 8,
     },
     pctText: {
-        fontSize: 9,
-        fontWeight: 'bold',
+      fontSize: 9,
     },
     content: { marginBottom: Spacing.md },
     title: {
       fontFamily: Typography.heading,
       fontSize: 15,
-      fontWeight: 'bold',
       color: Colors.textPrimary,
       marginBottom: 2,
     },
@@ -164,7 +169,7 @@ const getStyles = (Colors: any) =>
       borderTopWidth: 1,
       borderTopColor: Colors.border,
     },
-    statsTextWrap: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    statsValue: { fontSize: 10, fontWeight: 'bold', color: Colors.textPrimary },
+    statsTextWrap: { flexDirection: "row", alignItems: "center", gap: 4 },
+    statsValue: { fontSize: 10, color: Colors.textPrimary },
     statsLabel: { fontSize: 8, color: Colors.textTertiary },
   });

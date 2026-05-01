@@ -1,4 +1,3 @@
-import { useAppStore } from "../store/AppStore";
 import { useThemeStore } from "../store/ThemeStore";
 
 // Design Tokens for مفاتيح حفظ القرآن (Quran Anchoring Keys)
@@ -161,8 +160,6 @@ export const lightColors: typeof darkColors = {
     string,
   ],
 };
-
-
 
 export const useTheme = () => {
   const themeMode = useThemeStore((state) => state.themeMode);

@@ -11,8 +11,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { HusoonAlert } from "../components/shared/CustomAlert";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { HusoonAlert } from "../components/shared/CustomAlert";
 
 import { useModuleLogic } from "../hooks/useModuleLogic";
 import { useAppStore } from "../store/AppStore";
@@ -58,7 +58,12 @@ export default function ModuleScreen() {
         selectionStore.createPageRange(r.start, r.end),
       ),
     );
-    HusoonAlert.alert("تم الإضافة", "تمت إضافة ورد الخطة إلى الأوراد الحالية", [], "success");
+    HusoonAlert.alert(
+      "تم الإضافة",
+      "تمت إضافة ورد الخطة إلى الأوراد الحالية",
+      [],
+      "success",
+    );
   };
 
   const moduleInfo = MODULES.find((m) => m.id === id);
@@ -99,18 +104,28 @@ export default function ModuleScreen() {
       type: "TOGGLE_FORTRESS",
       payload: { fortressId: moduleInfo.fortressId },
     });
-    HusoonAlert.alert("إنجاز عظيم!", `أتممت ورد ${moduleInfo.nameAr}`, [], "success");
+    HusoonAlert.alert(
+      "إنجاز عظيم!",
+      `أتممت ورد ${moduleInfo.nameAr}`,
+      [],
+      "success",
+    );
   };
 
   const handleRemove = (taskId: string) => {
-    HusoonAlert.alert("تأكيد", "هل تريد حذف هذا النطاق؟", [
-      { text: "إلغاء", style: "cancel" },
-      {
-        text: "حذف",
-        style: "destructive",
-        onPress: () => selectionStore.removeTaskSelection(taskId),
-      },
-    ], "delete");
+    HusoonAlert.alert(
+      "تأكيد",
+      "هل تريد حذف هذا النطاق؟",
+      [
+        { text: "إلغاء", style: "cancel" },
+        {
+          text: "حذف",
+          style: "destructive",
+          onPress: () => selectionStore.removeTaskSelection(taskId),
+        },
+      ],
+      "delete",
+    );
   };
 
   const groupedCompleted = useMemo(() => {
@@ -150,7 +165,7 @@ export default function ModuleScreen() {
             selectionStore.clearModuleSelections(moduleInfo.id as ModuleId),
         },
       ],
-      "delete"
+      "delete",
     );
   };
 
@@ -264,14 +279,27 @@ export default function ModuleScreen() {
 
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>الأوراد الحالية</Text>
-            {activeSelections.length > 0 && (
-              <View style={styles.countBadge}>
-                <Text style={styles.countBadgeText}>
-                  {toArabicNumerals(activeSelections.length)}
-                </Text>
-              </View>
-            )}
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
+            >
+              <Text style={styles.sectionTitle}>الأوراد الحالية</Text>
+              {activeSelections.length > 0 && (
+                <View style={styles.countBadge}>
+                  <Text style={styles.countBadgeText}>
+                    {toArabicNumerals(activeSelections.length)}
+                  </Text>
+                </View>
+              )}
+            </View>
+            <TouchableOpacity
+              style={[styles.addBtnHeader, { borderColor: moduleInfo.color }]}
+              onPress={() => setShowSelectionModal(true)}
+            >
+              <Ionicons name="add" size={16} color={moduleInfo.color} />
+              <Text style={[styles.addBtnText, { color: moduleInfo.color }]}>
+                إضافة ورد يدوي
+              </Text>
+            </TouchableOpacity>
           </View>
 
           {activeSelections.length === 0 ? (
@@ -284,8 +312,19 @@ export default function ModuleScreen() {
                 />
               </View>
               <Text style={styles.emptyText}>
-                لم تحدد أوراداً لهذا القسم بعد
+                لم تحدد أوراداً لهذا القسم بعد. يمكنك إضافة أوراد مخصصة الآن.
               </Text>
+              <TouchableOpacity
+                style={[
+                  styles.addBtnSmall,
+                  { backgroundColor: moduleInfo.color, marginTop: 12 },
+                ]}
+                onPress={() => setShowSelectionModal(true)}
+              >
+                <Text style={{ color: "#FFF", fontWeight: "bold" }}>
+                  إضافة ورد جديد
+                </Text>
+              </TouchableOpacity>
             </Animated.View>
           ) : (
             activeSelections.map((task) => (
@@ -486,7 +525,7 @@ const getStyles = (Colors: any) =>
       borderRadius: 14,
       backgroundColor: Colors.surfaceElevated,
       borderWidth: 1,
-      borderColor: Colors.border,
+      borderColor: Colors.surface,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -516,7 +555,7 @@ const getStyles = (Colors: any) =>
       backgroundColor: Colors.surface,
       borderRadius: BorderRadius.xl,
       borderWidth: 1,
-      borderColor: Colors.border,
+      borderColor: Colors.surface,
       padding: Spacing.lg,
       marginBottom: Spacing.xl,
     },
@@ -573,7 +612,9 @@ const getStyles = (Colors: any) =>
       fontSize: 12,
       fontWeight: "bold",
     },
-    section: { gap: Spacing.md },
+    section: {
+      gap: Spacing.md,
+    },
     sectionHeaderRow: {
       flexDirection: "row",
       alignItems: "center",
@@ -592,7 +633,7 @@ const getStyles = (Colors: any) =>
       paddingVertical: 2,
       borderRadius: 8,
       borderWidth: 1,
-      borderColor: Colors.border,
+      borderColor: Colors.surface,
     },
     countBadgeText: {
       fontSize: 11,
@@ -605,7 +646,7 @@ const getStyles = (Colors: any) =>
       backgroundColor: Colors.surface,
       borderRadius: BorderRadius.xl,
       borderWidth: 1,
-      borderColor: Colors.border,
+      borderColor: Colors.surface,
       borderStyle: "dashed",
       gap: Spacing.md,
     },
@@ -630,6 +671,19 @@ const getStyles = (Colors: any) =>
       borderRadius: 12,
       marginTop: Spacing.sm,
     },
+    addBtnHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      borderWidth: 1,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 12,
+    },
+    addBtnText: {
+      fontSize: 13,
+      fontWeight: "bold",
+    },
     backBtn: {
       marginTop: Spacing.md,
       paddingVertical: Spacing.sm,
@@ -650,7 +704,7 @@ const getStyles = (Colors: any) =>
     taskCardCompleted: {
       borderRadius: BorderRadius.xl,
       borderWidth: 1,
-      borderColor: Colors.border,
+      borderColor: Colors.surface,
       padding: Spacing.lg,
       gap: Spacing.md,
       marginBottom: Spacing.md,

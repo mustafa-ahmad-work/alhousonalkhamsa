@@ -24,7 +24,7 @@ import VersionOverlay from "../components/shared/VersionOverlay";
 import { useAppStore } from "../store/AppStore";
 import { UpdateInfo, UpdateService } from "../store/UpdateService";
 import { useSelectionStore } from "../store/selectionStore";
-import { BorderRadius, Spacing, useTheme } from "../theme";
+import { BorderRadius, Spacing, Typography, useTheme } from "../theme";
 import { MODULES, TaskSelection } from "../types";
 
 const { width } = Dimensions.get("window");
@@ -116,10 +116,12 @@ export default function DashboardScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar 
-        barStyle={Colors.background === "#07090F" ? "light-content" : "dark-content"} 
-        translucent 
-        backgroundColor="transparent" 
+      <StatusBar
+        barStyle={
+          Colors.background === "#07090F" ? "light-content" : "dark-content"
+        }
+        translucent
+        backgroundColor="transparent"
       />
       <View style={styles.backgroundAccent} />
 
@@ -284,7 +286,11 @@ const getStyles = (Colors: any) =>
       justifyContent: "center",
       marginBottom: Spacing.sm,
     },
-    actionTitle: { fontSize: 15, fontWeight: "bold", marginBottom: 2 },
+    actionTitle: {
+      fontFamily: Typography.heading,
+      fontSize: 15,
+      marginBottom: 2,
+    },
     actionSub: { fontSize: 11, color: Colors.textSecondary },
     quizActionCard: {
       flexDirection: "row",

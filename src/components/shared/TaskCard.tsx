@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { RangeChip } from "./RangeChip";
-import { BorderRadius, Shadow, Spacing, Typography } from "../../theme";
+import { BorderRadius, Spacing, Typography } from "../../theme";
 import { TaskSelection } from "../../types";
+import { RangeChip } from "./RangeChip";
 
 interface TaskCardProps {
   task: TaskSelection;
@@ -24,34 +24,54 @@ export function TaskCard({
   onComplete,
   onStartSession,
   Colors,
-}: TaskCardProps & { onRemoveRange?: (taskId: string, rangeId: string) => void }) {
+}: TaskCardProps & {
+  onRemoveRange?: (taskId: string, rangeId: string) => void;
+}) {
   return (
-    <View style={[styles.taskCard, { backgroundColor: Colors.surface, borderColor: Colors.border }]}>
+    <View
+      style={[
+        styles.taskCard,
+        { backgroundColor: Colors.surface, borderColor: Colors.border },
+      ]}
+    >
       <View style={styles.taskHeader}>
         <View style={styles.timeTag}>
-           <Ionicons name="calendar-outline" size={12} color={Colors.textTertiary} />
-           <Text style={styles.taskDate}>
-             {new Date(task.createdAt).toLocaleDateString("ar-EG")}
-           </Text>
+          <Ionicons
+            name="calendar-outline"
+            size={12}
+            color={Colors.textTertiary}
+          />
+          <Text style={styles.taskDate}>
+            {new Date(task.createdAt).toLocaleDateString("ar-EG")}
+          </Text>
         </View>
-        <TouchableOpacity style={styles.deleteCircle} onPress={() => onRemove(task.id)}>
+        <TouchableOpacity
+          style={styles.deleteCircle}
+          onPress={() => onRemove(task.id)}
+        >
           <Ionicons name="trash-outline" size={14} color={Colors.red} />
         </TouchableOpacity>
       </View>
 
       <View style={styles.rangesContainer}>
         {task.ranges.map((r, i) => (
-          <RangeChip 
-            key={i} 
-            range={r} 
-            onRemove={(rid) => onRemoveRange?.(task.id, rid)} 
+          <RangeChip
+            key={i}
+            range={r}
+            onRemove={(rid) => onRemoveRange?.(task.id, rid)}
           />
         ))}
       </View>
 
       <View style={styles.actionsBox}>
         <TouchableOpacity
-          style={[styles.startBtn, { backgroundColor: `${moduleColor}12`, borderColor: `${moduleColor}20` }]}
+          style={[
+            styles.startBtn,
+            {
+              backgroundColor: `${moduleColor}12`,
+              borderColor: `${moduleColor}20`,
+            },
+          ]}
           onPress={() => onStartSession(task)}
         >
           <Ionicons
@@ -65,11 +85,22 @@ export function TaskCard({
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.completeBtn, { backgroundColor: Colors.surfaceElevated }]}
+          style={[
+            styles.completeBtn,
+            { backgroundColor: Colors.surfaceElevated },
+          ]}
           onPress={() => onComplete(task)}
         >
-          <Ionicons name="checkmark-circle-outline" size={18} color={Colors.textSecondary} />
-          <Text style={[styles.completeBtnText, { color: Colors.textSecondary }]}>إتمام</Text>
+          <Ionicons
+            name="checkmark-circle-outline"
+            size={18}
+            color={Colors.textSecondary}
+          />
+          <Text
+            style={[styles.completeBtnText, { color: Colors.textSecondary }]}
+          >
+            إتمام
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -82,21 +113,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: Spacing.md,
     gap: Spacing.md,
-    ...Shadow.sm,
   },
   taskHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
+    borderBottomColor: "rgba(0,0,0,0.05)",
     paddingBottom: Spacing.sm,
   },
   timeTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
-    backgroundColor: 'rgba(0,0,0,0.03)',
+    backgroundColor: "rgba(0,0,0,0.03)",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
@@ -105,14 +135,14 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: 'rgba(240, 112, 112, 0.08)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "rgba(240, 112, 112, 0.08)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   taskDate: {
     fontFamily: Typography.body,
     fontSize: 10,
-    color: '#7A8394',
+    color: "#7A8394",
   },
   rangesContainer: {
     flexDirection: "row",
@@ -120,7 +150,7 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   actionsBox: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: Spacing.sm,
   },
   completeBtn: {
@@ -150,6 +180,6 @@ const styles = StyleSheet.create({
   startBtnText: {
     fontFamily: Typography.body,
     fontSize: 13,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
