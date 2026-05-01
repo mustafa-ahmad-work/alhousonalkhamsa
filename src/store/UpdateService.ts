@@ -52,7 +52,9 @@ export const UpdateService = {
         } catch (e) {}
       }
 
-      const freshUrl = `https://raw.githubusercontent.com/mustafa-ahmad-work/mafateeh-tathbeet-alquran/main/version.json?v=${Date.now()}&r=${Math.random()}`;
+      // Using GitHub API instead of Raw CDN to avoid aggressive caching (CDN can take 5+ mins)
+      // The 'application/vnd.github.v3.raw' header tells GitHub to return the file content directly
+      const freshUrl = `https://api.github.com/repos/mustafa-ahmad-work/mafateeh-tathbeet-alquran/contents/version.json?ref=main&t=${Date.now()}`;
       
       try {
         // Check if we should skip fetch (e.g. checked in last 24 hours)
@@ -73,11 +75,9 @@ export const UpdateService = {
         
         const response = await fetch(freshUrl, {
           method: 'GET',
-          cache: 'no-store',
           headers: { 
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            "Pragma": "no-cache",
-            "Expires": "0"
+            "Accept": "application/vnd.github.v3.raw",
+            "Cache-Control": "no-cache",
           },
         });
 

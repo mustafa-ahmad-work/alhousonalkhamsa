@@ -1,7 +1,7 @@
 {
-  "latestVersion": "1.0.0",
+  "latestVersion": "1.6.0",
   "minRequiredVersion": "1.0.0",
-  "isAppDisabled": true,
+  "isAppDisabled": false,
   "disabledMessage": "التطبيق يخضع للصيانة الدورية حالياً لتوفير تجربة أفضل. نعتذر عن الإزعاج ونعدكم بالعودة قريباً جداً.",
   "releaseDate": "2026-03-25",
   "changelog": "إضافة نظام متابعة الخطط، تحسين شاشة فضل القرآن، وتحديثات أمنية هامة.",
