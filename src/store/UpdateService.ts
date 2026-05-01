@@ -89,13 +89,16 @@ export const UpdateService = {
         console.warn("Failed to fetch remote update, falling back to cache:", error);
       }
 
-      try {
-        const cached = await AsyncStorage.getItem(CACHE_KEY);
-        if (cached) {
-          const data = JSON.parse(cached);
-          return this.processUpdateData(data);
-        }
-      } catch (e) {}
+      // 2. Fallback to cache if offline or fetch failed (Skip if bypassing cache)
+      if (!DEV_CONFIG.bypassUpdateCache) {
+        try {
+          const cached = await AsyncStorage.getItem(CACHE_KEY);
+          if (cached) {
+            const data = JSON.parse(cached);
+            return this.processUpdateData(data);
+          }
+        } catch (e) {}
+      }
 
       return null;
     } finally {

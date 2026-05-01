@@ -23,6 +23,7 @@ import { StatsOverview } from "../components/dashboard/StatsOverview";
 import VersionOverlay from "../components/shared/VersionOverlay";
 import { useAppStore } from "../store/AppStore";
 import { UpdateInfo, UpdateService } from "../store/UpdateService";
+import { DEV_CONFIG } from "../developerConfig";
 import { useSelectionStore } from "../store/selectionStore";
 import { BorderRadius, Spacing, Typography, useTheme } from "../theme";
 import { MODULES, TaskSelection } from "../types";
@@ -65,7 +66,7 @@ export default function DashboardScreen() {
   // 2. Continuous Check only for Critical Blocks
   useEffect(() => {
     if (blockType === "disabled" || blockType === "force_update") {
-      const interval = setInterval(checkVersion, 30000);
+      const interval = setInterval(checkVersion, DEV_CONFIG.bypassUpdateCache ? 5000 : 30000);
       return () => clearInterval(interval);
     }
   }, [checkVersion, blockType]);
