@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
+import { DEV_CONFIG } from "../developerConfig";
 
 /**
  * Interface for the detailed update information.
@@ -59,7 +60,7 @@ export const UpdateService = {
         const now = Date.now();
         const twentyFourHours = 24 * 60 * 60 * 1000;
 
-        if (lastCheck && now - parseInt(lastCheck) < twentyFourHours) {
+        if (lastCheck && now - parseInt(lastCheck) < twentyFourHours && !DEV_CONFIG.bypassUpdateCache) {
           const cached = await AsyncStorage.getItem(CACHE_KEY);
           if (cached) {
             const data = JSON.parse(cached);
@@ -114,7 +115,7 @@ export const UpdateService = {
     const isMandatory = this.isVersionGreater(minRequiredVersion, this.CURRENT_VERSION);
 
     // If the user dismissed this specific optional update in the current session, hide it
-    if (!isMandatory && hasUpdate && this.dismissedOptionalVersion === latestVersion) {
+    if (!isMandatory && hasUpdate && this.dismissedOptionalVersion === latestVersion && !DEV_CONFIG.bypassUpdateCache) {
       hasUpdate = false;
     }
 

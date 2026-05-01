@@ -10,7 +10,7 @@ export const DEV_CONFIG = {
   unlockAllPlans: true,
 
   /**
-   * Set to true to show extra debug info in various screens.
+   * Set to true to bypass update check throttling and dismissal logic.
    */
-  debugMode: false,
+  bypassUpdateCache: true,
 };
