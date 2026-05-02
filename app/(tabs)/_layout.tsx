@@ -51,7 +51,7 @@ function TabItem({
       tension: 50,
       useNativeDriver: true,
     }).start();
-  }, [isFocused]);
+  }, [isFocused, progressAnim]);
 
   // Minimalist active scale
   const activeScale = progressAnim.interpolate({

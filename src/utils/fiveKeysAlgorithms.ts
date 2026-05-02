@@ -14,7 +14,7 @@
 
 import { MushafEdition } from '../data/mushafEditions';
 import { ModuleId, Plan } from '../types';
-import { buildRanges, formatRanges, getSurahSegments } from './planLogic';
+import { buildRanges, formatRanges } from './planLogic';
 import { toArabicNumerals } from './helpers';
 
 // ─── Constants matching the methodology ──────────────────────

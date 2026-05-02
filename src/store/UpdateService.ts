@@ -32,7 +32,7 @@ export const UpdateService = {
     this.dismissedOptionalVersion = version;
     try {
       await AsyncStorage.setItem(DISMISSED_KEY, version);
-    } catch (e) {
+    } catch (_e) {
       // ignore
     }
   },
@@ -49,7 +49,7 @@ export const UpdateService = {
       if (!this.dismissedOptionalVersion) {
         try {
           this.dismissedOptionalVersion = await AsyncStorage.getItem(DISMISSED_KEY);
-        } catch (e) {}
+        } catch (_e) {}
       }
 
       // Using GitHub API instead of Raw CDN to avoid aggressive caching (CDN can take 5+ mins)
@@ -99,7 +99,7 @@ export const UpdateService = {
             const data = JSON.parse(cached);
             return this.processUpdateData(data);
           }
-        } catch (e) {}
+        } catch (_e) {}
       }
 
       return null;

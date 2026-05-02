@@ -150,8 +150,8 @@ export const NotificationService = {
 
       await NotificationService._ensureAndroidChannel(notifs);
       console.log("[NS] Permissions granted and channel ready");
-    } catch (e) {
-      console.warn("[NS] Permission setup error:", e);
+    } catch (_e) {
+      console.warn("[NS] Permission setup error:", _e);
     }
   },
 
@@ -204,8 +204,8 @@ export const NotificationService = {
         enableVibrate: true,
         showBadge: false,
       });
-    } catch (e) {
-      console.warn("[NS] Failed to create Android channel:", e);
+    } catch (_e) {
+      console.warn("[NS] Failed to create Android channel:", _e);
     }
   },
 
@@ -307,13 +307,13 @@ export const NotificationService = {
     }
 
     // ── 5. Reminder definitions ───────────────────────────────────────────
-    const reminders: Array<{
+    const reminders: {
       id: ReminderId;
       title: string;
       body: string;
       enabled: boolean;
       time: string;
-    }> = [
+    }[] = [
       {
         id: REMINDER_IDS.recitation,
         title: "ورد التلاوة",

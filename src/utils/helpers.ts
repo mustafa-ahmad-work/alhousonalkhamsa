@@ -2,7 +2,6 @@ import { SURAHS } from "../data/quranMeta";
 import {
   PageProgress,
   MemorizationStrength,
-  TOTAL_QURAN_PAGES,
   Plan,
   PlanDirection,
   TaskSelection,
