@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سياسة الخصوصية والشروط - مفاتيح حفظ القرآن</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+    <style>
+        :root {
+            --primary: #1A9E77;
+            --primary-dark: #148564;
+            --primary-subtle: rgba(26, 158, 119, 0.05);
+            --gold: #C7892E;
+            --background: #F7F8FA;
+            --surface: #FFFFFF;
+            --surface-elevated: #F0F1F4;
+            --text-primary: #1A1D24;
+            --text-secondary: #5A6170;
+            --border: rgba(0, 0, 0, 0.06);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 40px auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo-container {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            background-color: var(--surface);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border);
+        }
+
+        .logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .info-card {
+            background-color: var(--primary-subtle);
+            border: 1px solid rgba(45, 212, 160, 0.15);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 32px;
+            text-align: right;
+        }
+
+        .update-date {
+            font-size: 12px;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .app-name {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .developer {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        p {
+            font-size: 15px;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            opacity: 0.9;
+        }
+
+        .bullet-list {
+            list-style: none;
+        }
+
+        .bullet-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            gap: 12px;
+        }
+
+        .bullet-point {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            margin-top: 10px;
+            flex-shrink: 0;
+        }
+
+        .bullet-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .contact-btn {
+            display: block;
+            width: 100%;
+            background-color: var(--primary-subtle);
+            border: 1px solid var(--primary-dark);
+            color: var(--primary);
+            text-align: center;
+            padding: 12px;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            margin-top: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .contact-btn:hover {
+            background-color: rgba(45, 212, 160, 0.1);
+            transform: translateY(-1px);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--text-secondary);
+            font-size: 12px;
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 16px;
+            }
+            .container {
+                margin: 20px auto;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <img src="assets/images/icon.png" alt="Logo" class="logo-img">
+            </div>
+            <h1>مفاتيح حفظ القرآن</h1>
+            <p class="subtitle">السياسات الرسمية وشروط الاستخدام</p>
+        </header>
+
+        <div class="info-card">
+            <span class="update-date">آخر تحديث: ١ مايو ٢٠٢٦</span>
+            <div class="app-name">تطبيق: مفاتيح حفظ القرآن</div>
+            <div class="developer">المطور: مصطفى أحمد (Mustafa Ahmad)</div>
+        </div>
+
+        <section class="card">
+            <h2>١. مقدمة وهدف السياسة</h2>
+            <p>
+                تهدف هذه السياسة إلى توضيح كيفية تعامل تطبيق "مفاتيح حفظ القرآن" مع بياناتك. نحن ندرك رحلتك مع القرآن الكريم، لذا صممنا هذا التطبيق ليكون ملاذاً آمناً وخاصاً بالكامل، حيث لا تخرج بياناتك عن حدود جهازك الشخصي أبداً.
+            </p>
+        </section>
+
+        <section class="card">
+            <h2>٢. ضمانة "صفر بيانات" (Zero-Data Policy)</h2>
+            <p>
+                نحن نلتزم بسياسة صارمة لعدم جمع البيانات. إليك ما لا نقوم بجمعه نهائياً:
+            </p>
+            <div class="bullet-list">
+                <div class="bullet-item">
+                    <div class="bullet-point"></div>
+                    <div class="bullet-text">الهوية الشخصية: لا نطلب العمر، الجنس، أو أي وثائق تعريفية.</div>
+                </div>
+                <div class="bullet-item">
+                    <div class="bullet-point"></div>
+                    <div class="bullet-text">الاتصال: لا نطلب البريد الإلكتروني، رقم الهاتف، أو حسابات التواصل الاجتماعي.</div>
+                </div>
+                <div class="bullet-item">
+                    <div class="bullet-point"></div>
+                    <div class="bullet-text">الوصول للحسابات: لا يطلب التطبيق تسجيل الدخول عبر جوجل، فيسبوك، أو أي طرف ثالث.</div>
+                </div>
+                <div class="bullet-item">
+                    <div class="bullet-point"></div>
+                    <div class="bullet-text">البيانات الحساسة: لا نطلب الوصول لرسائلك، سجل المكالمات، أو كلمات المرور الخاصة بك.</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>٣. أمن التخزين المحلي (On-Device Storage)</h2>
+            <p>
+                كل ما تقوم بإدخاله من سجلات حفظ، مراجعة، ودرجات قوة الحفظ يتم تخزينه باستخدام تقنيات التخزين المحلي المؤمنة في نظام تشغيل جهازك.
+            </p>
+            <div class="bullet-list">
+                <div class="bullet-item">
+                    <div class="bullet-point"></div>
+                    <div class="bullet-text">التشفير: البيانات تُخزن في مساحة معزولة خاصة بالتطبيق (Sandbox) لا يمكن للتطبيقات الأخرى الوصول إليها.</div>
+                </div>
+                <div class="bullet-item">
+                    <div class="bullet-point"></div>
+                    <div class="bullet-text">عدم المزامنة السحابية: لا يملك المطور أي خوادم لاستقبال بياناتك، مما يعني أن بياناتك لا ترحل عبر الإنترنت إلى أي مكان.</div>
+                </div>
+                <div class="bullet-item">
+                    <div class="bullet-point"></div>
+                    <div class="bullet-text">النسخ الاحتياطي: إذا قمت بتفعيل النسخ الاحتياطي لنظام أندرويد (Google Backup)، فقد يتم تضمين بيانات التطبيق ضمن نسخة نظامك الخاصة بك وحدك تحت إشرافك.</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>٤. الأذونات المطلوبة (App Permissions)</h2>
+            <p>
+                يطلب التطبيق حداً أدنى من الأذونات ليعمل بكفاءة:
+            </p>
+            <div class="bullet-list">
+                <div class="bullet-item">
+                    <div class="bullet-point"></div>
+                    <div class="bullet-text">الإشعارات (Notifications): لإرسال تنبيهات ورد الحفظ والمراجعة التي تضبطها بنفسك.</div>
+                </div>
+                <div class="bullet-item">
+                    <div class="bullet-point"></div>
+                    <div class="bullet-text">الاهتزاز (Vibration): لتقديم استجابة لمسية عند التفاعل مع أزرار التطبيق.</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>٥. الإفصاح عن الأطراف الثالثة التقنية</h2>
+            <p>
+                لتقديم خدمة مستقرة، يعتمد التطبيق على بنية تحتية تقنية عالمية:
+            </p>
+            <div class="bullet-list">
+                <div class="bullet-item">
+                    <div class="bullet-point"></div>
+                    <div class="bullet-text">Google Play Services: تُستخدم لتوزيع التطبيق والتأكد من سلامته التقنية على أجهزة أندرويد.</div>
+                </div>
+                <div class="bullet-item">
+                    <div class="bullet-point"></div>
+                    <div class="bullet-text">Expo SDK: هي البيئة البرمجية التي بُني عليها التطبيق لضمان عمله على مختلف إصدارات الهواتف.</div>
+                </div>
+            </div>
+            <p style="margin-top: 16px;">
+                هذه الجهات قد تجمع معلومات تقنية عامة (غير شخصية) مثل إصدار النظام أو نوع الهاتف لتحسين استقرار النظام البرمجي.
+            </p>
+        </section>
+
+        <section class="card">
+            <h2>٦. التزامات قانونية (GDPR & COPPA)</h2>
+            <div class="bullet-list">
+                <div class="bullet-item">
+                    <div class="bullet-point"></div>
+                    <div class="bullet-text">حقوق المستخدم (GDPR): لك الحق الكامل في حذف كافة بياناتك بضغطة زر واحدة عبر مسح ذاكرة التطبيق.</div>
+                </div>
+                <div class="bullet-item">
+                    <div class="bullet-point"></div>
+                    <div class="bullet-text">حماية الأطفال (COPPA): التطبيق مصمم ليكون آمناً ١٠٠٪ للأطفال؛ لا إعلانات، لا تعقب، ولا محتوى غير لائق.</div>
+                </div>
+                <div class="bullet-item">
+                    <div class="bullet-point"></div>
+                    <div class="bullet-text">عدم البيع: نلتزم بعدم بيع أو تأجير أي معلومات تقنية قد تتوفر لدينا لأي جهة إعلانية أو تجارية.</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>٧. الاحتفاظ بالبيانات وحذفها</h2>
+            <p>
+                نحن لا نحتفظ ببياناتك لأننا لا نملكها أصلاً. بياناتك تبقى على جهازك طالما أن التطبيق مثبّت.
+            </p>
+            <div class="bullet-list">
+                <div class="bullet-item">
+                    <div class="bullet-point"></div>
+                    <div class="bullet-text">عند رغبتك في حذف البيانات: انتقل إلى إعدادات الهاتف > التطبيقات > مفاتيح حفظ القرآن > مسح البيانات.</div>
+                </div>
+                <div class="bullet-item">
+                    <div class="bullet-point"></div>
+                    <div class="bullet-text">عند حذف التطبيق: يتم تدمير كافة سجلات الحفظ والمراجعة ولا يمكن استعادتها.</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>٨. التواصل والدعم القانوني</h2>
+            <p>
+                إذا كان لديك أي تساؤل حول كيفية حماية خصوصيتك، فنحن نرحب بتواصلك المباشر مع المطور:
+            </p>
+            <a href="mailto:mustafa.ahmad.work@gmail.com" class="contact-btn">
+                mustafa.ahmad.work@gmail.com
+            </a>
+        </section>
+
+        <footer>
+            <p>&copy; ٢٠٢٦ جميع الحقوق محفوظة لتطبيق مفاتيح حفظ القرآن</p>
+            <p>تم التصميم ليتوافق مع معايير متجر جوجل بلاي</p>
+        </footer>
+    </div>
+</body>
+</html>
