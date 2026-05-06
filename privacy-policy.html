@@ -250,7 +250,9 @@
           <div class="bullet-item">
             <div class="bullet-point"></div>
             <div class="bullet-text">
-              الهوية الشخصية: لا نطلب العمر، الجنس، أو أي وثائق تعريفية.
+              الهوية الشخصية: نطلب فقط اسمك لتخصيص تجربتك داخل التطبيق، ويتم
+              تخزينه محلياً على جهازك فقط. كما أننا لا نطلب العمر، الجنس، أو أي
+              وثائق تعريفية.
             </div>
           </div>
           <div class="bullet-item">
@@ -311,23 +313,34 @@
 
       <section class="card">
         <h2>٤. الأذونات المطلوبة (App Permissions)</h2>
-        <p>يطلب التطبيق حداً أدنى من الأذونات ليعمل بكفاءة:</p>
+        <p>يطلب التطبيق <strong>ثلاثة أذونات فقط</strong> لتشغيله بكفاءة، ولا يطلب أي شيء آخر:</p>
         <div class="bullet-list">
           <div class="bullet-item">
             <div class="bullet-point"></div>
             <div class="bullet-text">
-              الإشعارات (Notifications): لإرسال تنبيهات ورد الحفظ والمراجعة التي
-              تضبطها بنفسك.
+              <strong>الإشعارات (POST_NOTIFICATIONS):</strong> لإرسال تنبيهات ورد الحفظ والمراجعة التي
+              تضبطها بنفسك. لا تُستخدم لأي غرض إعلاني أو تتبعي.
             </div>
           </div>
           <div class="bullet-item">
             <div class="bullet-point"></div>
             <div class="bullet-text">
-              الاهتزاز (Vibration): لتقديم استجابة لمسية عند التفاعل مع أزرار
+              <strong>الاهتزاز (VIBRATE):</strong> لتقديم استجابة لمسية عند التفاعل مع أزرار
               التطبيق.
             </div>
           </div>
+          <div class="bullet-item">
+            <div class="bullet-point"></div>
+            <div class="bullet-text">
+              <strong>البدء مع النظام (RECEIVE_BOOT_COMPLETED):</strong> لضمان وصول تنبيهات الورد
+              إليك حتى بعد إعادة تشغيل الهاتف، دون أن يعمل التطبيق في الخلفية.
+            </div>
+          </div>
         </div>
+        <p style="margin-top: 16px; padding: 12px; background: rgba(26,158,119,0.06); border-radius: 10px; border-right: 3px solid var(--primary);">
+          <strong>الأذونات المحظورة صراحةً:</strong> الميكروفون، الكاميرا، الموقع الجغرافي، جهات الاتصال،
+          الرسائل، سجل المكالمات، والبلوتوث — جميعها محظورة برمجياً ولا تظهر في ملف التطبيق النهائي.
+        </p>
       </section>
 
       <section class="card">

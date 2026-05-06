@@ -82,10 +82,10 @@ export default function LegalScreen() {
             نحن نلتزم بسياسة صارمة لعدم جمع البيانات. إليك ما لا نقوم بجمعه
             نهائياً:
           </Text>
-          <BulletPoint text="الهوية الشخصية: لا نطلب العمر، الجنس، أو أي وثائق تعريفية." />
-          <BulletPoint text="الاتصال: لا نطلب البريد الإلكتروني، رقم الهاتف، أو حسابات التواصل الاجتماعي." />
+          <BulletPoint text="الهوية الشخصية: نطلب فقط اسمك لتخصيص تجربتك داخل التطبيق، ويتم تخزينه محلياً على جهازك فقط. كما أننا لا نطلب العمر، الجنس، أو أي وثائق تعريفية." />
+          <BulletPoint text="الأذونات الحساسة: قمنا بحظر الوصول نهائياً لكل من (الميكروفون، الكاميرا، جهات الاتصال، الموقع الجغرافي، الملفات الشخصية، الرسائل النصية، وسجل المكالمات)." />
           <BulletPoint text="الوصول للحسابات: لا يطلب التطبيق تسجيل الدخول عبر جوجل، فيسبوك، أو أي طرف ثالث." />
-          <BulletPoint text="البيانات الحساسة: لا نطلب الوصول لرسائلك، سجل المكالمات، أو كلمات المرور الخاصة بك." />
+          <BulletPoint text="الاتصال: لا نطلب البريد الإلكتروني، رقم الهاتف، أو حسابات التواصل الاجتماعي." />
         </View>
 
         <View style={[styles.card, { marginTop: Spacing.xl }]}>
@@ -106,10 +106,24 @@ export default function LegalScreen() {
             ٤. الأذونات المطلوبة (App Permissions)
           </Text>
           <Text style={styles.paragraph}>
-            يطلب التطبيق حداً أدنى من الأذونات ليعمل بكفاءة:
+            يطلب التطبيق <Text style={{ fontFamily: 'System', fontWeight: 'bold', color: Colors.textPrimary }}>ثلاثة أذونات فقط</Text> لتشغيله بكفاءة، ولا يطلب أي شيء آخر:
           </Text>
-          <BulletPoint text="الإشعارات (Notifications): لإرسال تنبيهات ورد الحفظ والمراجعة التي تضبطها بنفسك." />
-          <BulletPoint text="الاهتزاز (Vibration): لتقديم استجابة لمسية عند التفاعل مع أزرار التطبيق." />
+          <BulletPoint text="الإشعارات (POST_NOTIFICATIONS): لإرسال تنبيهات ورد الحفظ والمراجعة التي تضبطها بنفسك. لا تُستخدم لأي غرض إعلاني أو تتبعي." />
+          <BulletPoint text="الاهتزاز (VIBRATE): لتقديم استجابة لمسية عند التفاعل مع أزرار التطبيق." />
+          <BulletPoint text="البدء مع النظام (RECEIVE_BOOT_COMPLETED): لضمان وصول تنبيهات الورد إليك حتى بعد إعادة تشغيل الهاتف، دون أن يعمل التطبيق في الخلفية." />
+          <View style={{
+            marginTop: Spacing.md,
+            padding: Spacing.md,
+            backgroundColor: Colors.primarySubtle,
+            borderRadius: BorderRadius.md,
+            borderRightWidth: 3,
+            borderRightColor: Colors.primary,
+          }}>
+            <Text style={[styles.paragraph, { marginBottom: 0, color: Colors.textSecondary }]}>
+              <Text style={{ fontWeight: 'bold', color: Colors.textPrimary }}>الأذونات المحظورة صراحةً: </Text>
+              الميكروفون، الكاميرا، الموقع الجغرافي، جهات الاتصال، الرسائل، سجل المكالمات، والبلوتوث — جميعها محظورة برمجياً ولا تظهر في ملف التطبيق النهائي.
+            </Text>
+          </View>
         </View>
 
         <View style={[styles.card, { marginTop: Spacing.xl }]}>

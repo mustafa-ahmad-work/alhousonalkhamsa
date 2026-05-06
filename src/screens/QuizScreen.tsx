@@ -361,7 +361,7 @@ export default function QuizScreen() {
             <View style={styles.gapVisual}>
               <View style={styles.gapLine} />
               <View style={styles.gapIconBox}>
-                <Ionicons name="mic" size={24} color={Colors.primary} />
+                <Ionicons name="book-outline" size={24} color={Colors.primary} />
               </View>
               <View style={styles.gapLine} />
             </View>

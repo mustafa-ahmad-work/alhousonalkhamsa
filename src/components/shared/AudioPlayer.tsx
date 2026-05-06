@@ -1,17 +1,18 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Audio } from "expo-av";
+import { setAudioModeAsync, createAudioPlayer } from "expo-audio";
+import * as KeepAwake from "expo-keep-awake";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
   Modal,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { Shadow, Spacing, Typography, useTheme } from "../../theme";
 import { toArabicNumerals } from "../../utils/helpers";
@@ -46,10 +47,11 @@ export const AudioPlayer = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [errorMsg, setErrorMsg] = useState("");
 
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const playerRef = useRef<any>(null);
   const isChangingTrackRef = useRef(false);
   const currentIndexRef = useRef(0);
   const trackToPlayRef = useRef("");
+  const lastProcessedIndexRef = useRef(-1);
 
   const updateCurrentIndex = (idx: number) => {
     currentIndexRef.current = idx;
@@ -59,11 +61,14 @@ export const AudioPlayer = ({
   useEffect(() => {
     if (visible && pages.length > 0) {
       loadPlaylist();
+      KeepAwake.activateKeepAwakeAsync();
     } else {
       shutdownPlayer();
+      KeepAwake.deactivateKeepAwake();
     }
     return () => {
       shutdownPlayer();
+      KeepAwake.deactivateKeepAwake();
     };
   }, [visible, pages]);
 
@@ -71,10 +76,11 @@ export const AudioPlayer = ({
     setIsLoading(true);
     setErrorMsg("");
     try {
-      await Audio.setAudioModeAsync({
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: true,
-        playThroughEarpieceAndroid: false,
+      // Set global audio mode using the correct setAudioModeAsync function
+      await setAudioModeAsync({
+        playsInSilentMode: true,
+        shouldPlayInBackground: true,
+        interruptionMode: "doNotMix",
       });
 
       let allVerses: VerseAudio[] = [];
@@ -128,39 +134,37 @@ export const AudioPlayer = ({
     isChangingTrackRef.current = true;
     updateCurrentIndex(index);
     trackToPlayRef.current = verse.url;
-    setIsPlaying(false);
-
+    lastProcessedIndexRef.current = -1;
+    
     try {
-      if (soundRef.current) {
-        soundRef.current.setOnPlaybackStatusUpdate(null);
-        await soundRef.current.unloadAsync();
-        soundRef.current = null;
+      const url = verse.url.startsWith("//") ? `https:${verse.url}` : verse.url;
+      
+      if (!playerRef.current) {
+        const player = createAudioPlayer(url);
+        playerRef.current = player;
+        
+        player.addListener("playbackStatusUpdate", (status) => {
+          if (status.didJustFinish && lastProcessedIndexRef.current !== currentIndexRef.current) {
+            lastProcessedIndexRef.current = currentIndexRef.current;
+            setTimeout(() => {
+              playNext();
+            }, 100);
+          }
+        });
+      } else {
+        playerRef.current.replace(url);
       }
 
-      const url = verse.url.startsWith("//") ? `https:${verse.url}` : verse.url;
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: url },
-        { shouldPlay: true },
-      );
-
       if (trackToPlayRef.current !== verse.url || !visible) {
-        await sound.unloadAsync();
         return;
       }
 
-      soundRef.current = sound;
-      soundRef.current.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
+      playerRef.current.play();
       setIsPlaying(true);
     } catch (error) {
       console.error("Error playing track:", error);
     } finally {
       isChangingTrackRef.current = false;
-    }
-  };
-
-  const onPlaybackStatusUpdate = (status: any) => {
-    if (status.isLoaded && status.didJustFinish) {
-      setTimeout(() => playNext(), 50);
     }
   };
 
@@ -182,12 +186,12 @@ export const AudioPlayer = ({
 
   const togglePlayPause = async () => {
     if (isChangingTrackRef.current) return;
-    if (soundRef.current) {
+    if (playerRef.current) {
       if (isPlaying) {
-        await soundRef.current.pauseAsync();
+        playerRef.current.pause();
         setIsPlaying(false);
       } else {
-        await soundRef.current.playAsync();
+        playerRef.current.play();
         setIsPlaying(true);
       }
     } else if (playlist.length > 0) {
@@ -197,10 +201,10 @@ export const AudioPlayer = ({
 
   const shutdownPlayer = async () => {
     trackToPlayRef.current = "";
-    if (soundRef.current) {
-      soundRef.current.setOnPlaybackStatusUpdate(null);
-      await soundRef.current.unloadAsync();
-      soundRef.current = null;
+    if (playerRef.current) {
+      playerRef.current.pause();
+      playerRef.current.remove();
+      playerRef.current = null;
     }
     setIsPlaying(false);
   };
@@ -252,29 +256,31 @@ export const AudioPlayer = ({
               <>
                 <Animated.View
                   entering={FadeInDown.duration(600)}
-                  style={styles.mushafCard}
+                  style={{ flex: 1 }}
                 >
-                  <View style={styles.mushafPattern} />
-                  <ScrollView
-                    style={styles.textScroll}
-                    contentContainerStyle={styles.textScrollContent}
-                    showsVerticalScrollIndicator={false}
-                  >
-                    <Text style={styles.quranText}>
-                      {playlist[currentIndex]?.text}
-                    </Text>
-                  </ScrollView>
+                  <View style={styles.mushafCard}>
+                    <View style={styles.mushafPattern} />
+                    <ScrollView
+                      style={styles.textScroll}
+                      contentContainerStyle={styles.textScrollContent}
+                      showsVerticalScrollIndicator={false}
+                    >
+                      <Text style={styles.quranText}>
+                        {playlist[currentIndex]?.text}
+                      </Text>
+                    </ScrollView>
 
-                  <View style={styles.ayahInfo}>
-                    <View style={styles.infoBadge}>
-                      <Text style={styles.infoBadgeText}>
-                        {playlist[currentIndex]?.verse_key}
+                    <View style={styles.ayahInfo}>
+                      <View style={styles.infoBadge}>
+                        <Text style={styles.infoBadgeText}>
+                          {playlist[currentIndex]?.verse_key}
+                        </Text>
+                      </View>
+                      <Text style={styles.progressCounter}>
+                        {toArabicNumerals(currentIndex + 1)} /{" "}
+                        {toArabicNumerals(playlist.length)}
                       </Text>
                     </View>
-                    <Text style={styles.progressCounter}>
-                      {toArabicNumerals(currentIndex + 1)} /{" "}
-                      {toArabicNumerals(playlist.length)}
-                    </Text>
                   </View>
                 </Animated.View>
 

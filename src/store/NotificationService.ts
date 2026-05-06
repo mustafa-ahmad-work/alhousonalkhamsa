@@ -58,9 +58,21 @@ function getNotifications(): any | null {
   if (Platform.OS === "web") return null;
   if (_Notifications) return _Notifications;
 
-  // Silence Expo Go's Android push-token warning (local-only app)
+  // Silence Expo Go's warnings (local-only app)
   const isGo = Constants.appOwnership === "expo";
   if (isGo && !(console as any).__nsFilterInstalled) {
+    const origWarn = console.warn;
+    console.warn = (...args: any[]) => {
+      if (
+        typeof args[0] === "string" &&
+        (args[0].includes("expo-notifications` functionality is not fully supported") ||
+          args[0].includes("SafeAreaView has been deprecated") ||
+          args[0].includes("Property \"opacity\" of AnimatedComponent"))
+      )
+        return;
+      origWarn.apply(console, args);
+    };
+
     const origError = console.error;
     console.error = (...args: any[]) => {
       if (
